@@ -4,7 +4,7 @@ import { addTeamToGame, getTeamsInGame } from "~/domain/games.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
 
-enum Stage {
+export enum Stage {
   NotStarted = 0,
   Training = 1,
   Scouting = 2,

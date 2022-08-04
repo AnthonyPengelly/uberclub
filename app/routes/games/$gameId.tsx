@@ -7,6 +7,7 @@ import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { isOpenForPlayers, joinGame } from "~/engine/game";
+import PhaseSummary from "~/components/phaseSummary";
 
 type LoaderData = {
   game: Game;
@@ -46,6 +47,7 @@ export default function GamePage() {
   return (
     <div>
       <h1>{game.name}</h1>
+      <PhaseSummary game={game} />
       {team && <Outlet />}
       {!team &&
         (isOpenForPlayers(game) ? (
