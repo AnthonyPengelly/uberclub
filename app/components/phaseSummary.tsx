@@ -15,7 +15,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Training Phase"
           callToAction="Go To Training"
-          href={`games/${game.id}/training`}
+          href={`/games/${game.id}/training`}
         />
       );
     case Stage.Scouting:
@@ -23,7 +23,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Scouting Phase"
           callToAction="Go To Scouting"
-          href={`games/${game.id}/scouting`}
+          href={`/games/${game.id}/scouting`}
         />
       );
     case Stage.Investments:
@@ -31,7 +31,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Investments Phase"
           callToAction="Go To Investments"
-          href={`games/${game.id}/investments`}
+          href={`/games/${game.id}/investments`}
         />
       );
     case Stage.DeadlineDay:
@@ -39,7 +39,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="It's Deadline Day!"
           callToAction="Check out who is up for grabs"
-          href={`games/${game.id}/deadline-day`}
+          href={`/games/${game.id}/deadline-day`}
         />
       );
     case Stage.Match1:
@@ -47,7 +47,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Match Day 1"
           callToAction="Get Your Team Ready"
-          href={`games/${game.id}/team`}
+          href={`/games/${game.id}/team`}
         />
       );
     case Stage.Match2:
@@ -55,7 +55,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Match Day 2"
           callToAction="Get Your Team Ready"
-          href={`games/${game.id}/team`}
+          href={`/games/${game.id}/team`}
         />
       );
     case Stage.Match3:
@@ -63,7 +63,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Final Match Day"
           callToAction="Get Your Team Ready"
-          href={`games/${game.id}/team`}
+          href={`/games/${game.id}/team`}
         />
       );
     case Stage.SuperCup:
@@ -71,7 +71,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
         <PhaseHeading
           heading="Who knows how this works!"
           callToAction="Get Your Team Ready"
-          href={`games/${game.id}/team`}
+          href={`/games/${game.id}/team`}
         />
       );
     default:

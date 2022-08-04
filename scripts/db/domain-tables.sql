@@ -83,6 +83,31 @@ create table public.seasons (
   primary key (id)
 );
 
+create table public.training_logs (
+  id uuid not null default uuid_generate_v4(),
+  season_id uuid references public.seasons not null,
+  team_id uuid references public.teams not null,
+  result integer not null,
+
+  primary key (id)
+);
+
+create table public.scouting_logs (
+  id uuid not null default uuid_generate_v4(),
+  season_id uuid references public.seasons not null,
+  team_id uuid references public.teams not null,
+
+  primary key (id)
+);
+
+create table public.improvement_logs (
+  id uuid not null default uuid_generate_v4(),
+  season_id uuid references public.seasons not null,
+  team_id uuid references public.teams not null,
+
+  primary key (id)
+);
+
 create table public.team_seasons (
   team_id uuid references public.teams not null,
   season_id uuid references public.seasons not null,

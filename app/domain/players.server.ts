@@ -78,9 +78,7 @@ export async function getPlayersForDraft(
   );
 }
 
-export async function getTeamPlayers(
-  teamId: string
-): Promise<GamePlayerSummary[]> {
+export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
@@ -106,6 +104,33 @@ export async function getTeamPlayers(
       imageUrl: x.real_players.image_url,
     })) || []
   );
+}
+
+export async function getPlayer(id: string): Promise<GamePlayer> {
+  const { data, error } = await supabase
+    .from("player_game_states")
+    .select(
+      `id, lineup_position, captain, injured, stars,
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
+    )
+    .eq("id", id)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return {
+    id: data.id,
+    lineupPosition: data.lineup_position,
+    captain: data.captain,
+    injured: data.injured,
+    stars: data.stars,
+    name: data.real_players.name,
+    position: data.real_players.positions.name,
+    overall: data.real_players.overall,
+    potential: data.real_players.potential,
+    team: data.real_players.real_teams.team,
+    imageUrl: data.real_players.image_url,
+  };
 }
 
 export async function addPlayerGameStates(
@@ -134,6 +159,17 @@ export async function addPlayerToTeam(id: string, teamId: string) {
   const { error } = await supabase
     .from("player_game_states")
     .update({ team_id: teamId })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updatePlayerStars(id: string, stars: number) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ stars: stars })
     .eq("id", id);
 
   if (error) {

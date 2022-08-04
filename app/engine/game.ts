@@ -1,6 +1,7 @@
 import type { Game } from "~/domain/games.server";
 import { getGame, updateGameStage } from "~/domain/games.server";
 import { addTeamToGame, getTeamsInGame } from "~/domain/games.server";
+import { createSeason } from "~/domain/season.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
 
@@ -39,6 +40,7 @@ export async function joinGame(teamInput: {
 async function startGame(gameId: string, teamIds: string[]) {
   console.log("adding all players");
   await addAllPlayersToGame(gameId);
+  await createSeason(gameId, 1);
   console.log("doing draft");
   await performDraft(gameId, teamIds);
   console.log("advancing game");
