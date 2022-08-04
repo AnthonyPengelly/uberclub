@@ -1,10 +1,10 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, Link, NavLink, Outlet, useLoaderData } from "@remix-run/react";
-import type { Note } from "~/models/note.server";
-import { getNoteListItems } from "~/models/note.server";
+import type { Note } from "~/domain/note.server";
+import { getNoteListItems } from "~/domain/note.server";
 import { requireUserId } from "~/session.server";
-import { useUser } from "~/utils";
+import { useUser } from "~/userUtils";
 
 type LoaderData = {
   noteListItems: Note[];

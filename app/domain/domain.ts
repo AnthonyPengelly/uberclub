@@ -1,9 +1,3 @@
-export type Game = {
-  id: string;
-  name: string;
-  stage: number;
-};
-
 export type GameLog = {
   id: string;
   gameId: string;
@@ -28,20 +22,6 @@ export type RealPlayer = {
   realTeamId: string;
   positionId: string;
   imageUrl: string;
-};
-
-export type Team = {
-  id: string;
-  gameId: string;
-  userId: string;
-  teamName: string;
-  managerName: string;
-  cash: number;
-  isReady: boolean;
-  captainBoost: number;
-  trainingLevel: number;
-  scoutingLevel: number;
-  stadiumLevel: number;
 };
 
 export type PlayerGameState = {
