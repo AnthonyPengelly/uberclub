@@ -27,6 +27,7 @@ export type RealPlayer = {
   potential: string;
   realTeamId: string;
   positionId: string;
+  imageUrl: string;
 };
 
 export type Team = {

@@ -37,6 +37,7 @@ create table public.realPlayers (
   potential integer not null,
   realTeamId uuid references public.realTeams not null,
   positionId uuid references public.positions not null,
+  imageUrl varchar not null,
 
   primary key (id)
 );
