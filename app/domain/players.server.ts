@@ -29,7 +29,7 @@ export type PlayerGameState = {
   captain: boolean;
   injured: boolean;
   stars: number;
-  released: boolean;
+  outOfDeck: boolean;
 };
 
 export type GamePlayerSummary = {
@@ -40,6 +40,7 @@ export type GamePlayerSummary = {
 
 export type GamePlayer = {
   id: string;
+  teamId: string;
   name: string;
   overall: number;
   potential: number;
@@ -82,7 +83,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars,
+      `id, lineup_position, captain, injured, stars, team_id,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
     )
     .eq("team_id", teamId);
@@ -92,6 +93,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   return (
     data?.map((x) => ({
       id: x.id,
+      teamId: x.team_id,
       lineupPosition: x.lineup_position,
       captain: x.captain,
       injured: x.injured,
@@ -110,7 +112,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars,
+      `id, lineup_position, captain, injured, stars, team_id,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
     )
     .eq("id", id)
@@ -120,6 +122,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
   }
   return {
     id: data.id,
+    teamId: data.team_id,
     lineupPosition: data.lineup_position,
     captain: data.captain,
     injured: data.injured,
@@ -158,7 +161,18 @@ export async function addPlayerGameStates(
 export async function addPlayerToTeam(id: string, teamId: string) {
   const { error } = await supabase
     .from("player_game_states")
-    .update({ team_id: teamId })
+    .update({ team_id: teamId, out_of_deck: true })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function markPlayerOutOfDeck(id: string) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ out_of_deck: true })
     .eq("id", id);
 
   if (error) {
@@ -175,4 +189,33 @@ export async function updatePlayerStars(id: string, stars: number) {
   if (error) {
     throw error;
   }
+}
+
+export async function drawPlayerFromDeck(gameId: string) {
+  const { data, error } = await supabase
+    .from("player_game_states")
+    .select(
+      `id, lineup_position, captain, injured, stars,
+          real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
+    )
+    .eq("game_id", gameId)
+    .is("team_id", null)
+    .is("out_of_deck", false);
+  if (error) {
+    throw error;
+  }
+  const randomIndex = Math.floor(Math.random() * data.length);
+  return {
+    id: data[randomIndex].id,
+    lineupPosition: data[randomIndex].lineup_position,
+    captain: data[randomIndex].captain,
+    injured: data[randomIndex].injured,
+    stars: data[randomIndex].stars,
+    name: data[randomIndex].real_players.name,
+    position: data[randomIndex].real_players.positions.name,
+    overall: data[randomIndex].real_players.overall,
+    potential: data[randomIndex].real_players.potential,
+    team: data[randomIndex].real_players.real_teams.team,
+    imageUrl: data[randomIndex].real_players.image_url,
+  };
 }

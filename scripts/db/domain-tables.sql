@@ -67,7 +67,7 @@ create table public.player_game_states (
   lineup_position integer null,
   captain boolean not null default false,
   injured boolean not null default false,
-  released boolean not null default false,
+  out_of_deck boolean not null default false,
   stars integer not null,
 
   primary key (id),
@@ -96,6 +96,7 @@ create table public.scouting_logs (
   id uuid not null default uuid_generate_v4(),
   season_id uuid references public.seasons not null,
   team_id uuid references public.teams not null,
+  player_game_state_id uuid references public.player_game_states not null,
 
   primary key (id)
 );

@@ -1,6 +1,6 @@
 import type { Game } from "~/domain/games.server";
 import { getGame, updateGameStage } from "~/domain/games.server";
-import { addTeamToGame, getTeamsInGame } from "~/domain/games.server";
+import { addTeamToGame, getTeamsInGame } from "~/domain/team.server";
 import { createSeason } from "~/domain/season.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";

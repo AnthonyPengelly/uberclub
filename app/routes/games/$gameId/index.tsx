@@ -1,8 +1,9 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import type { Game, Team } from "~/domain/games.server";
-import { getTeam } from "~/domain/games.server";
+import type { Game } from "~/domain/games.server";
+import type { Team } from "~/domain/team.server";
+import { getTeam } from "~/domain/team.server";
 import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";

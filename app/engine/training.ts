@@ -1,4 +1,4 @@
-import type { Team } from "~/domain/games.server";
+import type { Team } from "~/domain/team.server";
 import {
   createTrainingLog,
   getTrainingLogsForSeason,

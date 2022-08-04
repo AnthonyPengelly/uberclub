@@ -35,11 +35,13 @@ export async function getTrainingLogsForSeason(
 export async function createScoutingLog(
   seasonId: string,
   teamId: string,
-  improvement: number
+  playerId: string
 ) {
   const { data, error } = await supabase
     .from("scouting_logs")
-    .insert([{ season_id: seasonId, team_id: teamId }])
+    .insert([
+      { season_id: seasonId, team_id: teamId, player_game_state_id: playerId },
+    ])
     .single();
 
   if (!error) {
@@ -47,6 +49,21 @@ export async function createScoutingLog(
   }
 
   return null;
+}
+
+export async function getScoutingLogsForSeason(
+  seasonId: string,
+  teamId: string
+) {
+  const { data, error } = await supabase
+    .from("scouting_logs")
+    .select("player_game_state_id")
+    .eq("season_id", seasonId)
+    .eq("team_id", teamId);
+  if (error) {
+    throw error;
+  }
+  return data.map((x) => x.player_game_state_id) || [];
 }
 
 export async function createImprovementLog(
