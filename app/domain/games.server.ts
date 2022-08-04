@@ -41,11 +41,24 @@ export async function getGame(id: string): Promise<Game> {
   throw error;
 }
 
+export async function updateGameStage(gameId: string, stage: number) {
+  const { data, error } = await supabase
+    .from("games")
+    .update({ stage: stage })
+    .eq("id", gameId);
+
+  if (!error) {
+    return data;
+  }
+
+  throw error;
+}
+
 export async function getTeamsInGame(gameId: string): Promise<Partial<Team>[]> {
   const { data } = await supabase
     .from("teams")
     .select(`id, team_name, manager_name`)
-    .eq("gameId", gameId);
+    .eq("game_id", gameId);
   return (
     data?.map((team) => ({
       id: team.id,
@@ -61,22 +74,24 @@ export async function getTeam(userId: string, gameId: string): Promise<Team> {
     .select("*")
     .eq("user_id", userId)
     .eq("game_id", gameId)
-    .single();
+    .maybeSingle();
 
   if (!error) {
-    return {
-      id: data.id,
-      gameId: data.game_id,
-      userId: data.user_id,
-      teamName: data.team_name,
-      managerName: data.manager_name,
-      cash: data.cash,
-      isReady: data.is_ready,
-      captainBoost: data.captain_boost,
-      trainingLevel: data.training_level,
-      scoutingLevel: data.scouting_level,
-      stadiumLevel: data.stadium_level,
-    };
+    return (
+      data && {
+        id: data.id,
+        gameId: data.game_id,
+        userId: data.user_id,
+        teamName: data.team_name,
+        managerName: data.manager_name,
+        cash: data.cash,
+        isReady: data.is_ready,
+        captainBoost: data.captain_boost,
+        trainingLevel: data.training_level,
+        scoutingLevel: data.scouting_level,
+        stadiumLevel: data.stadium_level,
+      }
+    );
   }
 
   throw error;
@@ -92,8 +107,8 @@ export async function addTeamToGame({
   gameId: string;
   teamName: string;
   managerName: string;
-}): Promise<Team> {
-  const { data, error } = await supabase
+}) {
+  const { error } = await supabase
     .from("teams")
     .insert([
       {
@@ -106,9 +121,7 @@ export async function addTeamToGame({
     ])
     .single();
 
-  if (!error) {
-    return data;
+  if (error) {
+    throw error;
   }
-
-  throw error;
 }

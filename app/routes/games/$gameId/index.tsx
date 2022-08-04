@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import type { Game, Team } from "~/domain/games.server";
 import { getTeam } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
@@ -31,7 +31,7 @@ export default function GameDetailsPage() {
   return (
     <div>
       <h2>{team.teamName}</h2>
-      <div>TODO: get started!</div>
+      <Link to="team">Team</Link>
     </div>
   );
 }

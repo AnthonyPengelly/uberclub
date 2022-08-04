@@ -37,7 +37,7 @@ create table public.real_players (
   potential integer not null,
   real_team_id uuid references public.real_teams not null,
   position_id uuid references public.positions not null,
-  imageUrl varchar not null,
+  image_url varchar not null,
 
   primary key (id)
 );
@@ -60,6 +60,7 @@ create table public.teams (
 );
 
 create table public.player_game_states (
+  id uuid not null default uuid_generate_v4(),
   player_id uuid references public.real_players not null,
   game_id uuid references public.games not null,
   team_id uuid references public.teams null,
@@ -69,7 +70,8 @@ create table public.player_game_states (
   released boolean not null default false,
   stars integer not null,
 
-  primary key (player_id, game_id)
+  primary key (id),
+  unique (player_id, game_id)
 );
 
 create table public.seasons (
@@ -100,3 +102,13 @@ create table public.results (
 
   primary key (id)
 );
+
+create table public.fixture_lineups (
+  id uuid not null default uuid_generate_v4(),
+  result_id uuid references public.results not null,
+  player_game_state_id uuid references public.player_game_states not null,
+  lineup_position integer not null,
+  captain boolean not null default false,
+
+  primary key (id)
+)

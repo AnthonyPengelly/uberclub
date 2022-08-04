@@ -4,37 +4,6 @@ export type GameLog = {
   event: string;
 };
 
-export type RealTeam = {
-  id: string;
-  name: string;
-};
-
-export type Position = {
-  id: string;
-  name: string;
-};
-
-export type RealPlayer = {
-  id: string;
-  name: string;
-  overall: string;
-  potential: string;
-  realTeamId: string;
-  positionId: string;
-  imageUrl: string;
-};
-
-export type PlayerGameState = {
-  playerId: string;
-  gameId: string;
-  teamId?: string;
-  lineupPosition?: number;
-  captain: boolean;
-  injured: boolean;
-  stars: string;
-  released: boolean;
-};
-
 export type Season = {
   id: string;
   gameId: string;
@@ -55,4 +24,12 @@ export type Results = {
   seasonId: string;
   draw: boolean;
   winningTeamId?: string;
+};
+
+export type FixtureLineup = {
+  id: string;
+  result_id: string;
+  player_game_state_id: string;
+  lineup_position: number;
+  captain: boolean;
 };
