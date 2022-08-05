@@ -191,6 +191,20 @@ export async function updatePlayerStars(id: string, stars: number) {
   }
 }
 
+export async function updatePlayerLineupPosition(
+  id: string,
+  lineupPosition: number | undefined
+) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ lineup_position: lineupPosition || null })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function drawPlayersFromDeck(
   gameId: string,
   numberOfPlayers: number

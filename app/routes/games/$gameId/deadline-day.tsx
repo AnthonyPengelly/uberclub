@@ -97,6 +97,8 @@ export default function DeadlineDayPage() {
               .join("")}{" "}
             Min: {minBidPrice(x)}M
             {!bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
+              game.stage === Stage.DeadlineDay &&
+              !team.isReady &&
               (team.cash < minBidPrice(x) ? (
                 <div>Not enough cash!</div>
               ) : (
