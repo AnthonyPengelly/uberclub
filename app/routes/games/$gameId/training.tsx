@@ -52,7 +52,7 @@ export default function TrainingPage() {
   return (
     <div>
       <h2>{team.teamName}</h2>
-      {!hasTrainingRemaining && <h3>Training complete</h3>}
+      {!hasTrainingRemaining && <h3>No Training Available</h3>}
       <ul>
         {players.map((x) => (
           <li key={x.id}>

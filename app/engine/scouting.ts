@@ -11,6 +11,8 @@ import {
   markPlayerOutOfDeck,
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
+import { getGame } from "~/domain/games.server";
+import { Stage } from "./game";
 
 export async function getScoutedPlayers(team: Team) {
   const season = await getCurrentSeason(team.gameId);
@@ -22,6 +24,7 @@ export async function getScoutedPlayers(team: Team) {
 export async function scoutPlayer(team: Team) {
   const player = await drawPlayerFromDeck(team.gameId);
   const season = await getCurrentSeason(team.gameId);
+  await assertCanScout(team.gameId, season.id, team);
   await createScoutingLog(season.id, team.id, player.id);
   await markPlayerOutOfDeck(player.id);
   return player;
@@ -30,6 +33,9 @@ export async function scoutPlayer(team: Team) {
 export async function buyScoutedPlayer(playerId: string, team: Team) {
   const player = await getPlayer(playerId);
   const cost = getScoutPrice(player.overall, player.potential);
+  if (cost > team.cash) {
+    throw new Error("Cannot afford to scout player!");
+  }
   await addPlayerToTeam(playerId, team.id);
   await updateCash(team.id, team.cash - cost);
 }
@@ -58,3 +64,26 @@ const getScoutPriceFromOverall = (overall: number) => {
       throw overall;
   }
 };
+
+export async function hasScoutingRemaining(team: Team) {
+  const season = await getCurrentSeason(team.gameId);
+  return await canScout(team.gameId, season.id, team);
+}
+
+async function assertCanScout(gameId: string, seasonId: string, team: Team) {
+  if (!canScout(gameId, seasonId, team)) {
+    throw new Error("Not currently able to scout");
+  }
+}
+
+async function canScout(gameId: string, seasonId: string, team: Team) {
+  const game = await getGame(gameId);
+  const scoutingLogs = await getScoutingLogsForSeason(seasonId, team.id);
+  if (game.stage !== Stage.Scouting) {
+    return false;
+  }
+  if (scoutingLogs.length >= team.scoutingLevel) {
+    return false;
+  }
+  return true;
+}

@@ -11,6 +11,7 @@ import {
   buyScoutedPlayer,
   getScoutedPlayers,
   getScoutPrice,
+  hasScoutingRemaining,
   scoutPlayer,
 } from "~/engine/scouting";
 
@@ -26,6 +27,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const team = await getTeam(userId, params.gameId);
   const scoutedPlayers = await getScoutedPlayers(team);
+  const canScout = await hasScoutingRemaining(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
@@ -33,7 +35,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   return json({
     team,
     scoutedPlayers,
-    hasScoutingRemaining: team.scoutingLevel > scoutedPlayers.length,
+    hasScoutingRemaining: canScout,
   });
 };
 
@@ -102,6 +104,7 @@ export default function ScoutingPage() {
                   <button type="submit">Buy</button>
                 </Form>
               ))}
+            {x.teamId && " - Signed!"}
           </li>
         ))}
       </ul>
