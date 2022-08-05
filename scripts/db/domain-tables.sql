@@ -109,6 +109,23 @@ create table public.improvement_logs (
   primary key (id)
 );
 
+create table public.deadline_day_players (
+  id uuid not null default uuid_generate_v4(),
+  season_id uuid references public.seasons not null,
+  player_game_state_id uuid references public.player_game_states not null,
+
+  primary key (id)
+);
+
+create table public.deadline_day_bids (
+  id uuid not null default uuid_generate_v4(),
+  team_id uuid references public.teams not null,
+  deadline_day_player_id uuid references public.deadline_day_players not null,
+  cost integer not null,
+
+  primary key (id)
+);
+
 create table public.team_seasons (
   team_id uuid references public.teams not null,
   season_id uuid references public.seasons not null,

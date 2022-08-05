@@ -40,7 +40,7 @@ export type GamePlayerSummary = {
 
 export type GamePlayer = {
   id: string;
-  teamId: string;
+  teamId?: string;
   name: string;
   overall: number;
   potential: number;
@@ -191,7 +191,10 @@ export async function updatePlayerStars(id: string, stars: number) {
   }
 }
 
-export async function drawPlayerFromDeck(gameId: string) {
+export async function drawPlayersFromDeck(
+  gameId: string,
+  numberOfPlayers: number
+): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
@@ -204,18 +207,19 @@ export async function drawPlayerFromDeck(gameId: string) {
   if (error) {
     throw error;
   }
-  const randomIndex = Math.floor(Math.random() * data.length);
-  return {
-    id: data[randomIndex].id,
-    lineupPosition: data[randomIndex].lineup_position,
-    captain: data[randomIndex].captain,
-    injured: data[randomIndex].injured,
-    stars: data[randomIndex].stars,
-    name: data[randomIndex].real_players.name,
-    position: data[randomIndex].real_players.positions.name,
-    overall: data[randomIndex].real_players.overall,
-    potential: data[randomIndex].real_players.potential,
-    team: data[randomIndex].real_players.real_teams.team,
-    imageUrl: data[randomIndex].real_players.image_url,
-  };
+  const randomPlayers = data.sort(() => 0.5 - Math.random());
+  return randomPlayers.slice(0, numberOfPlayers).map((x) => ({
+    id: x.id,
+    teamId: undefined,
+    lineupPosition: x.lineup_position,
+    captain: x.captain,
+    injured: x.injured,
+    stars: x.stars,
+    name: x.real_players.name,
+    position: x.real_players.positions.name,
+    overall: x.real_players.overall,
+    potential: x.real_players.potential,
+    team: x.real_players.real_teams.team,
+    imageUrl: x.real_players.image_url,
+  }));
 }

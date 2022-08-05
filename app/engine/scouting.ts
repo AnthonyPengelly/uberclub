@@ -7,7 +7,7 @@ import {
 } from "~/domain/logs.server";
 import {
   addPlayerToTeam,
-  drawPlayerFromDeck,
+  drawPlayersFromDeck,
   getPlayer,
   markPlayerOutOfDeck,
 } from "~/domain/players.server";
@@ -23,7 +23,7 @@ export async function getScoutedPlayers(team: Team) {
 }
 
 export async function scoutPlayer(team: Team) {
-  const player = await drawPlayerFromDeck(team.gameId);
+  const player = (await drawPlayersFromDeck(team.gameId, 1))[0];
   const season = await getCurrentSeason(team.gameId);
   await assertCanScout(team.gameId, season.id, team);
   await createScoutingLog(season.id, team.id, player.id);
