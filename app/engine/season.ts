@@ -13,6 +13,7 @@ import type { Team } from "~/domain/team.server";
 import { getTeamsInGame } from "~/domain/team.server";
 import { Stage } from "./game";
 import { getLineupScores } from "./lineup";
+import { calculateScoreForTeam } from "./team";
 
 type TeamWithPlayer = {
   team: Team;
@@ -222,8 +223,4 @@ async function recordSimLoss(gameId: string, team: Team) {
       team.teamName
     } lose their sim. The fans are chanting "GET ${team.managerName.toUpperCase()} OUT!"`
   );
-}
-
-async function calculateScoreForTeam(players: GamePlayer[]) {
-  return players.reduce((acc, x) => acc + x.stars, 0);
 }

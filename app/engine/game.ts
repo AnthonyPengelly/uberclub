@@ -12,6 +12,7 @@ import { addAllPlayersToGame } from "./players";
 import { createGameLog } from "~/domain/logs.server";
 import { resolveDeadlineDay, setDeadlineDayPlayers } from "./deadlineDay";
 import { playFixtures, startSeason } from "./season";
+import { completeFinancesForAllTeams } from "./finances";
 
 export enum Stage {
   NotStarted = 0,
@@ -87,8 +88,7 @@ async function advance(gameId: string) {
       return updateGameStage(gameId, Stage.Match3);
     case Stage.Match3:
       await playFixtures(gameId, Stage.Match3);
-      // Summarise season/captains etc.
-      // Finances
+      await completeFinancesForAllTeams(gameId);
       await createNextSeason(gameId);
       return updateGameStage(gameId, Stage.Training);
     case Stage.SuperCup:

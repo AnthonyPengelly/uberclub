@@ -67,6 +67,34 @@ export async function getTeam(userId: string, gameId: string): Promise<Team> {
   throw error;
 }
 
+export async function getTeamById(id: string): Promise<Team> {
+  const { data, error } = await supabase
+    .from("teams")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!error) {
+    return (
+      data && {
+        id: data.id,
+        gameId: data.game_id,
+        userId: data.user_id,
+        teamName: data.team_name,
+        managerName: data.manager_name,
+        cash: data.cash,
+        isReady: data.is_ready,
+        captainBoost: data.captain_boost,
+        trainingLevel: data.training_level,
+        scoutingLevel: data.scouting_level,
+        stadiumLevel: data.stadium_level,
+      }
+    );
+  }
+
+  throw error;
+}
+
 export async function addTeamToGame({
   userId,
   gameId,
@@ -100,6 +128,17 @@ export async function updateCash(id: string, cashRemaining: number) {
   const { error } = await supabase
     .from("teams")
     .update({ cash: cashRemaining })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateCaptainBoost(id: string, captainBoost: number) {
+  const { error } = await supabase
+    .from("teams")
+    .update({ captain_boost: captainBoost })
     .eq("id", id);
 
   if (error) {

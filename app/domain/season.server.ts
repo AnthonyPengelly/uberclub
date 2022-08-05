@@ -10,6 +10,7 @@ export type TeamSeason = {
   id: string;
   score: number;
   startingScore: number;
+  teamId: string;
 };
 
 export type TeamSeasonSummary = TeamSeason & {
@@ -48,6 +49,23 @@ export async function getCurrentSeason(gameId: string): Promise<Season> {
     name: data.name,
     seasonNumber: data.season,
   };
+}
+
+export async function getAllSeasons(gameId: string): Promise<Season[]> {
+  const { data, error } = await supabase
+    .from("seasons")
+    .select("*")
+    .eq("game_id", gameId)
+    .order("season", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+  return data?.map((x) => ({
+    id: x.id,
+    name: x.name,
+    seasonNumber: x.season,
+  }));
 }
 
 export async function createTeamSeason(
@@ -92,6 +110,7 @@ export async function getTeamSeason(
     id: data.id,
     score: data.score,
     startingScore: data.starting_score,
+    teamId: data.team_id,
   };
 }
 
@@ -100,7 +119,7 @@ export async function getTeamSeasons(
 ): Promise<TeamSeasonSummary[]> {
   const { data, error } = await supabase
     .from("team_seasons")
-    .select("id, score, starting_score, teams (team_name)")
+    .select("id, score, starting_score, team_id, teams (team_name)")
     .eq("season_id", seasonId);
 
   if (error) {
@@ -111,6 +130,7 @@ export async function getTeamSeasons(
     score: x.score,
     startingScore: x.starting_score,
     teamName: x.teams.team_name,
+    teamId: x.team_id,
   }));
 }
 
