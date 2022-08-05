@@ -59,7 +59,13 @@ export default function TrainingPage() {
 
   return (
     <div>
-      <h2>{team.teamName}</h2>
+      <h2>
+        {team.teamName}: Training Level {team.trainingLevel}
+      </h2>
+      <p>
+        ({team.trainingLevel} player(s) may be improved by up to{" "}
+        {team.trainingLevel} stars)
+      </p>
       {!hasTrainingRemaining && <h3>No Training Available</h3>}
       {game.stage === Stage.Training && team.isReady && (
         <div>Waiting for other players</div>

@@ -17,7 +17,11 @@ export async function trainPlayer(playerId: string, team: Team) {
   const diceRoll = Math.floor(Math.random() * 6) + 1;
   const improvement = Math.max(
     0,
-    Math.min(maxImprovement, diceRoll - player.stars)
+    Math.min(
+      maxImprovement,
+      diceRoll - player.stars,
+      player.potential - player.stars
+    )
   );
   if (improvement === 0) {
     await createGameLog(

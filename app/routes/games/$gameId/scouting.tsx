@@ -85,8 +85,10 @@ export default function ScoutingPage() {
   return (
     <div>
       <h2>
-        {team.teamName} - {team.cash}M
+        {team.teamName}: Scouting Level {team.scoutingLevel}
       </h2>
+      <p>({team.scoutingLevel} player(s) may be scouted)</p>
+      <h3>{team.cash}M cash available</h3>
       {game.stage === Stage.Scouting && team.isReady && (
         <div>Waiting for other players</div>
       )}
