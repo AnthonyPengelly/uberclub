@@ -67,7 +67,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function TeamPage() {
   const { team, players, game } = useLoaderData<LoaderData>();
-  const scores = getLineupScores(players);
+  const scores = getLineupScores(players, team.captainBoost);
   const validationMessage = validateLineup(players);
   const isMatchDay =
     game.stage === Stage.Match1 ||
@@ -75,6 +75,7 @@ export default function TeamPage() {
     game.stage === Stage.Match3;
   const canMakeChanges = !team.isReady || !isMatchDay;
   const canSell = canSellPlayer(game) && players.length > 11;
+  const captain = players.find((x) => x.captain);
 
   return (
     <div>
@@ -86,6 +87,28 @@ export default function TeamPage() {
         </Form>
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
+      <h3>Captain</h3>
+      {captain ? (
+        <Player player={captain} />
+      ) : (
+        canMakeChanges && <div>No player selected</div>
+      )}
+      {canMakeChanges && (
+        <Form method="post" action={`/games/${game.id}/captain`}>
+          <input type="hidden" name="existing-player-id" value={captain?.id} />
+          <select name="player-id" defaultValue={captain?.id}>
+            {players
+              .filter((x) => x.lineupPosition)
+              .map((x) => (
+                <option key={x.id} value={x.id}>
+                  [{x.position}] {x.name}
+                </option>
+              ))}
+          </select>
+          <button type="submit">Save</button>
+        </Form>
+      )}
+
       <h3>GKP</h3>
       <Position
         players={players}

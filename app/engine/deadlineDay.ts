@@ -8,7 +8,8 @@ import {
   getDeadlineDayPlayers,
 } from "~/domain/deadlineDay.server";
 import { createGameLog } from "~/domain/logs.server";
-import { GamePlayer, getTeamPlayers } from "~/domain/players.server";
+import type { GamePlayer } from "~/domain/players.server";
+import { getTeamPlayers } from "~/domain/players.server";
 import { addPlayerToTeam } from "~/domain/players.server";
 import {
   drawPlayersFromDeck,

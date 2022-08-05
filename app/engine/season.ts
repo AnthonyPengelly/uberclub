@@ -178,11 +178,11 @@ function calculateSegmentResult(homeScore: number, awayScore: number) {
 }
 
 function getTeamScores(team: TeamWithPlayer) {
-  const homeScores = getLineupScores(team.players);
-  homeScores.DEF += Math.floor(Math.random() * 12) + 1;
-  homeScores.MID += Math.floor(Math.random() * 12) + 1;
-  homeScores.FWD += Math.floor(Math.random() * 12) + 1;
-  return homeScores;
+  const scores = getLineupScores(team.players, team.team.captainBoost);
+  scores.DEF += Math.floor(Math.random() * 12) + 1;
+  scores.MID += Math.floor(Math.random() * 12) + 1;
+  scores.FWD += Math.floor(Math.random() * 12) + 1;
+  return scores;
 }
 
 async function playSim(gameId: string, seasonId: string, team: Team) {

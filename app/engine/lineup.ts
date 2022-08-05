@@ -15,9 +15,30 @@ export async function addPlayerToLineup(
   const existingPlayer =
     existingPlayerId && (await getPlayer(existingPlayerId));
   const existingPosition = player.lineupPosition;
-  await updatePlayerLineupPosition(player.id, position);
+  await updatePlayerLineupPosition(player.id, position, player.captain);
   if (existingPlayer) {
-    await updatePlayerLineupPosition(existingPlayer.id, existingPosition);
+    await updatePlayerLineupPosition(
+      existingPlayer.id,
+      existingPosition,
+      existingPosition ? existingPlayer.captain : false
+    );
+  }
+}
+
+export async function updateCaptain(
+  playerId: string,
+  existingPlayerId: string
+) {
+  const player = await getPlayer(playerId);
+  const existingPlayer =
+    existingPlayerId && (await getPlayer(existingPlayerId));
+  await updatePlayerLineupPosition(player.id, player.lineupPosition, true);
+  if (existingPlayer) {
+    await updatePlayerLineupPosition(
+      existingPlayer.id,
+      existingPlayer.lineupPosition,
+      false
+    );
   }
 }
 
@@ -25,10 +46,10 @@ export async function removePlayerFromLineup(playerId: string) {
   if (!playerId) {
     return;
   }
-  await updatePlayerLineupPosition(playerId, undefined);
+  await updatePlayerLineupPosition(playerId, undefined, false);
 }
 
-export function getLineupScores(players: GamePlayer[]) {
+export function getLineupScores(players: GamePlayer[], captainBoost: number) {
   const scores = {
     DEF: 0,
     MID: 0,
@@ -37,20 +58,21 @@ export function getLineupScores(players: GamePlayer[]) {
   players
     .filter((x) => x.lineupPosition)
     .forEach((x) => {
+      const captainBonus = x.captain ? captainBoost : 0;
       if (x.lineupPosition! <= MAX_DEF_POSITION) {
         const position = x.lineupPosition === 1 ? "GKP" : "DEF";
         const penalty = positionPenalty(x, position);
-        scores.DEF += x.stars - penalty;
+        scores.DEF += x.stars + captainBonus - penalty;
         return;
       }
       if (x.lineupPosition! <= MAX_MID_POSITION) {
         const penalty = positionPenalty(x, "MID");
-        scores.MID += x.stars - penalty;
+        scores.MID += x.stars + captainBonus - penalty;
         return;
       }
       if (x.lineupPosition! <= MAX_FWD_POSITION) {
         const penalty = positionPenalty(x, "FWD");
-        scores.FWD += x.stars - penalty;
+        scores.FWD += x.stars + captainBonus - penalty;
         return;
       }
     });

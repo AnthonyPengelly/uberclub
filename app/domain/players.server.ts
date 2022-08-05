@@ -206,11 +206,12 @@ export async function removePlayerFromTeam(id: string) {
 
 export async function updatePlayerLineupPosition(
   id: string,
-  lineupPosition: number | undefined
+  lineupPosition: number | undefined,
+  captain: boolean
 ) {
   const { error } = await supabase
     .from("player_game_states")
-    .update({ lineup_position: lineupPosition || null })
+    .update({ lineup_position: lineupPosition || null, captain })
     .eq("id", id);
 
   if (error) {
