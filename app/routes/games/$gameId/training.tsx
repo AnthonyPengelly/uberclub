@@ -9,9 +9,13 @@ import type { GamePlayer } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import type { ActionFunction } from "@remix-run/node";
 import { hasTrainingRemaining, trainPlayer } from "~/engine/training";
+import type { Game } from "~/domain/games.server";
+import { getGame } from "~/domain/games.server";
+import { Stage } from "~/engine/game";
 
 type LoaderData = {
   team: Team;
+  game: Game;
   players: GamePlayer[];
   hasTrainingRemaining: boolean;
 };
@@ -19,6 +23,7 @@ type LoaderData = {
 export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
+  const game = await getGame(params.gameId);
 
   const team = await getTeam(userId, params.gameId);
   const players = await getTeamPlayers(team.id);
@@ -27,32 +32,43 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ team, players, hasTrainingRemaining: trainingRemaining });
+  return json({ game, team, players, hasTrainingRemaining: trainingRemaining });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
+  const game = await getGame(params.gameId);
   const formData = await request.formData();
   const team = await getTeam(userId, params.gameId);
   let playerId = formData.get("player-id") as string;
   await trainPlayer(playerId, team);
 
   const players = await getTeamPlayers(team.id);
+  const trainingRemaining = await hasTrainingRemaining(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ team, players });
+  return json({ game, team, players, hasTrainingRemaining: trainingRemaining });
 };
 
 export default function TrainingPage() {
-  const { team, players, hasTrainingRemaining } = useLoaderData<LoaderData>();
+  const { game, team, players, hasTrainingRemaining } =
+    useLoaderData<LoaderData>();
 
   return (
     <div>
       <h2>{team.teamName}</h2>
       {!hasTrainingRemaining && <h3>No Training Available</h3>}
+      {game.stage === Stage.Training && team.isReady && (
+        <div>Waiting for other players</div>
+      )}
+      {game.stage === Stage.Training && !team.isReady && (
+        <Form method="post" action={`/games/${game.id}/ready`}>
+          <button type="submit">Complete training</button>
+        </Form>
+      )}
       <ul>
         {players.map((x) => (
           <li key={x.id}>

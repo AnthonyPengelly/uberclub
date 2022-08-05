@@ -50,7 +50,7 @@ export async function buyScoutedPlayer(playerId: string, team: Team) {
     } for the bargain price of ${getScoutPrice(
       player.overall,
       player.potential
-    )}`
+    )}M`
   );
 }
 

@@ -14,9 +14,13 @@ import {
   hasScoutingRemaining,
   scoutPlayer,
 } from "~/engine/scouting";
+import type { Game } from "~/domain/games.server";
+import { getGame } from "~/domain/games.server";
+import { Stage } from "~/engine/game";
 
 type LoaderData = {
   team: Team;
+  game: Game;
   scoutedPlayers: GamePlayer[];
   hasScoutingRemaining: boolean;
 };
@@ -26,6 +30,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   invariant(params.gameId, "gameId not found");
 
   const team = await getTeam(userId, params.gameId);
+  const game = await getGame(params.gameId);
   const scoutedPlayers = await getScoutedPlayers(team);
   const canScout = await hasScoutingRemaining(team);
   if (!team) {
@@ -33,6 +38,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
 
   return json({
+    game,
     team,
     scoutedPlayers,
     hasScoutingRemaining: canScout,
@@ -44,6 +50,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
   invariant(params.gameId, "gameId not found");
   const team = await getTeam(userId, params.gameId);
+  const game = await getGame(params.gameId);
 
   if (!team) {
     throw new Response("Not Found", { status: 404 });
@@ -61,16 +68,18 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
   }
   const scoutedPlayers = await getScoutedPlayers(team);
+  const canScout = await hasScoutingRemaining(team);
 
   return json({
+    game,
     team,
     scoutedPlayers,
-    hasScoutingRemaining: team.scoutingLevel > scoutedPlayers.length,
+    hasScoutingRemaining: canScout,
   });
 };
 
 export default function ScoutingPage() {
-  const { team, scoutedPlayers, hasScoutingRemaining } =
+  const { game, team, scoutedPlayers, hasScoutingRemaining } =
     useLoaderData<LoaderData>();
 
   return (
@@ -78,6 +87,14 @@ export default function ScoutingPage() {
       <h2>
         {team.teamName} - {team.cash}M
       </h2>
+      {game.stage === Stage.Scouting && team.isReady && (
+        <div>Waiting for other players</div>
+      )}
+      {game.stage === Stage.Scouting && !team.isReady && (
+        <Form method="post" action={`/games/${game.id}/ready`}>
+          <button type="submit">Complete scouting</button>
+        </Form>
+      )}
       {hasScoutingRemaining && (
         <Form method="post">
           <input type="hidden" name="action" value="scout-a-player" />

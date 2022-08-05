@@ -1,6 +1,11 @@
 import type { Game } from "~/domain/games.server";
 import { getGame, updateGameStage } from "~/domain/games.server";
-import { addTeamToGame, getTeamsInGame } from "~/domain/team.server";
+import type { Team } from "~/domain/team.server";
+import {
+  addTeamToGame,
+  getTeamsInGame,
+  markAsReady,
+} from "~/domain/team.server";
 import { createSeason } from "~/domain/season.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
@@ -77,5 +82,16 @@ async function advance(gameId: string) {
       return updateGameStage(gameId, Stage.Match3);
     case Stage.SuperCup:
       return updateGameStage(gameId, Stage.Training);
+  }
+}
+
+export async function markTeamAsReady(gameId: string, team: Team) {
+  await markAsReady(team.id);
+  await createGameLog(gameId, `${team.managerName} is ready to continue`);
+  const allTeams = await getTeamsInGame(gameId);
+  if (allTeams.filter((x) => x.isReady).length === 4) {
+    await createGameLog(gameId, "Everyone is ready, starting next phase");
+    await advance(gameId);
+    await Promise.all(allTeams.map((x) => markAsReady(x.id as string, false)));
   }
 }

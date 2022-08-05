@@ -19,13 +19,14 @@ const STARTING_CASH = 120;
 export async function getTeamsInGame(gameId: string): Promise<Partial<Team>[]> {
   const { data } = await supabase
     .from("teams")
-    .select(`id, team_name, manager_name`)
+    .select(`id, team_name, manager_name, is_ready`)
     .eq("game_id", gameId);
   return (
     data?.map((team) => ({
       id: team.id,
       teamName: team.team_name,
       managerName: team.manager_name,
+      isReady: team.is_ready,
     })) || []
   );
 }
@@ -92,6 +93,17 @@ export async function updateCash(id: string, cashRemaining: number) {
   const { error } = await supabase
     .from("teams")
     .update({ cash: cashRemaining })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function markAsReady(id: string, ready: boolean = true) {
+  const { error } = await supabase
+    .from("teams")
+    .update({ is_ready: ready })
     .eq("id", id);
 
   if (error) {
