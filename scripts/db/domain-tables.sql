@@ -127,12 +127,14 @@ create table public.deadline_day_bids (
 );
 
 create table public.team_seasons (
+  id uuid not null default uuid_generate_v4(),
   team_id uuid references public.teams not null,
   season_id uuid references public.seasons not null,
   score integer not null,
   starting_score integer not null,
 
-  primary key (team_id, season_id)
+  primary key (id),
+  unique (team_id, season_id)
 );
 
 create table public.results (

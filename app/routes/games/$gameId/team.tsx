@@ -177,8 +177,8 @@ function Player({ player }: { player: GamePlayer }) {
     <>
       <img src={player.imageUrl} alt={player.name} width={40} height={40} />[
       {player.position}] {player.name}{" "}
-      {[...Array(player.overall).keys()].map(() => "★").join("")}
-      {[...Array(player.potential - player.overall).keys()]
+      {[...Array(player.stars).keys()].map(() => "★").join("")}
+      {[...Array(player.potential - player.stars).keys()]
         .map(() => "☆")
         .join("")}
     </>

@@ -11,6 +11,7 @@ import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
 import { createGameLog } from "~/domain/logs.server";
 import { resolveDeadlineDay, setDeadlineDayPlayers } from "./deadlineDay";
+import { playFixtures, startSeason } from "./season";
 
 export enum Stage {
   NotStarted = 0,
@@ -78,6 +79,8 @@ async function advance(gameId: string) {
       await resolveDeadlineDay(gameId);
       return updateGameStage(gameId, Stage.Match1);
     case Stage.Match1:
+      await startSeason(gameId);
+      await playFixtures(gameId, Stage.Match1);
       return updateGameStage(gameId, Stage.Match2);
     case Stage.Match2:
       return updateGameStage(gameId, Stage.Match3);

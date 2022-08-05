@@ -16,18 +16,24 @@ export type Team = {
 
 const STARTING_CASH = 120;
 
-export async function getTeamsInGame(gameId: string): Promise<Partial<Team>[]> {
+export async function getTeamsInGame(gameId: string): Promise<Team[]> {
   const { data } = await supabase
     .from("teams")
-    .select(`id, team_name, manager_name, is_ready, cash`)
+    .select(`*`)
     .eq("game_id", gameId);
   return (
     data?.map((team) => ({
       id: team.id,
+      gameId: team.game_id,
+      userId: team.user_id,
       teamName: team.team_name,
       managerName: team.manager_name,
-      isReady: team.is_ready,
       cash: team.cash,
+      isReady: team.is_ready,
+      captainBoost: team.captain_boost,
+      trainingLevel: team.training_level,
+      scoutingLevel: team.scouting_level,
+      stadiumLevel: team.stadium_level,
     })) || []
   );
 }
