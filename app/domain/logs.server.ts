@@ -72,11 +72,7 @@ export async function getScoutingLogsForSeason(
   return data.map((x) => x.player_game_state_id) || [];
 }
 
-export async function createImprovementLog(
-  seasonId: string,
-  teamId: string,
-  improvement: number
-) {
+export async function createImprovementLog(seasonId: string, teamId: string) {
   const { data, error } = await supabase
     .from("improvement_logs")
     .insert([{ season_id: seasonId, team_id: teamId }])
@@ -87,6 +83,21 @@ export async function createImprovementLog(
   }
 
   return null;
+}
+
+export async function getImprovementLogsForSeason(
+  seasonId: string,
+  teamId: string
+) {
+  const { data, error } = await supabase
+    .from("improvement_logs")
+    .select("id")
+    .eq("season_id", seasonId)
+    .eq("team_id", teamId);
+  if (error) {
+    throw error;
+  }
+  return data.map((x) => x.id) || [];
 }
 
 export async function createGameLog(gameId: string, event: string) {

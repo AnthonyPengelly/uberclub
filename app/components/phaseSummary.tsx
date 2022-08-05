@@ -26,12 +26,12 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           href={`/games/${game.id}/scouting`}
         />
       );
-    case Stage.Investments:
+    case Stage.Improvements:
       return (
         <PhaseHeading
-          heading="Investments Phase"
-          callToAction="Go To Investments"
-          href={`/games/${game.id}/investments`}
+          heading="Improvements Phase"
+          callToAction="Go To Improvements"
+          href={`/games/${game.id}/improvements`}
         />
       );
     case Stage.DeadlineDay:

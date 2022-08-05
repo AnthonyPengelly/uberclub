@@ -15,7 +15,7 @@ export enum Stage {
   NotStarted = 0,
   Training = 1,
   Scouting = 2,
-  Investments = 3,
+  Improvements = 3,
   DeadlineDay = 4,
   Match1 = 5,
   Match2 = 6,
@@ -69,8 +69,8 @@ async function advance(gameId: string) {
     case Stage.Training:
       return updateGameStage(gameId, Stage.Scouting);
     case Stage.Scouting:
-      return updateGameStage(gameId, Stage.Investments);
-    case Stage.Investments:
+      return updateGameStage(gameId, Stage.Improvements);
+    case Stage.Improvements:
       return updateGameStage(gameId, Stage.DeadlineDay);
     case Stage.DeadlineDay:
       return updateGameStage(gameId, Stage.Match1);

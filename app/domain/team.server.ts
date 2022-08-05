@@ -110,3 +110,23 @@ export async function markAsReady(id: string, ready: boolean = true) {
     throw error;
   }
 }
+
+export async function updateImprovements(
+  id: string,
+  trainingLevel: number,
+  scoutingLevel: number,
+  stadiumLevel: number
+) {
+  const { error } = await supabase
+    .from("teams")
+    .update({
+      training_level: trainingLevel,
+      scouting_level: scoutingLevel,
+      stadium_level: stadiumLevel,
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
