@@ -1,5 +1,6 @@
 import type { Team } from "~/domain/team.server";
 import {
+  createGameLog,
   createTrainingLog,
   getTrainingLogsForSeason,
 } from "~/domain/logs.server";
@@ -18,6 +19,19 @@ export async function trainPlayer(playerId: string, team: Team) {
     0,
     Math.min(maxImprovement, diceRoll - player.stars)
   );
+  if (improvement === 0) {
+    await createGameLog(
+      team.gameId,
+      `${player.name} didn't turn up to ${team.teamName} training`
+    );
+  } else {
+    await createGameLog(
+      team.gameId,
+      `${team.managerName} trained ${player.name} from ${player.stars} to ${
+        player.stars + improvement
+      } stars`
+    );
+  }
   await updatePlayerStars(playerId, player.stars + improvement);
   await createTrainingLog(season.id, team.id, improvement);
 }

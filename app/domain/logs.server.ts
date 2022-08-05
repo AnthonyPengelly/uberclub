@@ -1,5 +1,11 @@
 import { supabase } from "./supabase.server";
 
+export type GameLog = {
+  id: string;
+  createdAt: Date;
+  event: string;
+};
+
 export async function createTrainingLog(
   seasonId: string,
   teamId: string,
@@ -81,4 +87,35 @@ export async function createImprovementLog(
   }
 
   return null;
+}
+
+export async function createGameLog(gameId: string, event: string) {
+  const { data, error } = await supabase
+    .from("game_logs")
+    .insert([{ game_id: gameId, event }])
+    .single();
+
+  if (!error) {
+    return data;
+  }
+
+  return null;
+}
+
+export async function getGameLogs(gameId: string): Promise<GameLog[]> {
+  const { data, error } = await supabase
+    .from("game_logs")
+    .select("id, created_at, event")
+    .eq("game_id", gameId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    throw error;
+  }
+  return (
+    data.map((x) => ({
+      id: x.id,
+      createdAt: new Date(x.created_at),
+      event: x.event,
+    })) || []
+  );
 }

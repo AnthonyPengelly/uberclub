@@ -4,6 +4,7 @@ import { addTeamToGame, getTeamsInGame } from "~/domain/team.server";
 import { createSeason } from "~/domain/season.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
+import { createGameLog } from "~/domain/logs.server";
 
 export enum Stage {
   NotStarted = 0,
@@ -28,6 +29,10 @@ export async function joinGame(teamInput: {
   managerName: string;
 }) {
   await addTeamToGame(teamInput);
+  await createGameLog(
+    teamInput.gameId,
+    `${teamInput.managerName} joined the game!`
+  );
   const allTeams = await getTeamsInGame(teamInput.gameId);
   if (allTeams.length === 4) {
     await startGame(
@@ -38,6 +43,10 @@ export async function joinGame(teamInput: {
 }
 
 async function startGame(gameId: string, teamIds: string[]) {
+  await createGameLog(
+    gameId,
+    "Everyone is here, starting the game and randomising teams"
+  );
   console.log("adding all players");
   await addAllPlayersToGame(gameId);
   await createSeason(gameId, 1);

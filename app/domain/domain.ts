@@ -1,15 +1,3 @@
-export type GameLog = {
-  id: string;
-  gameId: string;
-  event: string;
-};
-
-export type Season = {
-  id: string;
-  gameId: string;
-  seasonNumber: string;
-};
-
 export type TeamSeason = {
   teamId: string;
   seasonId: number;

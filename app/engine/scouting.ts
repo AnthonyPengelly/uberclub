@@ -1,6 +1,7 @@
 import type { Team } from "~/domain/team.server";
 import { updateCash } from "~/domain/team.server";
 import {
+  createGameLog,
   createScoutingLog,
   getScoutingLogsForSeason,
 } from "~/domain/logs.server";
@@ -27,6 +28,10 @@ export async function scoutPlayer(team: Team) {
   await assertCanScout(team.gameId, season.id, team);
   await createScoutingLog(season.id, team.id, player.id);
   await markPlayerOutOfDeck(player.id);
+  await createGameLog(
+    team.gameId,
+    `${team.teamName} have discovered a hidden gem: ${player.name} already playing at ${player.overall} stars`
+  );
   return player;
 }
 
@@ -38,6 +43,15 @@ export async function buyScoutedPlayer(playerId: string, team: Team) {
   }
   await addPlayerToTeam(playerId, team.id);
   await updateCash(team.id, team.cash - cost);
+  await createGameLog(
+    team.gameId,
+    `${team.managerName} has picked up ${
+      player.name
+    } for the bargain price of ${getScoutPrice(
+      player.overall,
+      player.potential
+    )}`
+  );
 }
 
 export const getScoutPrice = (overall: number, potential: number) => {
