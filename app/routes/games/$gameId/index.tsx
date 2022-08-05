@@ -12,11 +12,17 @@ import { getGameLogs } from "~/domain/logs.server";
 import type { Season, TeamSeasonSummary } from "~/domain/season.server";
 import { getAllSeasons } from "~/domain/season.server";
 import { getTeamSeasons } from "~/domain/season.server";
+import { getResults, Result } from "~/domain/fixtures.server";
+import Fixtures from "~/components/fixtures";
 
 type LoaderData = {
   game: Game;
   team: Team;
-  seasons: { season: Season; teamSeasons: TeamSeasonSummary[] }[];
+  seasons: {
+    season: Season;
+    teamSeasons: TeamSeasonSummary[];
+    results: Result[];
+  }[];
   logs: GameLog[];
 };
 
@@ -33,6 +39,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     seasons.map(async (x) => ({
       season: x,
       teamSeasons: await getTeamSeasons(x.id),
+      results: await getResults(x.id),
     }))
   );
   const team = await getTeam(userId, params.gameId);
@@ -48,28 +55,32 @@ export default function GameDetailsPage() {
     <div>
       <h2>Welcome, {team.managerName}</h2>
       <Link to="team">Team</Link>
-      {seasons.map(({ season, teamSeasons }) => (
+      {seasons.map(({ season, teamSeasons, results }) => (
         <div key={season.id}>
           <h3>{season.name}</h3>
           {teamSeasons.length !== 0 ? (
-            <table>
-              <tbody>
-                <tr>
-                  <th>Name</th>
-                  <th>Starting Score</th>
-                  <th>Score</th>
-                </tr>
-                {teamSeasons
-                  .sort((a, b) => b.score - a.score)
-                  .map((x) => (
-                    <tr key={x.id}>
-                      <td>{x.teamName}</td>
-                      <td>{x.startingScore}</td>
-                      <td>{x.score}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+            <>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Name</th>
+                    <th>Starting Score</th>
+                    <th>Score</th>
+                  </tr>
+                  {teamSeasons
+                    .sort((a, b) => b.score - a.score)
+                    .map((x) => (
+                      <tr key={x.id}>
+                        <td>{x.teamName}</td>
+                        <td>{x.startingScore}</td>
+                        <td>{x.score}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              <h4>Fixtures</h4>
+              <Fixtures teamSeasons={teamSeasons} results={results} />
+            </>
           ) : (
             <h4>Pre Season</h4>
           )}

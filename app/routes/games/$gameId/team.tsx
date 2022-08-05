@@ -18,6 +18,7 @@ import {
   validateLineup,
 } from "~/engine/lineup";
 import { canSellPlayer, Stage } from "~/engine/game";
+import PlayerDisplay from "~/components/playerDisplay";
 
 type LoaderData = {
   team: Team;
@@ -87,9 +88,9 @@ export default function TeamPage() {
         </Form>
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
-      <h3>Captain</h3>
+      <h3>Captain ({team.captainBoost}★ Boost)</h3>
       {captain ? (
-        <Player player={captain} />
+        <PlayerDisplay player={captain} />
       ) : (
         canMakeChanges && <div>No player selected</div>
       )}
@@ -148,7 +149,7 @@ export default function TeamPage() {
           .filter((x) => x.lineupPosition === null)
           .map((x) => (
             <li key={x.id}>
-              <Player player={x} />
+              <PlayerDisplay player={x} />
               {canSell && (
                 <Form method="post" action={`/games/${game.id}/sell`}>
                   <input type="hidden" name="player-id" value={x.id} />
@@ -175,7 +176,7 @@ function Position({
   return (
     <div>
       {existingPlayer ? (
-        <Player player={existingPlayer} />
+        <PlayerDisplay player={existingPlayer} />
       ) : (
         canMakeChanges && <div>No player selected</div>
       )}
@@ -199,18 +200,5 @@ function Position({
         </Form>
       )}
     </div>
-  );
-}
-
-function Player({ player }: { player: GamePlayer }) {
-  return (
-    <>
-      <img src={player.imageUrl} alt={player.name} width={40} height={40} />[
-      {player.position}] {player.name}{" "}
-      {[...Array(player.stars).keys()].map(() => "★").join("")}
-      {[...Array(player.potential - player.stars).keys()]
-        .map(() => "☆")
-        .join("")}
-    </>
   );
 }
