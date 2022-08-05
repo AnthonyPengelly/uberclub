@@ -12,7 +12,8 @@ import { getGameLogs } from "~/domain/logs.server";
 import type { Season, TeamSeasonSummary } from "~/domain/season.server";
 import { getAllSeasons } from "~/domain/season.server";
 import { getTeamSeasons } from "~/domain/season.server";
-import { getResults, Result } from "~/domain/fixtures.server";
+import type { Result } from "~/domain/fixtures.server";
+import { getResults } from "~/domain/fixtures.server";
 import Fixtures from "~/components/fixtures";
 
 type LoaderData = {

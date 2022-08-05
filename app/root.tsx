@@ -17,7 +17,7 @@ import stylesheet from "./styles/main.css";
 import { getUser } from "./session.server";
 
 export const meta: MetaFunction = () => {
-  return { title: "Uberbase By Post" };
+  return { title: "Uberclub By Post" };
 };
 
 export const links: LinksFunction = () => {
