@@ -6,7 +6,7 @@ import {
   getTeamsInGame,
   markAsReady,
 } from "~/domain/team.server";
-import { createSeason } from "~/domain/season.server";
+import { createSeason, getCurrentSeason } from "~/domain/season.server";
 import { performDraft } from "./draft";
 import { addAllPlayersToGame } from "./players";
 import { createGameLog } from "~/domain/logs.server";
@@ -83,12 +83,22 @@ async function advance(gameId: string) {
       await playFixtures(gameId, Stage.Match1);
       return updateGameStage(gameId, Stage.Match2);
     case Stage.Match2:
+      await playFixtures(gameId, Stage.Match2);
       return updateGameStage(gameId, Stage.Match3);
     case Stage.Match3:
-      return updateGameStage(gameId, Stage.Match3);
+      await playFixtures(gameId, Stage.Match3);
+      // Summarise season/captains etc.
+      // Finances
+      await createNextSeason(gameId);
+      return updateGameStage(gameId, Stage.Training);
     case Stage.SuperCup:
       return updateGameStage(gameId, Stage.Training);
   }
+}
+
+async function createNextSeason(gameId: string) {
+  const currentSeason = await getCurrentSeason(gameId);
+  await createSeason(gameId, currentSeason.seasonNumber + 1);
 }
 
 export async function markTeamAsReady(gameId: string, team: Team) {

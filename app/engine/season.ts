@@ -218,7 +218,9 @@ async function recordSimDraw(
 async function recordSimLoss(gameId: string, team: Team) {
   await createGameLog(
     gameId,
-    `${team.teamName} lose their sim. The fans are chanting "GET ${team.managerName} OUT!"`
+    `${
+      team.teamName
+    } lose their sim. The fans are chanting "GET ${team.managerName.toUpperCase()} OUT!"`
   );
 }
 
