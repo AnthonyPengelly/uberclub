@@ -9,7 +9,15 @@ import type { GamePlayer } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import { addPlayerToLineup, removePlayerFromLineup } from "~/engine/lineup";
+import {
+  addPlayerToLineup,
+  getLineupScores,
+  MAX_DEF_POSITION,
+  MAX_MID_POSITION,
+  removePlayerFromLineup,
+  validateLineup,
+} from "~/engine/lineup";
+import { Stage } from "~/engine/game";
 
 type LoaderData = {
   team: Team;
@@ -58,25 +66,57 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function TeamPage() {
-  const { team, players } = useLoaderData<LoaderData>();
+  const { team, players, game } = useLoaderData<LoaderData>();
+  const scores = getLineupScores(players);
+  const validationMessage = validateLineup(players);
+  const isMatchDay =
+    game.stage === Stage.Match1 ||
+    game.stage === Stage.Match2 ||
+    game.stage === Stage.Match3;
+  const canMakeChanges = !team.isReady || !isMatchDay;
 
   return (
     <div>
       <h2>{team.teamName}</h2>
-      <p>Team validity TODO</p>
+      {validationMessage && <p>{validationMessage}</p>}
+      {isMatchDay && !team.isReady && !validationMessage && (
+        <Form method="post" action={`/games/${game.id}/ready`}>
+          <button type="submit">Submit lineup for match day</button>
+        </Form>
+      )}
+      {isMatchDay && team.isReady && <div>Waiting for other players</div>}
       <h3>GKP</h3>
-      <Position players={players} position={1} />
-      <h3>DEF</h3>
+      <Position
+        players={players}
+        position={1}
+        canMakeChanges={canMakeChanges}
+      />
+      <h3>DEF {scores.DEF}★ (incl. GKP)</h3>
       {[...Array(5).keys()].map((x) => (
-        <Position key={`def-${x}`} players={players} position={x + 2} />
+        <Position
+          key={`def-${x}`}
+          players={players}
+          position={x + 1 + 1}
+          canMakeChanges={canMakeChanges}
+        />
       ))}
-      <h3>MID</h3>
+      <h3>MID {scores.MID}★</h3>
       {[...Array(5).keys()].map((x) => (
-        <Position key={`mid-${x}`} players={players} position={x + 7} />
+        <Position
+          key={`mid-${x}`}
+          players={players}
+          position={x + MAX_DEF_POSITION + 1}
+          canMakeChanges={canMakeChanges}
+        />
       ))}
-      <h3>FWD</h3>
+      <h3>FWD {scores.FWD}★</h3>
       {[...Array(4).keys()].map((x) => (
-        <Position key={`fwd-${x}`} players={players} position={x + 12} />
+        <Position
+          key={`fwd-${x}`}
+          players={players}
+          position={x + MAX_MID_POSITION + 1}
+          canMakeChanges={canMakeChanges}
+        />
       ))}
       <h3>Reserves</h3>
       <ul>
@@ -95,9 +135,11 @@ export default function TeamPage() {
 function Position({
   position,
   players,
+  canMakeChanges,
 }: {
   position: number;
   players: GamePlayer[];
+  canMakeChanges: boolean;
 }) {
   const existingPlayer = players.find((x) => x.lineupPosition === position);
   return (
@@ -105,25 +147,27 @@ function Position({
       {existingPlayer ? (
         <Player player={existingPlayer} />
       ) : (
-        <div>No player selected</div>
+        canMakeChanges && <div>No player selected</div>
       )}
-      <Form method="post">
-        <input
-          type="hidden"
-          name="existing-player-id"
-          value={existingPlayer?.id}
-        />
-        <input type="hidden" name="position" value={position} />
-        <select name="player-id" defaultValue={existingPlayer?.id}>
-          <option value="null">None</option>
-          {players.map((x) => (
-            <option key={x.id} value={x.id}>
-              [{x.position}] {x.name}
-            </option>
-          ))}
-        </select>
-        <button type="submit">Save</button>
-      </Form>
+      {canMakeChanges && (
+        <Form method="post">
+          <input
+            type="hidden"
+            name="existing-player-id"
+            value={existingPlayer?.id}
+          />
+          <input type="hidden" name="position" value={position} />
+          <select name="player-id" defaultValue={existingPlayer?.id}>
+            <option value="null">None</option>
+            {players.map((x) => (
+              <option key={x.id} value={x.id}>
+                [{x.position}] {x.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit">Save</button>
+        </Form>
+      )}
     </div>
   );
 }

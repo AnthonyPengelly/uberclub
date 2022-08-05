@@ -91,20 +91,22 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
     throw error;
   }
   return (
-    data?.map((x) => ({
-      id: x.id,
-      teamId: x.team_id,
-      lineupPosition: x.lineup_position,
-      captain: x.captain,
-      injured: x.injured,
-      stars: x.stars,
-      name: x.real_players.name,
-      position: x.real_players.positions.name,
-      overall: x.real_players.overall,
-      potential: x.real_players.potential,
-      team: x.real_players.real_teams.team,
-      imageUrl: x.real_players.image_url,
-    })) || []
+    data
+      ?.map((x) => ({
+        id: x.id,
+        teamId: x.team_id,
+        lineupPosition: x.lineup_position,
+        captain: x.captain,
+        injured: x.injured,
+        stars: x.stars,
+        name: x.real_players.name,
+        position: x.real_players.positions.name,
+        overall: x.real_players.overall,
+        potential: x.real_players.potential,
+        team: x.real_players.real_teams.team,
+        imageUrl: x.real_players.image_url,
+      }))
+      .sort(sortPlayers) || []
   );
 }
 
@@ -236,4 +238,29 @@ export async function drawPlayersFromDeck(
     team: x.real_players.real_teams.team,
     imageUrl: x.real_players.image_url,
   }));
+}
+
+function sortPlayers(a: GamePlayer, b: GamePlayer) {
+  if (a.position === b.position) {
+    return b.stars - a.stars;
+  }
+  if (a.position === "GKP") {
+    return -1;
+  }
+  if (b.position === "GKP") {
+    return 1;
+  }
+  if (a.position === "DEF") {
+    return -1;
+  }
+  if (b.position === "DEF") {
+    return 1;
+  }
+  if (a.position === "MID") {
+    return -1;
+  }
+  if (b.position === "MID") {
+    return 1;
+  }
+  return 0;
 }
