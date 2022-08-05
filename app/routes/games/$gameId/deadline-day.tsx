@@ -51,6 +51,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(playerId, "playerId not found");
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  const bids = await bidsForTeam(team);
 
   if (!team) {
     throw new Response("Not Found", { status: 404 });
@@ -58,10 +59,10 @@ export const action: ActionFunction = async ({ request, params }) => {
   await bidForPlayer(
     playerId,
     team,
+    bids,
     parseInt(formData.get("cost") as string, 10)
   );
   const players = await deadlineDayPlayers(params.gameId);
-  const bids = await bidsForTeam(team);
   return json({
     game,
     team,

@@ -8,7 +8,7 @@ import {
   getDeadlineDayPlayers,
 } from "~/domain/deadlineDay.server";
 import { createGameLog } from "~/domain/logs.server";
-import type { GamePlayer } from "~/domain/players.server";
+import { GamePlayer, getTeamPlayers } from "~/domain/players.server";
 import { addPlayerToTeam } from "~/domain/players.server";
 import {
   drawPlayersFromDeck,
@@ -31,17 +31,35 @@ export async function setDeadlineDayPlayers(gameId: string) {
   );
 }
 
-export async function bidForPlayer(playerId: string, team: Team, cost: number) {
+export async function bidForPlayer(
+  playerId: string,
+  team: Team,
+  bids: Bid[],
+  cost: number
+) {
   const season = await getCurrentSeason(team.gameId);
   const players = await getDeadlineDayPlayers(season.id);
   const player = players.find((x) => x.deadlineDayId === playerId);
   invariant(player?.id, "Cannot find deadline day player");
   const playerValue = minBidPrice(player);
   if (cost < playerValue) {
-    throw new Error("bid too small");
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Bid too small",
+    });
   }
   if (team.cash < cost) {
-    throw new Error("not enough cash!");
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Not enough cash!",
+    });
+  }
+  const teamPlayers = await getTeamPlayers(team.id);
+  if (teamPlayers.length + bids.length === 23) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Too many players! Sell first",
+    });
   }
   await createDeadlineDayBid(team.id, player.deadlineDayId, cost);
   await updateCash(team.id, team.cash - cost);

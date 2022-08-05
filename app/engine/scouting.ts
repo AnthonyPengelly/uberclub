@@ -9,6 +9,7 @@ import {
   addPlayerToTeam,
   drawPlayersFromDeck,
   getPlayer,
+  getTeamPlayers,
   markPlayerOutOfDeck,
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
@@ -39,7 +40,17 @@ export async function buyScoutedPlayer(playerId: string, team: Team) {
   const player = await getPlayer(playerId);
   const cost = getScoutPrice(player.overall, player.potential);
   if (cost > team.cash) {
-    throw new Error("Cannot afford to scout player!");
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Not enough cash!",
+    });
+  }
+  const players = await getTeamPlayers(team.id);
+  if (players.length === 23) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Too many players! Sell first",
+    });
   }
   await addPlayerToTeam(playerId, team.id);
   await updateCash(team.id, team.cash - cost);

@@ -193,6 +193,17 @@ export async function updatePlayerStars(id: string, stars: number) {
   }
 }
 
+export async function removePlayerFromTeam(id: string) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ team_id: null })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function updatePlayerLineupPosition(
   id: string,
   lineupPosition: number | undefined

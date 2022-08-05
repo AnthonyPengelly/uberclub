@@ -78,6 +78,7 @@ async function advance(gameId: string) {
       return updateGameStage(gameId, Stage.DeadlineDay);
     case Stage.DeadlineDay:
       await resolveDeadlineDay(gameId);
+      await startSeason(gameId);
       return updateGameStage(gameId, Stage.Match1);
     case Stage.Match1:
       await startSeason(gameId);
@@ -110,4 +111,13 @@ export async function markTeamAsReady(gameId: string, team: Team) {
     await advance(gameId);
     await Promise.all(allTeams.map((x) => markAsReady(x.id as string, false)));
   }
+}
+
+export function canSellPlayer(game: Game) {
+  return (
+    game.stage === Stage.Training ||
+    game.stage === Stage.Scouting ||
+    game.stage === Stage.Improvements ||
+    game.stage === Stage.DeadlineDay
+  );
 }

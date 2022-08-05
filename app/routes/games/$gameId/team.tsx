@@ -17,7 +17,7 @@ import {
   removePlayerFromLineup,
   validateLineup,
 } from "~/engine/lineup";
-import { Stage } from "~/engine/game";
+import { canSellPlayer, Stage } from "~/engine/game";
 
 type LoaderData = {
   team: Team;
@@ -74,6 +74,7 @@ export default function TeamPage() {
     game.stage === Stage.Match2 ||
     game.stage === Stage.Match3;
   const canMakeChanges = !team.isReady || !isMatchDay;
+  const canSell = canSellPlayer(game) && players.length > 11;
 
   return (
     <div>
@@ -125,6 +126,12 @@ export default function TeamPage() {
           .map((x) => (
             <li key={x.id}>
               <Player player={x} />
+              {canSell && (
+                <Form method="post" action={`/games/${game.id}/sell`}>
+                  <input type="hidden" name="player-id" value={x.id} />
+                  <button type="submit">Sell</button>
+                </Form>
+              )}
             </li>
           ))}
       </ul>

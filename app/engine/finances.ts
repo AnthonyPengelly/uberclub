@@ -1,12 +1,18 @@
 import { createGameLog } from "~/domain/logs.server";
-import { getTeamPlayers } from "~/domain/players.server";
+import {
+  getPlayer,
+  getTeamPlayers,
+  removePlayerFromTeam,
+} from "~/domain/players.server";
 import type { TeamSeasonSummary } from "~/domain/season.server";
 import { getCurrentSeason, getTeamSeasons } from "~/domain/season.server";
+import type { Team } from "~/domain/team.server";
 import {
   getTeamById,
   updateCaptainBoost,
   updateCash,
 } from "~/domain/team.server";
+import { getScoutPrice } from "./scouting";
 import { calculateScoreForTeam } from "./team";
 
 const ESTABLISHED_MIN = 40;
@@ -29,10 +35,10 @@ async function completeFinances(
   position: number
 ) {
   const team = await getTeamById(teamSeason.teamId);
-  if (teamSeason.score > 100) {
+  if (teamSeason.score >= 100) {
     await createGameLog(
       gameId,
-      `${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER!`
+      `*************************${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER!********************************`
     );
   }
   const placementAward = 110 - 10 * position;
@@ -77,4 +83,15 @@ function calculateStadiumIncome(level: number, score: number) {
     return 15 + level * 15;
   }
   return 10 + level * 10;
+}
+
+export async function sellPlayer(gameId: string, playerId: string, team: Team) {
+  const player = await getPlayer(playerId);
+  const cost = getScoutPrice(player.stars, player.potential);
+  await createGameLog(
+    gameId,
+    `${team.teamName} have sold ${player.name} for ${cost}M`
+  );
+  await removePlayerFromTeam(playerId);
+  await updateCash(team.id, team.cash + cost);
 }
