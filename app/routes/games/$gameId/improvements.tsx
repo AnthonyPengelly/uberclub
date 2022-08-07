@@ -68,13 +68,29 @@ export default function ImprovementsPage() {
   const stadiumCost = improvementCost(team, Improvements.Stadium);
 
   return (
-    <div>
-      <h2>
-        {team.teamName} - {team.cash}M
-      </h2>
-      {game.stage === Stage.Improvements && team.isReady && (
-        <div>Waiting for other players</div>
-      )}
+    <>
+      <h1>{team.teamName} investments</h1>
+      <div className="flow | quote">
+        <p>
+          Welcome to the investment hub. Here you can choose any two investments
+          to improve your club for future seasons.
+        </p>
+        {game.stage === Stage.Improvements && team.isReady && (
+          <p>
+            You don't currently have any investments to make. Make sure to come
+            back during the improvement phase of pre season.
+          </p>
+        )}
+        {game.stage === Stage.Improvements &&
+          !team.isReady &&
+          !hasImprovementsRemaining && (
+            <p>
+              You've finished all of your improvements. Once you are ready,
+              select the button below to complete this phase.
+            </p>
+          )}
+      </div>
+      <h2>{team.cash}M cash available</h2>
       {game.stage === Stage.Improvements && !team.isReady && (
         <LoadingForm
           method="post"
@@ -82,57 +98,51 @@ export default function ImprovementsPage() {
           submitButtonText="Complete improvements"
         />
       )}
-      <div>
-        Current training level: {team.trainingLevel}
-        {hasImprovementsRemaining &&
-          trainingCost !== null &&
-          team.cash > trainingCost && (
-            <LoadingForm
-              method="post"
-              submitButtonText={`Improve for ${trainingCost}M`}
-            >
-              <input
-                type="hidden"
-                name="improvement"
-                value={Improvements.Training}
-              />
-            </LoadingForm>
-          )}
-      </div>
-      <div>
-        Current scouting level: {team.scoutingLevel}
-        {hasImprovementsRemaining &&
-          scoutingCost !== null &&
-          team.cash > scoutingCost && (
-            <LoadingForm
-              method="post"
-              submitButtonText={`Improve for ${scoutingCost}M`}
-            >
-              <input
-                type="hidden"
-                name="improvement"
-                value={Improvements.Scouting}
-              />
-            </LoadingForm>
-          )}
-      </div>
-      <div>
-        Current stadium level: {team.stadiumLevel}
-        {hasImprovementsRemaining &&
-          stadiumCost !== null &&
-          team.cash > stadiumCost && (
-            <LoadingForm
-              method="post"
-              submitButtonText={`Improve for ${stadiumCost}M`}
-            >
-              <input
-                type="hidden"
-                name="improvement"
-                value={Improvements.Stadium}
-              />
-            </LoadingForm>
-          )}
-      </div>
-    </div>
+      <h3>Current training level: {team.trainingLevel}</h3>
+      {hasImprovementsRemaining &&
+        trainingCost !== null &&
+        team.cash > trainingCost && (
+          <LoadingForm
+            method="post"
+            submitButtonText={`Improve for ${trainingCost}M`}
+          >
+            <input
+              type="hidden"
+              name="improvement"
+              value={Improvements.Training}
+            />
+          </LoadingForm>
+        )}
+      <h3>Current scouting level: {team.scoutingLevel}</h3>
+      {hasImprovementsRemaining &&
+        scoutingCost !== null &&
+        team.cash > scoutingCost && (
+          <LoadingForm
+            method="post"
+            submitButtonText={`Improve for ${scoutingCost}M`}
+          >
+            <input
+              type="hidden"
+              name="improvement"
+              value={Improvements.Scouting}
+            />
+          </LoadingForm>
+        )}
+      <h3>Current stadium level: {team.stadiumLevel}</h3>
+      {hasImprovementsRemaining &&
+        stadiumCost !== null &&
+        team.cash > stadiumCost && (
+          <LoadingForm
+            method="post"
+            submitButtonText={`Improve for ${stadiumCost}M`}
+          >
+            <input
+              type="hidden"
+              name="improvement"
+              value={Improvements.Stadium}
+            />
+          </LoadingForm>
+        )}
+    </>
   );
 }

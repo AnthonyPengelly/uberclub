@@ -16,7 +16,6 @@ export async function getGamesList(): Promise<DetailedGame[]> {
   const { data } = await supabase
     .from("games")
     .select("id, name, stage, seasons (name, id, season), teams (id)");
-  console.log(data);
   return (
     data?.map((x) => ({
       id: x.id,

@@ -84,12 +84,23 @@ export default function ScoutingPage() {
     useLoaderData<LoaderData>();
 
   return (
-    <div>
-      <h2>
-        {team.teamName}: Scouting Level {team.scoutingLevel}
-      </h2>
-      <p>({team.scoutingLevel} player(s) may be scouted)</p>
-      <h3>{team.cash}M cash available</h3>
+    <>
+      <h1>{team.teamName} scouting</h1>
+      <div className="flow | quote">
+        <p>
+          Welcome to the scouting hub. As a level {team.scoutingLevel} club, you
+          are able to scout {team.scoutingLevel} player(s). Once you have a
+          found a player, you may choose to sign them, or ignore them.
+        </p>
+        {!hasScoutingRemaining && (
+          <p>
+            You are not currently able to scout any more players, ensure you
+            have decided the fate of any players here, and then complete the
+            scouting phase.
+          </p>
+        )}
+      </div>
+      <h2>{team.cash}M cash available</h2>
       {game.stage === Stage.Scouting && team.isReady && (
         <div>Waiting for other players</div>
       )}
@@ -124,10 +135,10 @@ export default function ScoutingPage() {
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>
               ))}
-            {x.teamId && " - Signed!"}
+            {x.teamId && " ✅"}
           </li>
         ))}
       </ul>
-    </div>
+    </>
   );
 }

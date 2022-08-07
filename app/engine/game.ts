@@ -60,11 +60,11 @@ async function startGame(gameId: string, teamIds: string[]) {
   await createSeason(gameId, 1);
   console.log("doing draft");
   await performDraft(gameId, teamIds);
-  console.log("advancing game");
   await advance(gameId);
 }
 
 async function advance(gameId: string) {
+  console.log("advancing game");
   const game = await getGame(gameId);
   switch (game.stage) {
     case Stage.NotStarted:

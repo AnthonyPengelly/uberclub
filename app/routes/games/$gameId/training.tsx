@@ -59,18 +59,23 @@ export default function TrainingPage() {
     useLoaderData<LoaderData>();
 
   return (
-    <div>
-      <h2>
-        {team.teamName}: Training Level {team.trainingLevel}
-      </h2>
-      <p>
-        ({team.trainingLevel} player(s) may be improved by up to{" "}
-        {team.trainingLevel} stars)
-      </p>
-      {!hasTrainingRemaining && <h3>No Training Available</h3>}
-      {game.stage === Stage.Training && team.isReady && (
-        <div>Waiting for other players</div>
-      )}
+    <>
+      <h1>
+        {team.teamName} training camp
+      </h1>
+      <div className="flow | quote">
+        <p>
+          Welcome to the pre season training camp. As a level{" "}
+          {team.trainingLevel} club, {team.trainingLevel} player(s) may be
+          improved by up to {team.trainingLevel} star(s), if you're lucky!
+        </p>
+        {!hasTrainingRemaining && (
+          <p>
+            You are not currently able to do any training, come back at the
+            start of next season.
+          </p>
+        )}
+      </div>
       {game.stage === Stage.Training && !team.isReady && (
         <LoadingForm
           method="post"
@@ -93,6 +98,6 @@ export default function TrainingPage() {
           </li>
         ))}
       </ul>
-    </div>
+    </>
   );
 }

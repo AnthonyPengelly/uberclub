@@ -64,14 +64,14 @@ export default function GameDetailsPage() {
         <p>
           {team.isReady ? (
             <p>
-              Good work <strong>{team.managerName}</strong>,{" "}
+              ✅ Good work <strong>{team.managerName}</strong>,{" "}
               <strong>{team.teamName}</strong> are ready for the next phase, put
               your feet up.
             </p>
           ) : (
             <p>
-              <strong>{team.teamName}</strong> are waiting for your next move,{" "}
-              <strong>{team.managerName}</strong>!
+              ⏳ <strong>{team.teamName}</strong> are waiting for your next
+              move, <strong>{team.managerName}</strong>!
             </p>
           )}
         </p>
