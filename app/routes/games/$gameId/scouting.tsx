@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -17,6 +17,7 @@ import {
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   team: Team;
@@ -93,15 +94,16 @@ export default function ScoutingPage() {
         <div>Waiting for other players</div>
       )}
       {game.stage === Stage.Scouting && !team.isReady && (
-        <Form method="post" action={`/games/${game.id}/ready`}>
-          <button type="submit">Complete scouting</button>
-        </Form>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/ready`}
+          submitButtonText="Complete scouting"
+        />
       )}
       {hasScoutingRemaining && (
-        <Form method="post">
+        <LoadingForm method="post" submitButtonText="Scout a player">
           <input type="hidden" name="action" value="scout-a-player" />
-          <button type="submit">Scout A Player</button>
-        </Form>
+        </LoadingForm>
       )}
       <ul>
         {scoutedPlayers.map((x) => (
@@ -117,11 +119,10 @@ export default function ScoutingPage() {
               (team.cash < getScoutPrice(x.overall, x.potential) ? (
                 <div>Not enough cash!</div>
               ) : (
-                <Form method="post">
+                <LoadingForm method="post" submitButtonText="Buy">
                   <input type="hidden" name="action" value="buy-player" />
                   <input type="hidden" name="player-id" value={x.id} />
-                  <button type="submit">Buy</button>
-                </Form>
+                </LoadingForm>
               ))}
             {x.teamId && " - Signed!"}
           </li>

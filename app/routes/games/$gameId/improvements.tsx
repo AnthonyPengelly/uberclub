@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -15,6 +15,7 @@ import {
   improvementCost,
   Improvements,
 } from "~/engine/improvements";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   team: Team;
@@ -75,23 +76,27 @@ export default function ImprovementsPage() {
         <div>Waiting for other players</div>
       )}
       {game.stage === Stage.Improvements && !team.isReady && (
-        <Form method="post" action={`/games/${game.id}/ready`}>
-          <button type="submit">Complete improvements</button>
-        </Form>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/ready`}
+          submitButtonText="Complete improvements"
+        />
       )}
       <div>
         Current training level: {team.trainingLevel}
         {hasImprovementsRemaining &&
           trainingCost !== null &&
           team.cash > trainingCost && (
-            <Form method="post">
+            <LoadingForm
+              method="post"
+              submitButtonText={`Improve for ${trainingCost}M`}
+            >
               <input
                 type="hidden"
                 name="improvement"
                 value={Improvements.Training}
               />
-              <button type="submit">Improve for {trainingCost}M</button>
-            </Form>
+            </LoadingForm>
           )}
       </div>
       <div>
@@ -99,14 +104,16 @@ export default function ImprovementsPage() {
         {hasImprovementsRemaining &&
           scoutingCost !== null &&
           team.cash > scoutingCost && (
-            <Form method="post">
+            <LoadingForm
+              method="post"
+              submitButtonText={`Improve for ${scoutingCost}M`}
+            >
               <input
                 type="hidden"
                 name="improvement"
                 value={Improvements.Scouting}
               />
-              <button type="submit">Improve for {scoutingCost}M</button>
-            </Form>
+            </LoadingForm>
           )}
       </div>
       <div>
@@ -114,14 +121,16 @@ export default function ImprovementsPage() {
         {hasImprovementsRemaining &&
           stadiumCost !== null &&
           team.cash > stadiumCost && (
-            <Form method="post">
+            <LoadingForm
+              method="post"
+              submitButtonText={`Improve for ${stadiumCost}M`}
+            >
               <input
                 type="hidden"
                 name="improvement"
                 value={Improvements.Stadium}
               />
-              <button type="submit">Improve for {stadiumCost}M</button>
-            </Form>
+            </LoadingForm>
           )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -21,6 +21,7 @@ import {
 } from "~/engine/lineup";
 import { canSellPlayer, Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   team: Team;
@@ -85,9 +86,11 @@ export default function TeamPage() {
       <h2>{team.teamName}</h2>
       {validationMessage && <p>{validationMessage}</p>}
       {isMatchDay && !team.isReady && !validationMessage && (
-        <Form method="post" action={`/games/${game.id}/ready`}>
-          <button type="submit">Submit lineup for match day</button>
-        </Form>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/ready`}
+          submitButtonText="Submit lineup"
+        />
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
       <h3>Captain ({team.captainBoost}★ Boost)</h3>
@@ -97,7 +100,11 @@ export default function TeamPage() {
         canMakeChanges && <div>No player selected</div>
       )}
       {canMakeChanges && (
-        <Form method="post" action={`/games/${game.id}/captain`}>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/captain`}
+          submitButtonText="Save"
+        >
           <input type="hidden" name="existing-player-id" value={captain?.id} />
           <select name="player-id" defaultValue={captain?.id}>
             {players
@@ -108,8 +115,7 @@ export default function TeamPage() {
                 </option>
               ))}
           </select>
-          <button type="submit">Save</button>
-        </Form>
+        </LoadingForm>
       )}
 
       <h3>GKP</h3>
@@ -153,10 +159,13 @@ export default function TeamPage() {
             <li key={x.id}>
               <PlayerDisplay player={x} />
               {canSell && (
-                <Form method="post" action={`/games/${game.id}/sell`}>
+                <LoadingForm
+                  method="post"
+                  action={`/games/${game.id}/sell`}
+                  submitButtonText="Sell"
+                >
                   <input type="hidden" name="player-id" value={x.id} />
-                  <button type="submit">Sell</button>
-                </Form>
+                </LoadingForm>
               )}
             </li>
           ))}
@@ -190,7 +199,7 @@ function Position({
         canMakeChanges && <div>No player selected</div>
       )}
       {canMakeChanges && (
-        <Form method="post">
+        <LoadingForm method="post" submitButtonText="Save">
           <input
             type="hidden"
             name="existing-player-id"
@@ -205,8 +214,7 @@ function Position({
               </option>
             ))}
           </select>
-          <button type="submit">Save</button>
-        </Form>
+        </LoadingForm>
       )}
     </div>
   );

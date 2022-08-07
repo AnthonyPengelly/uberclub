@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -16,6 +16,7 @@ import {
   minBidPrice,
 } from "~/engine/deadlineDay";
 import type { Bid, DeadlineDayPlayer } from "~/domain/deadlineDay.server";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   team: Team;
@@ -83,9 +84,11 @@ export default function DeadlineDayPage() {
         <div>Waiting for other players</div>
       )}
       {game.stage === Stage.DeadlineDay && !team.isReady && (
-        <Form method="post" action={`/games/${game.id}/ready`}>
-          <button type="submit">Complete deadline day</button>
-        </Form>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/ready`}
+          submitButtonText="Complete deadline day"
+        />
       )}
       <ul>
         {players.map((x) => (
@@ -103,7 +106,7 @@ export default function DeadlineDayPage() {
               (team.cash < minBidPrice(x) ? (
                 <div>Not enough cash!</div>
               ) : (
-                <Form method="post">
+                <LoadingForm method="post" submitButtonText="Bid">
                   <input type="hidden" name="id" value={x.deadlineDayId} />
                   <input
                     type="number"
@@ -113,8 +116,7 @@ export default function DeadlineDayPage() {
                     placeholder={minBidPrice(x).toString()}
                     required
                   />
-                  <button type="submit">bid</button>
-                </Form>
+                </LoadingForm>
               ))}
             {bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
               ` - ${

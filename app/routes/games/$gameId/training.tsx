@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -12,6 +12,7 @@ import { hasTrainingRemaining, trainPlayer } from "~/engine/training";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   team: Team;
@@ -71,9 +72,11 @@ export default function TrainingPage() {
         <div>Waiting for other players</div>
       )}
       {game.stage === Stage.Training && !team.isReady && (
-        <Form method="post" action={`/games/${game.id}/ready`}>
-          <button type="submit">Complete training</button>
-        </Form>
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/ready`}
+          submitButtonText="Complete training"
+        />
       )}
       <ul>
         {players.map((x) => (
@@ -83,10 +86,9 @@ export default function TrainingPage() {
             {[...Array(x.stars).keys()].map(() => "★").join("")}
             {[...Array(x.potential - x.stars).keys()].map(() => "☆").join("")}
             {x.potential - x.stars && hasTrainingRemaining ? (
-              <Form method="post">
+              <LoadingForm method="post" submitButtonText="Train">
                 <input type="hidden" name="player-id" value={x.id} />
-                <button type="submit">Train</button>
-              </Form>
+              </LoadingForm>
             ) : null}
           </li>
         ))}

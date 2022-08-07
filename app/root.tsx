@@ -13,7 +13,11 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import stylesheet from "./styles/main.css";
+import main from "./styles/main.css";
+import composition from "./styles/composition.css";
+import utility from "./styles/utility.css";
+import block from "./styles/block.css";
+import exception from "./styles/exception.css";
 import { getUser } from "./session.server";
 
 export const meta: MetaFunction = () => {
@@ -21,7 +25,13 @@ export const meta: MetaFunction = () => {
 };
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesheet }];
+  return [
+    { rel: "stylesheet", href: main },
+    { rel: "stylesheet", href: composition },
+    { rel: "stylesheet", href: utility },
+    { rel: "stylesheet", href: block },
+    { rel: "stylesheet", href: exception },
+  ];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {

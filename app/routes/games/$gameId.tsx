@@ -1,6 +1,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Outlet, useLoaderData } from "@remix-run/react";
+import { Outlet, useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
@@ -9,6 +9,7 @@ import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { isOpenForPlayers, joinGame } from "~/engine/game";
 import PhaseSummary from "~/components/phaseSummary";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   game: Game;
@@ -52,7 +53,7 @@ export default function GamePage() {
       {team && <Outlet />}
       {!team &&
         (isOpenForPlayers(game) ? (
-          <Form method="post">
+          <LoadingForm method="post" submitButtonText="Join">
             <div>
               <label htmlFor="team-name">Team Name</label>
               <input type="text" name="team-name" id="team-name" />
@@ -61,8 +62,7 @@ export default function GamePage() {
               <label htmlFor="manager-name">Manager Name</label>
               <input type="text" name="manager-name" id="manager-name" />
             </div>
-            <button type="submit">Join</button>
-          </Form>
+          </LoadingForm>
         ) : (
           <div>Sorry, this game is not open for registration</div>
         ))}
