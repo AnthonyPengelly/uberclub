@@ -48,22 +48,31 @@ export default function GamePage() {
 
   return (
     <Layout game={game}>
-      <h1>{game.name}</h1>
       {team && <Outlet />}
       {!team &&
         (isOpenForPlayers(game) ? (
-          <LoadingForm method="post" submitButtonText="Join">
-            <div>
-              <label htmlFor="team-name">Team Name</label>
-              <input type="text" name="team-name" id="team-name" />
-            </div>
-            <div>
-              <label htmlFor="manager-name">Manager Name</label>
-              <input type="text" name="manager-name" id="manager-name" />
-            </div>
-          </LoadingForm>
+          <>
+            <h1>🏆{game.name}🏆</h1>
+            <LoadingForm className="flow" method="post" submitButtonText="Join">
+              <div>
+                <label htmlFor="team-name">Team Name</label>
+              </div>
+              <div>
+                <input type="text" name="team-name" id="team-name" />
+              </div>
+              <div>
+                <label htmlFor="manager-name">Manager Name</label>
+              </div>
+              <div>
+                <input type="text" name="manager-name" id="manager-name" />
+              </div>
+            </LoadingForm>
+          </>
         ) : (
-          <div>Sorry, this game is not open for registration</div>
+          <>
+            <h1>🏆{game.name}🏆</h1>
+            <div>Sorry, this game is not open for registration</div>
+          </>
         ))}
     </Layout>
   );

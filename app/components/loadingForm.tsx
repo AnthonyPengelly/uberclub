@@ -10,12 +10,13 @@ export type LoadingFormProps = {
 export default function LoadingForm({
   children,
   submitButtonText,
+  className,
   ...formProps
 }: LoadingFormProps) {
   const transition = useTransition();
   return (
     <Form {...formProps}>
-      <fieldset disabled={transition.state !== "idle"}>
+      <fieldset className={className} disabled={transition.state !== "idle"}>
         {children}
         <button
           className="button"

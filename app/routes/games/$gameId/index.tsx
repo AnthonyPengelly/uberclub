@@ -55,11 +55,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function GameDetailsPage() {
-  const { team, logs, seasons } = useLoaderData<LoaderData>();
+  const { team, logs, seasons, game } = useLoaderData<LoaderData>();
 
   return (
     <>
-      <article>
+      <h1>🏆{game.name}🏆</h1>
+      <article className="quote">
         <p>
           {team.isReady ? (
             <p>

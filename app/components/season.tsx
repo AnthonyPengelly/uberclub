@@ -59,7 +59,13 @@ export default function Season({
           />
         </>
       ) : (
-        <p>Pre Season</p>
+        <table className="table">
+          <tbody>
+            <tr>
+              <td>Currently in pre season</td>
+            </tr>
+          </tbody>
+        </table>
       )}
     </details>
   );
