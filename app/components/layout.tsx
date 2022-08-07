@@ -1,4 +1,4 @@
-import { Link } from "@remix-run/react";
+import { Form, Link } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
 import PhaseSummary from "./phaseSummary";
@@ -50,6 +50,11 @@ export default function Layout({ game, children }: LayoutProps) {
               <Link to={`/games/${game.id}/deadline-day`}>Deadline day</Link>
             </>
           )}
+          <Form method="post" action="/logout">
+            <button className="as-anchor" type="submit">
+              Logout
+            </button>
+          </Form>
         </div>
       </footer>
     </>

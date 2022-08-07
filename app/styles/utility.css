@@ -19,3 +19,7 @@
   font-family: var(--font-bold);
   font-weight: bold;
 }
+
+.error {
+  color: var(--color-red);
+}

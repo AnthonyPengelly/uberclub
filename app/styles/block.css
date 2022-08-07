@@ -1,7 +1,25 @@
-.button {
-  height: 44px;
-  padding: 0 20px;
-  line-height: 44px;
+.button,
+.button-secondary {
+  height: 3rem;
+  padding: 0 1rem;
+  line-height: 3rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-family: var(--font-bold);
+  min-width: 7.5rem;
+}
+
+.button,
+.button-secondary:hover {
+  background-color: var(--color-green--background);
+  color: var(--color-secondary);
+}
+
+.button-secondary,
+.button:hover {
+  background-color: var(--background-color-buttons--hover);
+  color: var(--color-secondary);
 }
 
 .header {
