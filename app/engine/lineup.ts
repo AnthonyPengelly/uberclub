@@ -6,6 +6,8 @@ export const MAX_DEF_POSITION = 6;
 export const MAX_MID_POSITION = 11;
 export const MAX_FWD_POSITION = 15;
 
+export type LineupPlayer = GamePlayer & { lineupPosition: number };
+
 export async function addPlayerToLineup(
   playerId: string,
   position: number,
@@ -55,28 +57,72 @@ export function getLineupScores(players: GamePlayer[], captainBoost: number) {
     MID: 0,
     FWD: 0,
   };
-  players
-    .filter((x) => x.lineupPosition)
+  const playersInLineup = players.filter(
+    (x) => x.lineupPosition
+  ) as LineupPlayer[];
+  playersInLineup
+    .filter((x) => x.lineupPosition <= MAX_DEF_POSITION)
     .forEach((x) => {
-      const captainBonus = x.captain ? captainBoost : 0;
-      if (x.lineupPosition! <= MAX_DEF_POSITION) {
-        const position = x.lineupPosition === 1 ? "GKP" : "DEF";
-        const penalty = positionPenalty(x, position);
-        scores.DEF += x.stars + captainBonus - penalty;
-        return;
-      }
-      if (x.lineupPosition! <= MAX_MID_POSITION) {
-        const penalty = positionPenalty(x, "MID");
-        scores.MID += x.stars + captainBonus - penalty;
-        return;
-      }
-      if (x.lineupPosition! <= MAX_FWD_POSITION) {
-        const penalty = positionPenalty(x, "FWD");
-        scores.FWD += x.stars + captainBonus - penalty;
-        return;
-      }
+      const position = x.lineupPosition === 1 ? "GKP" : "DEF";
+      const previousPlayer = findPlayerInPosition(
+        playersInLineup,
+        x.lineupPosition - 1
+      );
+      scores.DEF += playerScore(x, position, captainBoost, previousPlayer);
+    });
+  playersInLineup
+    .filter(
+      (x) =>
+        x.lineupPosition > MAX_DEF_POSITION &&
+        x.lineupPosition <= MAX_MID_POSITION
+    )
+    .forEach((x) => {
+      const previousPlayer = findPlayerInPosition(
+        playersInLineup,
+        x.lineupPosition - 1
+      );
+      scores.MID += playerScore(x, "MID", captainBoost, previousPlayer);
+    });
+  playersInLineup
+    .filter((x) => x.lineupPosition > MAX_MID_POSITION)
+    .forEach((x) => {
+      const previousPlayer = findPlayerInPosition(
+        playersInLineup,
+        x.lineupPosition - 1
+      );
+      scores.FWD += playerScore(x, "FWD", captainBoost, previousPlayer);
     });
   return scores;
+}
+
+function playerScore(
+  player: LineupPlayer,
+  position: "GKP" | "DEF" | "MID" | "FWD",
+  captainBoost: number,
+  previousPlayer: LineupPlayer | undefined
+) {
+  const captainBonus = player.captain ? captainBoost : 0;
+  const penalty = positionPenalty(player, position);
+  const score = player.stars + captainBonus - penalty;
+  return hasChemistry(player, previousPlayer) ? score + 1 : score;
+}
+
+export function hasChemistry(
+  player: LineupPlayer,
+  previousPlayer: LineupPlayer | undefined
+) {
+  if (player.lineupPosition === 1 || !previousPlayer) {
+    return false;
+  }
+  // Don't add chemistry between different lines in the formation
+  if (
+    previousPlayer.lineupPosition === 1 ||
+    previousPlayer.lineupPosition === MAX_DEF_POSITION ||
+    previousPlayer.lineupPosition === MAX_MID_POSITION
+  ) {
+    return false;
+  }
+  return player.team === previousPlayer.team;
 }
 
 function positionPenalty(
@@ -151,4 +197,13 @@ export function validateLineup(players: GamePlayer[]) {
   if (forwards.length < 2) {
     return "Not enough Forwards";
   }
+}
+
+export function findPlayerInPosition(
+  players: GamePlayer[],
+  position: number
+): LineupPlayer | undefined {
+  return players.find((x) => x.lineupPosition === position) as
+    | LineupPlayer
+    | undefined;
 }

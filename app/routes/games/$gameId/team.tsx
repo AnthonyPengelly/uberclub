@@ -11,7 +11,9 @@ import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import {
   addPlayerToLineup,
+  findPlayerInPosition,
   getLineupScores,
+  hasChemistry,
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
   removePlayerFromLineup,
@@ -172,11 +174,18 @@ function Position({
   players: GamePlayer[];
   canMakeChanges: boolean;
 }) {
-  const existingPlayer = players.find((x) => x.lineupPosition === position);
+  const existingPlayer = findPlayerInPosition(players, position);
+  const previousPlayer = findPlayerInPosition(players, position - 1);
+  const chemistry = existingPlayer
+    ? hasChemistry(existingPlayer, previousPlayer)
+    : false;
   return (
     <div>
       {existingPlayer ? (
-        <PlayerDisplay player={existingPlayer} />
+        <>
+          {chemistry && <div>★</div>}
+          <PlayerDisplay player={existingPlayer} />
+        </>
       ) : (
         canMakeChanges && <div>No player selected</div>
       )}

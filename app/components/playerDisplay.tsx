@@ -9,6 +9,9 @@ export default function PlayerDisplay({ player }: { player: GamePlayer }) {
       {[...Array(player.potential - player.stars).keys()]
         .map(() => "☆")
         .join("")}
+      <br />
+      {player.team}
+      <br />
     </>
   );
 }

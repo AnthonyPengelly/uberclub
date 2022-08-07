@@ -103,7 +103,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
         position: x.real_players.positions.name,
         overall: x.real_players.overall,
         potential: x.real_players.potential,
-        team: x.real_players.real_teams.team,
+        team: x.real_players.real_teams.name,
         imageUrl: x.real_players.image_url,
       }))
       .sort(sortPlayers) || []
@@ -133,7 +133,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
     position: data.real_players.positions.name,
     overall: data.real_players.overall,
     potential: data.real_players.potential,
-    team: data.real_players.real_teams.team,
+    team: data.real_players.real_teams.name,
     imageUrl: data.real_players.image_url,
   };
 }
@@ -247,7 +247,7 @@ export async function drawPlayersFromDeck(
     position: x.real_players.positions.name,
     overall: x.real_players.overall,
     potential: x.real_players.potential,
-    team: x.real_players.real_teams.team,
+    team: x.real_players.real_teams.name,
     imageUrl: x.real_players.image_url,
   }));
 }
