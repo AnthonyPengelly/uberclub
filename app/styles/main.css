@@ -3,7 +3,7 @@
   --color-secondary: #fff;
   --color-accent: #fe3400;
   --color-red: #e05640;
-  --color-green: #009640;
+  --color-green: #00963f;
   --color-green--background: #009640;
   --color-orange: #f5a429;
   --color-background--light: #fff;
@@ -25,6 +25,11 @@
   --border-radius: 4rem;
   --font-regular: "Averta Regular", sans-serif;
   --font-bold: "Averta Bold", sans-serif;
+  --position-forward: #00963f;
+  --position-midfield: #ffcc00;
+  --position-defender: #e52027;
+  --position-goalkeeper: #fce9e9;
+  --position-goalkeeper-text: #e52027;
 }
 
 body {

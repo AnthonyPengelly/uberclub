@@ -31,10 +31,12 @@ export async function updateCaptain(
   playerId: string,
   existingPlayerId: string
 ) {
-  const player = await getPlayer(playerId);
   const existingPlayer =
     existingPlayerId && (await getPlayer(existingPlayerId));
-  await updatePlayerLineupPosition(player.id, player.lineupPosition, true);
+  if (playerId && playerId !== "null") {
+    const player = await getPlayer(playerId);
+    await updatePlayerLineupPosition(player.id, player.lineupPosition, true);
+  }
   if (existingPlayer) {
     await updatePlayerLineupPosition(
       existingPlayer.id,

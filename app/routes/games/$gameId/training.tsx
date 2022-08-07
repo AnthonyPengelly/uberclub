@@ -13,6 +13,7 @@ import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
+import PlayerDisplay from "~/components/playerDisplay";
 
 type LoaderData = {
   team: Team;
@@ -60,9 +61,7 @@ export default function TrainingPage() {
 
   return (
     <>
-      <h1>
-        {team.teamName} training camp
-      </h1>
+      <h1>{team.teamName} training camp</h1>
       <div className="flow | quote">
         <p>
           Welcome to the pre season training camp. As a level{" "}
@@ -86,10 +85,7 @@ export default function TrainingPage() {
       <ul>
         {players.map((x) => (
           <li key={x.id}>
-            <img src={x.imageUrl} alt={x.name} width={40} height={40} />[
-            {x.position}] {x.name}{" "}
-            {[...Array(x.stars).keys()].map(() => "★").join("")}
-            {[...Array(x.potential - x.stars).keys()].map(() => "☆").join("")}
+            <PlayerDisplay player={x} />
             {x.potential - x.stars && hasTrainingRemaining ? (
               <LoadingForm method="post" submitButtonText="Train">
                 <input type="hidden" name="player-id" value={x.id} />

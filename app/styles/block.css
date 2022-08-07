@@ -22,6 +22,14 @@
   color: var(--color-secondary);
 }
 
+.mini-button {
+  height: 1rem;
+  min-width: 0;
+  width: 100%;
+  line-height: 1rem;
+  font-size: 0.75rem;
+}
+
 .header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -128,4 +136,113 @@
   border-left: 10px solid transparent;
   border-right: 10px solid var(--color-background-grey);
   border-bottom: 10px solid var(--color-background-grey);
+}
+
+.players {
+  display: flex;
+  justify-content: center;
+  column-gap: 6px;
+  margin: 1rem 0;
+  width: 100%;
+}
+
+.squad-list {
+  flex-wrap: wrap;
+  row-gap: 4rem;
+}
+
+.player {
+  color: var(--color-secondary);
+  border-radius: 8px;
+  padding: 0.25rem 0.25rem;
+  font-size: 0.45rem;
+  line-height: 0.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-family: var(--font-bold);
+  width: calc(20% - ((6px * 4) / 5));
+  flex-grow: 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.player img {
+  margin: 0.15rem auto;
+}
+
+.player__name {
+  height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player__team {
+  font-size: 0.4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.player__stars {
+  font-size: 0.4rem;
+  margin: 0.15rem auto;
+  font-size: 0.55rem;
+}
+
+.player__captain {
+  background-color: var(--background-color-buttons--hover);
+  color: var(--color-secondary);
+  border-radius: 100%;
+  position: absolute;
+  font-size: 0.75rem;
+  top: -0.75rem;
+  right: -0.4rem;
+  padding: 0.4rem;
+  line-height: 1rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  display: flex;
+  align-items: center;
+}
+
+.player__actions {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  text-align: center;
+}
+
+@media only screen and (min-width: 800px) {
+  .player,
+  .player__team,
+  .player__stars {
+    font-size: 1rem;
+    line-height: 1rem;
+  }
+
+  .player__name {
+    height: 3rem;
+  }
+}
+
+.player__FWD {
+  background-color: var(--position-forward);
+}
+
+.player__MID {
+  background-color: var(--position-midfield);
+}
+
+.player__DEF {
+  background-color: var(--position-defender);
+}
+
+.player__GKP {
+  background-color: var(--position-goalkeeper);
+  color: var(--position-goalkeeper-text);
+}
+
+.player__placeholder {
+  background-color: var(--color-background-grey);
+  color: var(--color-primary);
 }

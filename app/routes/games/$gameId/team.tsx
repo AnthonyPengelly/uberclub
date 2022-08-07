@@ -92,9 +92,9 @@ export default function TeamPage() {
   const captain = players.find((x) => x.captain);
 
   return (
-    <div>
-      <h2>{team.teamName}</h2>
-      {validationMessage && <p>{validationMessage}</p>}
+    <>
+      <h2>{team.teamName} Lineup</h2>
+      {validationMessage && <p className="error">{validationMessage}</p>}
       {isMatchDay && !team.isReady && !validationMessage && (
         <LoadingForm
           method="post"
@@ -104,83 +104,98 @@ export default function TeamPage() {
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
       <h3>Captain ({team.captainBoost}★ Boost)</h3>
-      {captain ? (
-        <PlayerDisplay player={captain} />
-      ) : (
-        canMakeChanges && <div>No player selected</div>
-      )}
       {canMakeChanges && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/captain`}
           submitButtonText="Save"
+          className="flow"
         >
-          <input type="hidden" name="existing-player-id" value={captain?.id} />
-          <select name="player-id" defaultValue={captain?.id}>
-            {players
-              .filter((x) => x.lineupPosition)
-              .map((x) => (
-                <option key={x.id} value={x.id}>
-                  [{x.position}] {x.name}
-                </option>
-              ))}
-          </select>
+          <div>
+            <label htmlFor="captain">
+              <div>Select a captain</div>
+            </label>
+            <select name="player-id" id="captain" defaultValue={captain?.id}>
+              <option value="null">None</option>
+              {players
+                .filter((x) => x.lineupPosition)
+                .map((x) => (
+                  <option key={x.id} value={x.id}>
+                    [{x.position}] {x.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <input
+            className="no-margin"
+            type="hidden"
+            name="existing-player-id"
+            value={captain?.id}
+          />
         </LoadingForm>
       )}
 
-      <h3>GKP</h3>
-      <Position
-        players={players}
-        position={1}
-        canMakeChanges={canMakeChanges}
-      />
-      <h3>DEF {scores.DEF}★ (incl. GKP)</h3>
-      {[...Array(5).keys()].map((x) => (
+      <h3 className="centre">GKP</h3>
+      <div className="players">
         <Position
-          key={`def-${x}`}
           players={players}
-          position={x + 1 + 1}
+          position={1}
           canMakeChanges={canMakeChanges}
         />
-      ))}
-      <h3>MID {scores.MID}★</h3>
-      {[...Array(5).keys()].map((x) => (
-        <Position
-          key={`mid-${x}`}
-          players={players}
-          position={x + MAX_DEF_POSITION + 1}
-          canMakeChanges={canMakeChanges}
-        />
-      ))}
-      <h3>FWD {scores.FWD}★</h3>
-      {[...Array(4).keys()].map((x) => (
-        <Position
-          key={`fwd-${x}`}
-          players={players}
-          position={x + MAX_MID_POSITION + 1}
-          canMakeChanges={canMakeChanges}
-        />
-      ))}
-      <h3>Reserves</h3>
-      <ul>
+      </div>
+      <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
+      <div className="players">
+        {[...Array(5).keys()].map((x) => (
+          <Position
+            key={`def-${x}`}
+            players={players}
+            position={x + 1 + 1}
+            canMakeChanges={canMakeChanges}
+          />
+        ))}
+      </div>
+      <h3 className="centre">MID {scores.MID}★</h3>
+      <div className="players">
+        {[...Array(5).keys()].map((x) => (
+          <Position
+            key={`mid-${x}`}
+            players={players}
+            position={x + MAX_DEF_POSITION + 1}
+            canMakeChanges={canMakeChanges}
+          />
+        ))}
+      </div>
+      <h3 className="centre">FWD {scores.FWD}★</h3>
+      <div className="players">
+        {[...Array(4).keys()].map((x) => (
+          <Position
+            key={`fwd-${x}`}
+            players={players}
+            position={x + MAX_MID_POSITION + 1}
+            canMakeChanges={canMakeChanges}
+          />
+        ))}
+      </div>
+      <h3 className="centre">Reserves</h3>
+      <div className="players squad-list">
         {players
           .filter((x) => x.lineupPosition === null)
           .map((x) => (
-            <li key={x.id}>
-              <PlayerDisplay player={x} />
+            <PlayerDisplay key={x.id} player={x}>
               {canSell && (
                 <LoadingForm
                   method="post"
                   action={`/games/${game.id}/sell`}
                   submitButtonText="Sell"
+                  buttonClass="mini-button"
                 >
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>
               )}
-            </li>
+            </PlayerDisplay>
           ))}
-      </ul>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -200,40 +215,39 @@ function Position({
     ? hasChemistry(existingPlayer, previousPlayer)
     : false;
   return (
-    <div>
-      {existingPlayer ? (
-        <>
-          {chemistry && <div>★</div>}
-          <PlayerDisplay player={existingPlayer} />
-        </>
-      ) : (
-        canMakeChanges && <div>No player selected</div>
-      )}
-      {canMakeChanges && (
-        <Form
-          method="post"
-          onChange={(e) => submit(e.currentTarget, { replace: true })}
-        >
-          <input
-            type="hidden"
-            name="existing-player-id"
-            value={existingPlayer?.id}
-          />
-          <input type="hidden" name="position" value={position} />
-          <select
-            name="player-id"
-            value={existingPlayer?.id}
-            onChange={() => {}}
-          >
-            <option value="null">None</option>
-            {players.map((x) => (
-              <option key={x.id} value={x.id}>
-                [{x.position}] {x.name}
-              </option>
-            ))}
-          </select>
-        </Form>
-      )}
-    </div>
+    <>
+      <>
+        {chemistry && <div style={{ position: "absolute" }}>★</div>}
+        <PlayerDisplay player={existingPlayer}>
+          {canMakeChanges && (
+            <Form
+              method="post"
+              onChange={(e) => submit(e.currentTarget, { replace: true })}
+            >
+              <input
+                type="hidden"
+                name="existing-player-id"
+                value={existingPlayer?.id}
+              />
+              <input type="hidden" name="position" value={position} />
+              <select
+                name="player-id"
+                value={existingPlayer?.id}
+                onChange={() => {
+                  /* React wants an onChange since this is a controlled component, but really it's the <form> that uses the on change */
+                }}
+              >
+                <option value="null">None</option>
+                {players.map((x) => (
+                  <option key={x.id} value={x.id}>
+                    [{x.position}] {x.name}
+                  </option>
+                ))}
+              </select>
+            </Form>
+          )}
+        </PlayerDisplay>
+      </>
+    </>
   );
 }

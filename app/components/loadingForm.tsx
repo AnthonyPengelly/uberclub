@@ -4,6 +4,7 @@ import { Form, useTransition } from "@remix-run/react";
 export type LoadingFormProps = {
   children?: React.ReactNode | React.ReactNode[];
   submitButtonText: string;
+  buttonClass?: string;
 } & FormProps &
   React.RefAttributes<HTMLFormElement>;
 
@@ -11,6 +12,7 @@ export default function LoadingForm({
   children,
   submitButtonText,
   className,
+  buttonClass,
   ...formProps
 }: LoadingFormProps) {
   const transition = useTransition();
@@ -22,7 +24,7 @@ export default function LoadingForm({
       <fieldset className={className} disabled={transition.state !== "idle"}>
         {children}
         <button
-          className="button"
+          className={`button ${buttonClass}`}
           data-submitting={currentFormIsSubmitting}
           type="submit"
         >

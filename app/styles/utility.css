@@ -23,3 +23,15 @@
 .error {
   color: var(--color-red);
 }
+
+.centre {
+  text-align: center;
+}
+
+.no-margin {
+  margin: 0;
+}
+
+.margin-bottom {
+  margin-bottom: 1rem;
+}

@@ -64,43 +64,48 @@ export default function ResultsPage() {
 }
 
 function Lineup({ players, team }: { players: GamePlayer[]; team: Team }) {
-  const captain = players.find((x) => x.captain);
   const sortedPlayers = players.sort(
     (a, b) => (a.lineupPosition as number) - (b.lineupPosition as number)
   );
   const scores = getLineupScores(players, team.captainBoost);
   return (
     <>
-      <h3>Captain</h3>
-      {captain ? <PlayerDisplay player={captain} /> : "None selected"}
-      <h3>GKP</h3>
-      <PlayerDisplay player={sortedPlayers[0]} />
-      <h3>DEF {scores.DEF}★ (incl. GKP)</h3>
-      {sortedPlayers
-        .filter(
-          (x) =>
-            (x.lineupPosition as number) > 1 &&
-            (x.lineupPosition as number) <= MAX_DEF_POSITION
-        )
-        .map((x) => (
-          <PlayerDisplay key={x.id} player={x} />
-        ))}
-      <h3>MID {scores.MID}★</h3>
-      {sortedPlayers
-        .filter(
-          (x) =>
-            (x.lineupPosition as number) > MAX_DEF_POSITION &&
-            (x.lineupPosition as number) <= MAX_MID_POSITION
-        )
-        .map((x) => (
-          <PlayerDisplay key={x.id} player={x} />
-        ))}
-      <h3>FWD {scores.FWD}★</h3>
-      {sortedPlayers
-        .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)
-        .map((x) => (
-          <PlayerDisplay key={x.id} player={x} />
-        ))}
+      <h3 className="centre">GKP</h3>
+      <div className="players">
+        <PlayerDisplay player={sortedPlayers[0]} />
+      </div>
+      <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
+      <div className="players">
+        {sortedPlayers
+          .filter(
+            (x) =>
+              (x.lineupPosition as number) > 1 &&
+              (x.lineupPosition as number) <= MAX_DEF_POSITION
+          )
+          .map((x) => (
+            <PlayerDisplay key={x.id} player={x} />
+          ))}
+      </div>
+      <h3 className="centre">MID {scores.MID}★</h3>
+      <div className="players">
+        {sortedPlayers
+          .filter(
+            (x) =>
+              (x.lineupPosition as number) > MAX_DEF_POSITION &&
+              (x.lineupPosition as number) <= MAX_MID_POSITION
+          )
+          .map((x) => (
+            <PlayerDisplay key={x.id} player={x} />
+          ))}
+      </div>
+      <h3 className="centre">FWD {scores.FWD}★</h3>
+      <div className="players">
+        {sortedPlayers
+          .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)
+          .map((x) => (
+            <PlayerDisplay key={x.id} player={x} />
+          ))}
+      </div>
     </>
   );
 }
