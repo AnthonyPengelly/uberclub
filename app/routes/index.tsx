@@ -2,12 +2,12 @@ import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import Layout from "~/components/layout";
-import type { Game } from "~/domain/games.server";
+import type { DetailedGame } from "~/domain/games.server";
 import { getGamesList } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 
 type LoaderData = {
-  games: Game[];
+  games: DetailedGame[];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -21,13 +21,28 @@ export default function Index() {
   return (
     <Layout>
       <h1>Games</h1>
-      <ul>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Game</th>
+            <th>Teams</th>
+            <th>Season</th>
+          </tr>
+        </thead>
         {games.map((game) => (
-          <li key={game.id}>
-            <Link to={`/games/${game.id}`}>{game.name}</Link>
-          </li>
+          <tr key={game.id}>
+            <td>
+              <Link to={`/games/${game.id}`}>«{game.name}»</Link>
+            </td>
+            <td>{game.players}</td>
+            <td>
+              {game.seasons.length !== 0 &&
+                game.seasons.sort((a, b) => b.seasonNumber - a.seasonNumber)[0]
+                  .seasonNumber}
+            </td>
+          </tr>
         ))}
-      </ul>
+      </table>
     </Layout>
   );
 }

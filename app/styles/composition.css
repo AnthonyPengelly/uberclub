@@ -10,11 +10,11 @@
 }
 
 .wrapper {
-  width: 90vw;
-  width: clamp(16rem, 93vw, 75rem);
+  width: 95vw;
+  width: clamp(16rem, 95vw, 85rem);
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(1.09rem, 1rem + 0.47vw, 1.33rem);
-  padding-right: clamp(1.09rem, 1rem + 0.47vw, 1.33rem);
+  padding-left: clamp(0.69rem, 0.5rem + 0.47vw, 1.33rem);
+  padding-right: clamp(0.69rem, 0.5rem + 0.47vw, 1.33rem);
   position: relative;
 }

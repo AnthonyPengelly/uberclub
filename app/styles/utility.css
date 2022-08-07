@@ -5,3 +5,17 @@
 .main-height__in-game {
   min-height: calc(100vh - 15rem);
 }
+
+.inline {
+  display: inline;
+}
+
+.highlight-text {
+  font-family: var(--font-bold);
+  font-weight: bold;
+}
+
+.bold {
+  font-family: var(--font-bold);
+  font-weight: bold;
+}

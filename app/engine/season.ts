@@ -2,7 +2,7 @@ import { createFixtureLineups, createResult } from "~/domain/fixtures.server";
 import { createGameLog } from "~/domain/logs.server";
 import type { GamePlayer } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
-import type { TeamSeason } from "~/domain/season.server";
+import type { TeamSeason, TeamSeasonSummary } from "~/domain/season.server";
 import {
   createTeamSeason,
   getCurrentSeason,
@@ -223,4 +223,11 @@ async function recordSimLoss(gameId: string, team: Team) {
       team.teamName
     } lose their sim. The fans are chanting "GET ${team.managerName.toUpperCase()} OUT!"`
   );
+}
+
+export function orderTeamsInSeason(teamSeasons: TeamSeasonSummary[]) {
+  return teamSeasons
+    .sort((a, b) => b.id.localeCompare(a.id))
+    .sort((a, b) => b.startingScore - a.startingScore)
+    .sort((a, b) => b.score - a.score);
 }

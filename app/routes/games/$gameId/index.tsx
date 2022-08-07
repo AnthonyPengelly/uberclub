@@ -9,18 +9,23 @@ import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import type { GameLog } from "~/domain/logs.server";
 import { getGameLogs } from "~/domain/logs.server";
-import type { Season, TeamSeasonSummary } from "~/domain/season.server";
+import type {
+  Season as SeasonModel,
+  TeamSeasonSummary,
+} from "~/domain/season.server";
 import { getAllSeasons } from "~/domain/season.server";
 import { getTeamSeasons } from "~/domain/season.server";
 import type { Result } from "~/domain/fixtures.server";
 import { getResults } from "~/domain/fixtures.server";
-import Fixtures from "~/components/fixtures";
+import Season from "~/components/season";
+import PreviousSeasons from "~/components/previousSeasons";
+import DateTime from "~/components/dateTime";
 
 type LoaderData = {
   game: Game;
   team: Team;
   seasons: {
-    season: Season;
+    season: SeasonModel;
     teamSeasons: TeamSeasonSummary[];
     results: Result[];
   }[];
@@ -53,47 +58,60 @@ export default function GameDetailsPage() {
   const { team, logs, seasons } = useLoaderData<LoaderData>();
 
   return (
-    <div>
-      <h2>Welcome, {team.managerName}</h2>
-      <Link to="team">Team</Link>
-      {seasons.map(({ season, teamSeasons, results }) => (
-        <div key={season.id}>
-          <h3>{season.name}</h3>
-          {teamSeasons.length !== 0 ? (
-            <>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>Name</th>
-                    <th>Starting Score</th>
-                    <th>Score</th>
-                  </tr>
-                  {teamSeasons
-                    .sort((a, b) => b.score - a.score)
-                    .map((x) => (
-                      <tr key={x.id}>
-                        <td>{x.teamName}</td>
-                        <td>{x.startingScore}</td>
-                        <td>{x.score}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-              <h4>Fixtures</h4>
-              <Fixtures teamSeasons={teamSeasons} results={results} />
-            </>
+    <>
+      <article>
+        <p>
+          {team.isReady ? (
+            <p>
+              Good work <strong>{team.managerName}</strong>,{" "}
+              <strong>{team.teamName}</strong> are ready for the next phase, put
+              your feet up.
+            </p>
           ) : (
-            <h4>Pre Season</h4>
+            <p>
+              <strong>{team.teamName}</strong> are waiting for your next move,{" "}
+              <strong>{team.managerName}</strong>!
+            </p>
           )}
-        </div>
-      ))}
-      <ul>
-        {logs.map((x) => (
-          <li key={x.id}>
-            {x.createdAt} - {x.event}
-          </li>
-        ))}
-      </ul>
-    </div>
+        </p>
+        <p>
+          <Link to="team">«View your team here»</Link>
+        </p>
+      </article>
+      <h2>Current Season</h2>
+      {seasons[0] && (
+        <Season
+          season={seasons[0].season}
+          teamSeasons={seasons[0].teamSeasons}
+          results={seasons[0].results}
+          startOpen={true}
+          usersTeamName={team.teamName}
+        />
+      )}
+      <PreviousSeasons
+        seasons={seasons.slice(1)}
+        usersTeamName={team.teamName}
+      />
+
+      <h2>Game log</h2>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Event</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((x) => (
+            <tr key={x.id}>
+              <td data-fit>
+                <DateTime dateTime={x.createdAt} />
+              </td>
+              <td>{x.event}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </>
   );
 }

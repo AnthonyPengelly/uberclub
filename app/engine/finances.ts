@@ -38,7 +38,7 @@ async function completeFinances(
   if (teamSeason.score >= 100) {
     await createGameLog(
       gameId,
-      `*************************${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER!********************************`
+      `******************************* ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! *******************************`
     );
   }
   const placementAward = 110 - 10 * position;

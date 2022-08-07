@@ -2,7 +2,7 @@ import { supabase } from "./supabase.server";
 
 export type GameLog = {
   id: string;
-  createdAt: Date;
+  createdAt: string;
   event: string;
 };
 
@@ -125,7 +125,7 @@ export async function getGameLogs(gameId: string): Promise<GameLog[]> {
   return (
     data.map((x) => ({
       id: x.id,
-      createdAt: new Date(x.created_at),
+      createdAt: x.created_at,
       event: x.event,
     })) || []
   );

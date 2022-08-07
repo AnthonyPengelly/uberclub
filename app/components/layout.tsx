@@ -28,8 +28,8 @@ export default function Layout({ game, children }: LayoutProps) {
           )}
         </div>
       </nav>
-      <header className="header__separator" />
       {game && gameStarted && <PhaseSummary game={game} />}
+      {(!game || !gameStarted) && <header className="header__separator" />}
       <main
         className={`flow wrapper ${
           game && gameStarted ? "main-height__in-game" : "main-height"

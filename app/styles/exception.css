@@ -34,3 +34,8 @@
     text-shadow: 0.5em 0 0 black, 1em 0 0 black;
   }
 }
+
+.table [data-fit] {
+  width: 1px;
+  white-space: nowrap;
+}

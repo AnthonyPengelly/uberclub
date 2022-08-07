@@ -5,60 +5,71 @@ import type { TeamSeasonSummary } from "~/domain/season.server";
 type FixturesProps = {
   teamSeasons: TeamSeasonSummary[];
   results: Result[];
+  usersTeamName: string;
 };
 
-export default function Fixtures({ teamSeasons, results }: FixturesProps) {
+export default function Fixtures({
+  teamSeasons,
+  results,
+  usersTeamName,
+}: FixturesProps) {
   const sortedTeamSeasons = teamSeasons.sort((a, b) =>
     (a.teamId as string).localeCompare(b.teamId as string)
   );
   return (
-    <table>
-      <tbody>
-        <tr>
-          <th>Match Day</th>
-          <th>Home</th>
-          <th>Away</th>
-          <th>Winner</th>
-          <th></th>
-        </tr>
-        <Fixture
-          homeTeam={sortedTeamSeasons[0]}
-          awayTeam={sortedTeamSeasons[2]}
-          results={results}
-          matchDay={1}
-        />
-        <Fixture
-          homeTeam={sortedTeamSeasons[1]}
-          awayTeam={sortedTeamSeasons[3]}
-          results={results}
-          matchDay={1}
-        />
-        <Fixture
-          homeTeam={sortedTeamSeasons[0]}
-          awayTeam={sortedTeamSeasons[1]}
-          results={results}
-          matchDay={2}
-        />
-        <Fixture
-          homeTeam={sortedTeamSeasons[2]}
-          awayTeam={sortedTeamSeasons[3]}
-          results={results}
-          matchDay={2}
-        />
-        <Fixture
-          homeTeam={sortedTeamSeasons[0]}
-          awayTeam={sortedTeamSeasons[3]}
-          results={results}
-          matchDay={3}
-        />
-        <Fixture
-          homeTeam={sortedTeamSeasons[1]}
-          awayTeam={sortedTeamSeasons[2]}
-          results={results}
-          matchDay={3}
-        />
-      </tbody>
-    </table>
+    <>
+      <h4>Match day 1</h4>
+      <table className="table">
+        <tbody>
+          <Fixture
+            homeTeam={sortedTeamSeasons[0]}
+            awayTeam={sortedTeamSeasons[2]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+          <Fixture
+            homeTeam={sortedTeamSeasons[1]}
+            awayTeam={sortedTeamSeasons[3]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+        </tbody>
+      </table>
+      <h4>Match day 2</h4>
+      <table className="table">
+        <tbody>
+          <Fixture
+            homeTeam={sortedTeamSeasons[0]}
+            awayTeam={sortedTeamSeasons[1]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+          <Fixture
+            homeTeam={sortedTeamSeasons[2]}
+            awayTeam={sortedTeamSeasons[3]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+        </tbody>
+      </table>
+      <h4>Match day 3</h4>
+      <table className="table">
+        <tbody>
+          <Fixture
+            homeTeam={sortedTeamSeasons[0]}
+            awayTeam={sortedTeamSeasons[3]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+          <Fixture
+            homeTeam={sortedTeamSeasons[1]}
+            awayTeam={sortedTeamSeasons[2]}
+            results={results}
+            usersTeamName={usersTeamName}
+          />
+        </tbody>
+      </table>
+    </>
   );
 }
 
@@ -66,28 +77,85 @@ type FixtureProps = {
   homeTeam: TeamSeasonSummary;
   awayTeam: TeamSeasonSummary;
   results: Result[];
-  matchDay: number;
+  usersTeamName: string;
 };
 
-function Fixture({ homeTeam, awayTeam, results, matchDay }: FixtureProps) {
+function Fixture({ homeTeam, awayTeam, results, usersTeamName }: FixtureProps) {
   const result = results.find(
     (x) => x.homeTeamId === homeTeam.teamId && x.awayTeamId === awayTeam.teamId
   );
+  if (!result) {
+    return (
+      <tr>
+        <td>
+          <span
+            className={
+              homeTeam.teamName === usersTeamName ? "highlight-text" : ""
+            }
+          >
+            {homeTeam.teamName}
+          </span>{" "}
+          vs.{" "}
+          <span
+            className={
+              awayTeam.teamName === usersTeamName ? "highlight-text" : ""
+            }
+          >
+            {awayTeam.teamName}
+          </span>
+        </td>
+      </tr>
+    );
+  }
+  if (result && result.draw) {
+    return (
+      <tr>
+        <td>
+          <span
+            className={
+              homeTeam.teamName === usersTeamName ? "highlight-text" : ""
+            }
+          >
+            {homeTeam.teamName}
+          </span>{" "}
+          vs.{" "}
+          <span
+            className={
+              awayTeam.teamName === usersTeamName ? "highlight-text" : ""
+            }
+          >
+            {awayTeam.teamName}
+          </span>{" "}
+          resulted in a draw.
+        </td>
+      </tr>
+    );
+  }
+  const winningTeamName =
+    result.winningTeamId === homeTeam.teamId
+      ? homeTeam.teamName
+      : awayTeam.teamName;
+  const losingTeamName =
+    result.winningTeamId !== homeTeam.teamId
+      ? homeTeam.teamName
+      : awayTeam.teamName;
   return (
     <tr>
-      <td>{matchDay}</td>
-      <td>{homeTeam.teamName}</td>
-      <td>{awayTeam.teamName}</td>
-      {!result && <td>TBC</td>}
-      {result && result.draw && <td>Draw</td>}
-      {result && !result.draw && (
-        <td>
-          {result.winningTeamId === homeTeam.teamId
-            ? homeTeam.teamName
-            : awayTeam.teamName}
-        </td>
-      )}
-      <td>{result && <Link to={`results/${result.id}`}>Lineups</Link>}</td>
+      <td>
+        <span
+          className={winningTeamName === usersTeamName ? "highlight-text" : ""}
+        >
+          {winningTeamName}
+        </span>{" "}
+        defeated{" "}
+        <span
+          className={losingTeamName === usersTeamName ? "highlight-text" : ""}
+        >
+          {losingTeamName}
+        </span>{" "}
+        resulted in a draw.{" "}
+        <Link to={`results/${result.id}`}>«View lineups»</Link>
+      </td>
     </tr>
   );
 }

@@ -1,3 +1,4 @@
+import type { Season } from "./season.server";
 import { supabase } from "./supabase.server";
 
 export type Game = {
@@ -6,9 +7,31 @@ export type Game = {
   stage: number;
 };
 
-export async function getGamesList(): Promise<Game[]> {
-  const { data } = await supabase.from("games").select("id, name, stage");
-  return data || [];
+export type DetailedGame = {
+  seasons: Season[];
+  players: number;
+} & Game;
+
+export async function getGamesList(): Promise<DetailedGame[]> {
+  const { data } = await supabase
+    .from("games")
+    .select("id, name, stage, seasons (name, id, season), teams (id)");
+  console.log(data);
+  return (
+    data?.map((x) => ({
+      id: x.id,
+      name: x.name,
+      stage: x.stage,
+      seasons: x.seasons.map(
+        (y: { id: string; name: string; season: number }) => ({
+          id: y.id,
+          name: y.name,
+          seasonNumber: y.season,
+        })
+      ),
+      players: x.teams.length,
+    })) || []
+  );
 }
 
 export async function getGame(id: string): Promise<Game> {

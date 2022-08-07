@@ -17,6 +17,7 @@
   left: 0;
   bottom: 0;
   width: 100%;
+  margin-bottom: 1rem;
 }
 
 .header__left {
@@ -31,7 +32,6 @@
   font-size: 1.25rem;
   color: var(--color-green);
   font-family: var(--font-bold);
-  font-weight: bold;
   text-align: center;
 }
 
@@ -45,6 +45,7 @@
   background-color: var(--color-background-nav);
   color: var(--color-secondary);
   padding: 0.5rem 0;
+  margin-bottom: 1rem;
 }
 
 .banner__text {
@@ -57,4 +58,35 @@
   background-color: var(--color-background-nav);
   color: var(--color-secondary);
   padding: 2rem 0;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+  table-layout: auto;
+  word-break: break-word;
+}
+
+.table thead tr {
+  background-color: var(--color-green--background);
+  color: var(--color-secondary);
+  text-align: left;
+}
+
+.table th,
+.table td {
+  padding: 0.5rem;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--color-borders);
+}
+
+.table tbody tr:nth-of-type(even) {
+  background-color: var(--color-background--light-grey);
+}
+
+.table tbody tr:last-of-type {
+  border-bottom: 2px solid var(--color-green--background);
 }
