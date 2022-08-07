@@ -1,6 +1,11 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  useLoaderData,
+  useSubmit,
+  useTransition,
+} from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -22,6 +27,7 @@ import {
 import { canSellPlayer, Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
+import { updatePlayersBasedOnFormData } from "~/engine/team";
 
 type LoaderData = {
   team: Team;
@@ -70,7 +76,11 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function TeamPage() {
+  const { submission } = useTransition();
   const { team, players, game } = useLoaderData<LoaderData>();
+  if (submission && submission.formData.get("position")) {
+    updatePlayersBasedOnFormData(players, submission.formData);
+  }
   const scores = getLineupScores(players, team.captainBoost);
   const validationMessage = validateLineup(players);
   const isMatchDay =
@@ -183,6 +193,7 @@ function Position({
   players: GamePlayer[];
   canMakeChanges: boolean;
 }) {
+  const submit = useSubmit();
   const existingPlayer = findPlayerInPosition(players, position);
   const previousPlayer = findPlayerInPosition(players, position - 1);
   const chemistry = existingPlayer
@@ -199,14 +210,21 @@ function Position({
         canMakeChanges && <div>No player selected</div>
       )}
       {canMakeChanges && (
-        <LoadingForm method="post" submitButtonText="Save">
+        <Form
+          method="post"
+          onChange={(e) => submit(e.currentTarget, { replace: true })}
+        >
           <input
             type="hidden"
             name="existing-player-id"
             value={existingPlayer?.id}
           />
           <input type="hidden" name="position" value={position} />
-          <select name="player-id" defaultValue={existingPlayer?.id}>
+          <select
+            name="player-id"
+            value={existingPlayer?.id}
+            onChange={() => {}}
+          >
             <option value="null">None</option>
             {players.map((x) => (
               <option key={x.id} value={x.id}>
@@ -214,7 +232,7 @@ function Position({
               </option>
             ))}
           </select>
-        </LoadingForm>
+        </Form>
       )}
     </div>
   );
