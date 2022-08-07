@@ -1,0 +1,7 @@
+.main-height {
+  min-height: calc(100vh - 10rem);
+}
+
+.main-height__in-game {
+  min-height: calc(100vh - 15rem);
+}

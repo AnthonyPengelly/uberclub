@@ -87,9 +87,11 @@ type PhaseProps = {
 
 function PhaseHeading({ heading, callToAction, href }: PhaseProps) {
   return (
-    <div>
-      <h3>{heading}</h3>
-      {callToAction && href && <Link to={href}>{callToAction}</Link>}
-    </div>
+    <aside className="banner">
+      <div className="wrapper | banner__text">
+        <span>{heading}</span>
+        {callToAction && href && <Link to={href}>«{callToAction}»</Link>}
+      </div>
+    </aside>
   );
 }

@@ -14,6 +14,7 @@ import {
 } from "@remix-run/react";
 
 import main from "./styles/main.css";
+import reset from "./styles/reset.css";
 import composition from "./styles/composition.css";
 import utility from "./styles/utility.css";
 import block from "./styles/block.css";
@@ -27,6 +28,7 @@ export const meta: MetaFunction = () => {
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: main },
+    { rel: "stylesheet", href: reset },
     { rel: "stylesheet", href: composition },
     { rel: "stylesheet", href: utility },
     { rel: "stylesheet", href: block },
@@ -46,6 +48,20 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link
+          rel="preload"
+          href="//cdn.shopify.com/s/files/1/0407/3678/4540/t/9/assets/avertaregular.woff2?v=49235355855020092321654083099"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="//cdn.shopify.com/s/files/1/0407/3678/4540/t/9/assets/avertabold.woff2?v=14125607424772896621654083098"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <Meta />
         <Links />
       </head>

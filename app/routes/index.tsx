@@ -1,7 +1,8 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import type { Game} from "~/domain/games.server";
+import Layout from "~/components/layout";
+import type { Game } from "~/domain/games.server";
 import { getGamesList } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 
@@ -18,7 +19,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Index() {
   const { games } = useLoaderData<LoaderData>();
   return (
-    <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
+    <Layout>
       <h1>Games</h1>
       <ul>
         {games.map((game) => (
@@ -27,6 +28,6 @@ export default function Index() {
           </li>
         ))}
       </ul>
-    </main>
+    </Layout>
   );
 }

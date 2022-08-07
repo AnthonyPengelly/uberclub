@@ -8,8 +8,8 @@ import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import { isOpenForPlayers, joinGame } from "~/engine/game";
-import PhaseSummary from "~/components/phaseSummary";
 import LoadingForm from "~/components/loadingForm";
+import Layout from "~/components/layout";
 
 type LoaderData = {
   game: Game;
@@ -47,9 +47,8 @@ export default function GamePage() {
   const { game, team } = useLoaderData<LoaderData>();
 
   return (
-    <div>
+    <Layout game={game}>
       <h1>{game.name}</h1>
-      <PhaseSummary game={game} />
       {team && <Outlet />}
       {!team &&
         (isOpenForPlayers(game) ? (
@@ -66,6 +65,6 @@ export default function GamePage() {
         ) : (
           <div>Sorry, this game is not open for registration</div>
         ))}
-    </div>
+    </Layout>
   );
 }

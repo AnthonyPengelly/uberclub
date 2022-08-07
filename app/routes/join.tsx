@@ -9,6 +9,7 @@ import { createUserSession, getUserId } from "~/session.server";
 import { createUser, getProfileByEmail } from "~/domain/user.server";
 import { validateEmail } from "~/userUtils";
 import * as React from "react";
+import Layout from "~/components/layout";
 
 export const meta: MetaFunction = () => {
   return {
@@ -98,6 +99,7 @@ export default function Join() {
   }, [actionData]);
 
   return (
+    <Layout>
     <div className="flex min-h-full flex-col justify-center">
       <div className="mx-auto w-full max-w-md px-8">
         <Form className="space-y-6" method="post" noValidate>
@@ -167,6 +169,6 @@ export default function Join() {
           </div>
         </Form>
       </div>
-    </div>
+    </div></Layout>
   );
 }
