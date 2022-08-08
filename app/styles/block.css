@@ -29,7 +29,11 @@
   line-height: 1.2rem;
   font-size: 0.5rem;
   border-radius: 2px;
-  padding: 0 0.5rem;
+  padding: 0 0.2rem;
+}
+
+.xs-button-text {
+  font-size: 0.4rem;
 }
 
 .mini-input {

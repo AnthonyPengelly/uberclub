@@ -118,6 +118,7 @@ export function canSellPlayer(game: Game) {
     game.stage === Stage.Training ||
     game.stage === Stage.Scouting ||
     game.stage === Stage.Improvements ||
-    game.stage === Stage.DeadlineDay
+    game.stage === Stage.DeadlineDay ||
+    game.stage === Stage.Match1
   );
 }

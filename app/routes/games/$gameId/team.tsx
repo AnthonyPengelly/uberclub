@@ -24,6 +24,7 @@ import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
 import { updatePlayersBasedOnFormData } from "~/engine/team";
 import PlayerSelection from "~/components/playerSelection";
+import { getScoutPrice } from "~/engine/scouting";
 
 type LoaderData = {
   team: Team;
@@ -90,6 +91,18 @@ export default function TeamPage() {
   return (
     <>
       <h1 className="centre">{team.teamName} Lineup</h1>
+      <div className="flow | quote">
+        <p>
+          It's time to set your lineup and choose your captain. In each match
+          your midfield star value will be put up against the opponents
+          midfield, plus 2 6 sided dice each! Your attack will play their
+          defence and vice-versa in a best of three. Good luck out there ⚽
+        </p>
+        <p>
+          During pre season you can also sell players but be careful, when
+          they're gone they're gone!
+        </p>
+      </div>
       {validationMessage && <p className="error centre">{validationMessage}</p>}
       {isMatchDay && !team.isReady && !validationMessage && (
         <LoadingForm
@@ -189,8 +202,11 @@ export default function TeamPage() {
                 <LoadingForm
                   method="post"
                   action={`/games/${game.id}/sell`}
-                  submitButtonText="Sell"
-                  buttonClass="mini-button button-secondary"
+                  submitButtonText={`Sell: ${getScoutPrice(
+                    x.stars,
+                    x.potential
+                  )}M`}
+                  buttonClass="mini-button xs-button-text button-secondary"
                 >
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>

@@ -18,12 +18,15 @@ import {
 import type { Bid, DeadlineDayPlayer } from "~/domain/deadlineDay.server";
 import LoadingForm from "~/components/loadingForm";
 import PlayerDisplay from "~/components/playerDisplay";
+import { getTeamPlayers } from "~/domain/players.server";
+import { MAX_SQUAD_SIZE } from "~/engine/team";
 
 type LoaderData = {
   team: Team;
   game: Game;
   players: DeadlineDayPlayer[];
   bids: Bid[];
+  squadSize: number;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -36,12 +39,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
   const players = await deadlineDayPlayers(params.gameId);
+  const squad = await getTeamPlayers(team.id);
   const bids = await bidsForTeam(team);
   return json({
     game,
     team,
     players,
     bids,
+    squadSize: squad.length,
   });
 };
 
@@ -53,6 +58,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(playerId, "playerId not found");
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  const squad = await getTeamPlayers(team.id);
   const bids = await bidsForTeam(team);
 
   if (!team) {
@@ -70,11 +76,12 @@ export const action: ActionFunction = async ({ request, params }) => {
     team,
     players,
     bids,
+    squadSize: squad.length,
   });
 };
 
 export default function DeadlineDayPage() {
-  const { game, team, players, bids } = useLoaderData<LoaderData>();
+  const { game, team, players, bids, squadSize } = useLoaderData<LoaderData>();
 
   return (
     <>
@@ -118,6 +125,8 @@ export default function DeadlineDayPage() {
                 !team.isReady &&
                 (team.cash < minBidPrice(x) ? (
                   <div>Not enough cash!</div>
+                ) : squadSize + bids.length >= MAX_SQUAD_SIZE ? (
+                  <div>Your squad is full!</div>
                 ) : (
                   <LoadingForm
                     method="post"
