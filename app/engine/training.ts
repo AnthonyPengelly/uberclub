@@ -7,6 +7,7 @@ import {
 import { getPlayer, updatePlayerStars } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
 import { Stage } from "./game";
+import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 
 export async function trainPlayer(playerId: string, team: Team) {
@@ -40,20 +41,24 @@ export async function trainPlayer(playerId: string, team: Team) {
   await createTrainingLog(season.id, team.id, improvement);
 }
 
-export async function hasTrainingRemaining(team: Team) {
+export async function getTrainingLogs(team: Team) {
   const season = await getCurrentSeason(team.gameId);
-  return await canTrain(team.gameId, season.id, team);
+  return await getTrainingLogsForSeason(season.id, team.id);
 }
 
 async function assertCanTrain(gameId: string, seasonId: string, team: Team) {
-  if (!canTrain(gameId, seasonId, team)) {
+  const game = await getGame(gameId);
+  const trainingLogs = await getTrainingLogsForSeason(seasonId, team.id);
+  if (!canTrain(game, trainingLogs, team)) {
     throw new Error("Not currently able to train");
   }
 }
 
-async function canTrain(gameId: string, seasonId: string, team: Team) {
-  const game = await getGame(gameId);
-  const trainingLogs = await getTrainingLogsForSeason(seasonId, team.id);
+export function canTrain(
+  game: Game,
+  trainingLogs: { id: string }[],
+  team: Team
+) {
   if (game.stage !== Stage.Training) {
     return false;
   }

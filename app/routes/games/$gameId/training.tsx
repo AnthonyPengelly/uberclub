@@ -8,7 +8,7 @@ import invariant from "tiny-invariant";
 import type { GamePlayer } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import type { ActionFunction } from "@remix-run/node";
-import { hasTrainingRemaining, trainPlayer } from "~/engine/training";
+import { canTrain, getTrainingLogs, trainPlayer } from "~/engine/training";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
@@ -19,7 +19,7 @@ type LoaderData = {
   team: Team;
   game: Game;
   players: GamePlayer[];
-  hasTrainingRemaining: boolean;
+  trainingLogs: { id: string }[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -29,12 +29,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const team = await getTeam(userId, params.gameId);
   const players = await getTeamPlayers(team.id);
-  const trainingRemaining = await hasTrainingRemaining(team);
+  const trainingLogs = await getTrainingLogs(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ game, team, players, hasTrainingRemaining: trainingRemaining });
+  return json({ game, team, players, trainingLogs });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -47,17 +47,17 @@ export const action: ActionFunction = async ({ request, params }) => {
   await trainPlayer(playerId, team);
 
   const players = await getTeamPlayers(team.id);
-  const trainingRemaining = await hasTrainingRemaining(team);
+  const trainingLogs = await getTrainingLogs(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ game, team, players, hasTrainingRemaining: trainingRemaining });
+  return json({ game, team, players, trainingLogs });
 };
 
 export default function TrainingPage() {
-  const { game, team, players, hasTrainingRemaining } =
-    useLoaderData<LoaderData>();
+  const { game, team, players, trainingLogs } = useLoaderData<LoaderData>();
+  const hasTrainingRemaining = canTrain(game, trainingLogs, team);
 
   return (
     <>
@@ -76,11 +76,17 @@ export default function TrainingPage() {
         )}
       </div>
       {game.stage === Stage.Training && !team.isReady && (
-        <LoadingForm
-          method="post"
-          action={`/games/${game.id}/ready`}
-          submitButtonText="Complete training"
-        />
+        <>
+          <LoadingForm
+            method="post"
+            action={`/games/${game.id}/ready`}
+            submitButtonText="Complete training"
+          />
+          <p>
+            {team.trainingLevel - trainingLogs.length}/{team.trainingLevel}{" "}
+            remaining
+          </p>
+        </>
       )}
       <div className="players squad-list">
         {players.map((x) => (

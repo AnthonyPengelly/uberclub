@@ -10,8 +10,9 @@ import { getTeamPlayers } from "~/domain/players.server";
 import type { ActionFunction } from "@remix-run/node";
 import {
   buyScoutedPlayer,
+  canScout,
   getScoutedPlayers,
-  hasScoutingRemaining,
+  getScoutingLogs,
   scoutPlayer,
 } from "~/engine/scouting";
 import type { Game } from "~/domain/games.server";
@@ -24,8 +25,8 @@ type LoaderData = {
   team: Team;
   game: Game;
   scoutedPlayers: GamePlayer[];
-  hasScoutingRemaining: boolean;
   squadSize: number;
+  scoutingLogs: { id: string }[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -39,14 +40,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const squad = await getTeamPlayers(team.id);
   const game = await getGame(params.gameId);
   const scoutedPlayers = await getScoutedPlayers(team);
-  const canScout = await hasScoutingRemaining(team);
+  const scoutingLogs = await getScoutingLogs(team);
 
   return json({
     game,
     team,
     scoutedPlayers,
-    hasScoutingRemaining: canScout,
     squadSize: squad.length,
+    scoutingLogs,
   });
 };
 
@@ -74,21 +75,21 @@ export const action: ActionFunction = async ({ request, params }) => {
     }
   }
   const scoutedPlayers = await getScoutedPlayers(team);
-  const canScout = await hasScoutingRemaining(team);
+  const scoutingLogs = await getScoutingLogs(team);
 
   return json({
     game,
     team,
     scoutedPlayers,
-    hasScoutingRemaining: canScout,
     squadSize: squad.length,
+    scoutingLogs,
   });
 };
 
 export default function ScoutingPage() {
-  const { game, team, scoutedPlayers, hasScoutingRemaining, squadSize } =
+  const { game, team, scoutedPlayers, squadSize, scoutingLogs } =
     useLoaderData<LoaderData>();
-
+  const hasScoutingRemaining = canScout(game, scoutingLogs, team);
   return (
     <>
       <h1>{team.teamName} scouting</h1>
@@ -111,13 +112,19 @@ export default function ScoutingPage() {
         <div>Waiting for other players</div>
       )}
       {game.stage === Stage.Scouting && !team.isReady && (
-        <LoadingForm
-          method="post"
-          action={`/games/${game.id}/ready`}
-          submitButtonText="Complete scouting"
-        />
+        <>
+          <LoadingForm
+            method="post"
+            action={`/games/${game.id}/ready`}
+            submitButtonText="Complete scouting"
+          />
+          <p>
+            {team.scoutingLevel - scoutingLogs.length}/{team.scoutingLevel}{" "}
+            searches remaining
+          </p>
+        </>
       )}
-      {hasScoutingRemaining && (
+      {hasScoutingRemaining && !team.isReady && (
         <LoadingForm method="post" submitButtonText="Scout a player">
           <input type="hidden" name="action" value="scout-a-player" />
         </LoadingForm>

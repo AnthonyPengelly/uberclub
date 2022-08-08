@@ -13,6 +13,7 @@ import {
   markPlayerOutOfDeck,
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
+import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "./game";
 import { MAX_SQUAD_SIZE } from "./team";
@@ -91,20 +92,24 @@ const getScoutPriceFromOverall = (overall: number) => {
   }
 };
 
-export async function hasScoutingRemaining(team: Team) {
+export async function getScoutingLogs(team: Team) {
   const season = await getCurrentSeason(team.gameId);
-  return await canScout(team.gameId, season.id, team);
+  return await getScoutingLogsForSeason(season.id, team.id);
 }
 
 async function assertCanScout(gameId: string, seasonId: string, team: Team) {
-  if (!canScout(gameId, seasonId, team)) {
+  const game = await getGame(gameId);
+  const scoutingLogs = await getScoutingLogsForSeason(seasonId, team.id);
+  if (!canScout(game, scoutingLogs, team)) {
     throw new Error("Not currently able to scout");
   }
 }
 
-async function canScout(gameId: string, seasonId: string, team: Team) {
-  const game = await getGame(gameId);
-  const scoutingLogs = await getScoutingLogsForSeason(seasonId, team.id);
+export function canScout(
+  game: Game,
+  scoutingLogs: { id: string }[],
+  team: Team
+) {
   if (game.stage !== Stage.Scouting) {
     return false;
   }

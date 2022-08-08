@@ -21,6 +21,15 @@ export default function Index() {
   return (
     <Layout>
       <h1>Games</h1>
+      <article className="flow | quote">
+        <p>
+          Welcome to Uberclub by post. Build the greatest team in the world
+          using real players and go head to head with your friends. The game is
+          designed to be played asynchronously, so there is no time limit. But
+          try to check in at least once a day, or everyone will get bored!
+        </p>
+        <p>Join a game below to get started 💪</p>
+      </article>
       <table className="table">
         <thead>
           <tr>

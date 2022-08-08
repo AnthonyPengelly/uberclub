@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
@@ -60,7 +60,7 @@ export default function GameDetailsPage() {
   return (
     <>
       <h1>🏆{game.name}🏆</h1>
-      <article className="quote">
+      <article className="flow | quote">
         <>
           {team.isReady ? (
             <p>
@@ -71,13 +71,12 @@ export default function GameDetailsPage() {
           ) : (
             <p>
               ⏳ <strong>{team.teamName}</strong> are waiting for your next
-              move, <strong>{team.managerName}</strong>!
+              move, <strong>{team.managerName}</strong>! The banner above will
+              direct you where you need to go.
             </p>
           )}
         </>
-        <p>
-          <Link to="team">«View your team here»</Link>
-        </p>
+        <p>Be the first to reach 100 points in one season to win!</p>
       </article>
       <h2>Current Season</h2>
       {seasons[0] && (
