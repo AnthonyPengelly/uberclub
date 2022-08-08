@@ -11,24 +11,25 @@
 }
 
 .button,
-.button-secondary:hover {
+.button.button-secondary:hover {
   background-color: var(--color-green--background);
   color: var(--color-secondary);
 }
 
-.button-secondary,
+.button.button-secondary,
 .button:hover {
   background-color: var(--background-color-buttons--hover);
   color: var(--color-secondary);
 }
 
 .mini-button {
-  height: 1.5rem;
+  height: 1.2rem;
   min-width: 0;
   width: 100%;
-  line-height: 1.5rem;
-  font-size: 0.75rem;
+  line-height: 1.2rem;
+  font-size: 0.5rem;
   border-radius: 2px;
+  padding: 0 0.5rem;
 }
 
 .header {
@@ -149,7 +150,7 @@
 
 .squad-list {
   flex-wrap: wrap;
-  row-gap: 4rem;
+  row-gap: 1rem;
 }
 .scout-info {
   width: calc(30% - ((6px * 4) / 5));
@@ -175,6 +176,8 @@
   flex-shrink: 0;
   position: relative;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.75);
+  display: flex;
+  flex-direction: column;
 }
 
 .player img {
@@ -234,9 +237,9 @@
 }
 
 .player__actions {
-  position: absolute;
-  top: calc(100% + 0.35rem);
   text-align: center;
+  margin-top: auto;
+  padding-top: 0.15rem;
 }
 
 @media only screen and (min-width: 800px) {
@@ -301,4 +304,15 @@
     var(--color-background-grey),
     rgba(0, 0, 0, 0.25)
   );
+}
+
+.player-selection {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 10;
 }

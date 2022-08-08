@@ -1,11 +1,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import {
-  Form,
-  useLoaderData,
-  useSubmit,
-  useTransition,
-} from "@remix-run/react";
+import { useLoaderData, useSubmit, useTransition } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -28,6 +23,7 @@ import { canSellPlayer, Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
 import { updatePlayersBasedOnFormData } from "~/engine/team";
+import PlayerSelection from "~/components/playerSelection";
 
 type LoaderData = {
   team: Team;
@@ -58,10 +54,9 @@ export const action: ActionFunction = async ({ request, params }) => {
   const playerId = formData.get("player-id") as string;
   const existingPlayerId = formData.get("existing-player-id") as string;
   const position = parseInt(formData.get("position") as string, 10);
-  invariant(playerId, "playerId not found");
   invariant(position, "position not found");
 
-  if (playerId === "null") {
+  if (playerId === "null" || !playerId) {
     await removePlayerFromLineup(existingPlayerId);
   } else {
     await addPlayerToLineup(playerId, position, existingPlayerId);
@@ -77,6 +72,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function TeamPage() {
   const { submission } = useTransition();
+  const submit = useSubmit();
   const { team, players, game } = useLoaderData<LoaderData>();
   if (submission && submission.formData.get("position")) {
     updatePlayersBasedOnFormData(players, submission.formData);
@@ -93,29 +89,36 @@ export default function TeamPage() {
 
   return (
     <>
-      <h2>{team.teamName} Lineup</h2>
-      {validationMessage && <p className="error">{validationMessage}</p>}
+      <h1 className="centre">{team.teamName} Lineup</h1>
+      {validationMessage && <p className="error centre">{validationMessage}</p>}
       {isMatchDay && !team.isReady && !validationMessage && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/ready`}
           submitButtonText="Submit lineup"
+          className="centre"
         />
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
-      <h3>Captain ({team.captainBoost}★ Boost)</h3>
       {canMakeChanges && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/captain`}
-          submitButtonText="Save"
-          className="flow"
+          className="flow | centre"
+          onChange={(e) => submit(e.currentTarget, { replace: true })}
         >
           <div>
             <label htmlFor="captain">
-              <div>Select a captain</div>
+              <div>Select a captain ({team.captainBoost}★ Boost)</div>
             </label>
-            <select name="player-id" id="captain" defaultValue={captain?.id}>
+            <select
+              name="player-id"
+              id="captain"
+              value={captain?.id}
+              onChange={() => {
+                /* React wants an onChange since this is a controlled component, but really it's the <form> that uses the on change */
+              }}
+            >
               <option value="null">None</option>
               {players
                 .filter((x) => x.lineupPosition)
@@ -187,7 +190,7 @@ export default function TeamPage() {
                   method="post"
                   action={`/games/${game.id}/sell`}
                   submitButtonText="Sell"
-                  buttonClass="mini-button"
+                  buttonClass="mini-button button-secondary"
                 >
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>
@@ -208,7 +211,6 @@ function Position({
   players: GamePlayer[];
   canMakeChanges: boolean;
 }) {
-  const submit = useSubmit();
   const existingPlayer = findPlayerInPosition(players, position);
   const previousPlayer = findPlayerInPosition(players, position - 1);
   const chemistry = existingPlayer
@@ -217,31 +219,11 @@ function Position({
   return (
     <PlayerDisplay player={existingPlayer} hasChemistry={chemistry}>
       {canMakeChanges && (
-        <Form
-          method="post"
-          onChange={(e) => submit(e.currentTarget, { replace: true })}
-        >
-          <input
-            type="hidden"
-            name="existing-player-id"
-            value={existingPlayer?.id}
-          />
-          <input type="hidden" name="position" value={position} />
-          <select
-            name="player-id"
-            value={existingPlayer?.id}
-            onChange={() => {
-              /* React wants an onChange since this is a controlled component, but really it's the <form> that uses the on change */
-            }}
-          >
-            <option value="null">None</option>
-            {players.map((x) => (
-              <option key={x.id} value={x.id}>
-                [{x.position}] {x.name}
-              </option>
-            ))}
-          </select>
-        </Form>
+        <PlayerSelection
+          position={position}
+          players={players}
+          existingPlayer={existingPlayer}
+        />
       )}
     </PlayerDisplay>
   );

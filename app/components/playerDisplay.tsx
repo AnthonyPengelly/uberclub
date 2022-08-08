@@ -13,22 +13,14 @@ export default function PlayerDisplay({
 }: PlayerDisplayProps) {
   if (!player) {
     return (
-      <div
-        className={`player player__placeholder ${
-          children ? "margin-bottom" : ""
-        }`}
-      >
+      <div className="player player__placeholder">
         <div className="player__name">None selected</div>
         {children && <div className="player__actions">{children}</div>}
       </div>
     );
   }
   return (
-    <div
-      className={`player player__${player.position} ${
-        children ? "margin-bottom" : ""
-      }`}
-    >
+    <div className={`player player__${player.position}`}>
       <div className="player__name">{player.name}</div>
       <div className="player__stars">
         {[...Array(player.stars).keys()].map(() => "★").join("")}
@@ -44,9 +36,9 @@ export default function PlayerDisplay({
         height={40}
       />
       <div className="player__team">{player.team}</div>
+      {children && <div className="player__actions">{children}</div>}
       {hasChemistry ? <div className="player__chemistry">★</div> : null}
       {player.captain ? <div className="player__captain">C</div> : null}
-      {children && <div className="player__actions">{children}</div>}
     </div>
   );
 }

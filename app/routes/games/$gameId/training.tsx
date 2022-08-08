@@ -89,7 +89,7 @@ export default function TrainingPage() {
               <LoadingForm
                 method="post"
                 submitButtonText="Train"
-                buttonClass="mini-button"
+                buttonClass="mini-button button-secondary"
               >
                 <input type="hidden" name="player-id" value={x.id} />
               </LoadingForm>
