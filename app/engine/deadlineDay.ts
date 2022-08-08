@@ -18,6 +18,7 @@ import {
 import { getCurrentSeason } from "~/domain/season.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamsInGame, updateCash } from "~/domain/team.server";
+import { MAX_SQUAD_SIZE } from "./team";
 
 export async function setDeadlineDayPlayers(gameId: string) {
   const players = await drawPlayersFromDeck(gameId, 5);
@@ -56,7 +57,7 @@ export async function bidForPlayer(
     });
   }
   const teamPlayers = await getTeamPlayers(team.id);
-  if (teamPlayers.length + bids.length === 23) {
+  if (teamPlayers.length + bids.length === MAX_SQUAD_SIZE) {
     throw new Response("Bad Request", {
       status: 400,
       statusText: "Too many players! Sell first",

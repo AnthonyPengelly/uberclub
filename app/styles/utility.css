@@ -35,3 +35,11 @@
 .margin-bottom {
   margin-bottom: 1rem;
 }
+
+.justify-left {
+  justify-content: left !important;
+}
+
+.reverse {
+  flex-direction: column-reverse !important;
+}

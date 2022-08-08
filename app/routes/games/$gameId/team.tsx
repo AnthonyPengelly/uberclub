@@ -215,39 +215,34 @@ function Position({
     ? hasChemistry(existingPlayer, previousPlayer)
     : false;
   return (
-    <>
-      <>
-        {chemistry && <div style={{ position: "absolute" }}>★</div>}
-        <PlayerDisplay player={existingPlayer}>
-          {canMakeChanges && (
-            <Form
-              method="post"
-              onChange={(e) => submit(e.currentTarget, { replace: true })}
-            >
-              <input
-                type="hidden"
-                name="existing-player-id"
-                value={existingPlayer?.id}
-              />
-              <input type="hidden" name="position" value={position} />
-              <select
-                name="player-id"
-                value={existingPlayer?.id}
-                onChange={() => {
-                  /* React wants an onChange since this is a controlled component, but really it's the <form> that uses the on change */
-                }}
-              >
-                <option value="null">None</option>
-                {players.map((x) => (
-                  <option key={x.id} value={x.id}>
-                    [{x.position}] {x.name}
-                  </option>
-                ))}
-              </select>
-            </Form>
-          )}
-        </PlayerDisplay>
-      </>
-    </>
+    <PlayerDisplay player={existingPlayer} hasChemistry={chemistry}>
+      {canMakeChanges && (
+        <Form
+          method="post"
+          onChange={(e) => submit(e.currentTarget, { replace: true })}
+        >
+          <input
+            type="hidden"
+            name="existing-player-id"
+            value={existingPlayer?.id}
+          />
+          <input type="hidden" name="position" value={position} />
+          <select
+            name="player-id"
+            value={existingPlayer?.id}
+            onChange={() => {
+              /* React wants an onChange since this is a controlled component, but really it's the <form> that uses the on change */
+            }}
+          >
+            <option value="null">None</option>
+            {players.map((x) => (
+              <option key={x.id} value={x.id}>
+                [{x.position}] {x.name}
+              </option>
+            ))}
+          </select>
+        </Form>
+      )}
+    </PlayerDisplay>
   );
 }

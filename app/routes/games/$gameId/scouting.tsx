@@ -6,11 +6,11 @@ import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import type { GamePlayer } from "~/domain/players.server";
+import { getTeamPlayers } from "~/domain/players.server";
 import type { ActionFunction } from "@remix-run/node";
 import {
   buyScoutedPlayer,
   getScoutedPlayers,
-  getScoutPrice,
   hasScoutingRemaining,
   scoutPlayer,
 } from "~/engine/scouting";
@@ -18,12 +18,14 @@ import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { Stage } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
+import ScoutPlayer from "~/components/scoutPlayer";
 
 type LoaderData = {
   team: Team;
   game: Game;
   scoutedPlayers: GamePlayer[];
   hasScoutingRemaining: boolean;
+  squadSize: number;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -31,18 +33,20 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   invariant(params.gameId, "gameId not found");
 
   const team = await getTeam(userId, params.gameId);
-  const game = await getGame(params.gameId);
-  const scoutedPlayers = await getScoutedPlayers(team);
-  const canScout = await hasScoutingRemaining(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
+  const squad = await getTeamPlayers(team.id);
+  const game = await getGame(params.gameId);
+  const scoutedPlayers = await getScoutedPlayers(team);
+  const canScout = await hasScoutingRemaining(team);
 
   return json({
     game,
     team,
     scoutedPlayers,
     hasScoutingRemaining: canScout,
+    squadSize: squad.length,
   });
 };
 
@@ -56,6 +60,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
+  const squad = await getTeamPlayers(team.id);
   switch (formData.get("action")) {
     case "scout-a-player": {
       await scoutPlayer(team);
@@ -76,11 +81,12 @@ export const action: ActionFunction = async ({ request, params }) => {
     team,
     scoutedPlayers,
     hasScoutingRemaining: canScout,
+    squadSize: squad.length,
   });
 };
 
 export default function ScoutingPage() {
-  const { game, team, scoutedPlayers, hasScoutingRemaining } =
+  const { game, team, scoutedPlayers, hasScoutingRemaining, squadSize } =
     useLoaderData<LoaderData>();
 
   return (
@@ -116,29 +122,16 @@ export default function ScoutingPage() {
           <input type="hidden" name="action" value="scout-a-player" />
         </LoadingForm>
       )}
-      <ul>
+      <div className="players squad-list | justify-left">
         {scoutedPlayers.map((x) => (
-          <li key={x.id}>
-            <img src={x.imageUrl} alt={x.name} width={40} height={40} />[
-            {x.position}] {x.name}{" "}
-            {[...Array(x.stars).keys()].map(() => "★").join("")}
-            {[...Array(x.potential - x.stars).keys()]
-              .map(() => "☆")
-              .join("")}{" "}
-            {getScoutPrice(x.overall, x.potential)}M
-            {!x.teamId &&
-              (team.cash < getScoutPrice(x.overall, x.potential) ? (
-                <div>Not enough cash!</div>
-              ) : (
-                <LoadingForm method="post" submitButtonText="Buy">
-                  <input type="hidden" name="action" value="buy-player" />
-                  <input type="hidden" name="player-id" value={x.id} />
-                </LoadingForm>
-              ))}
-            {x.teamId && " ✅"}
-          </li>
+          <ScoutPlayer
+            key={x.id}
+            player={x}
+            team={team}
+            squadSize={squadSize}
+          />
         ))}
-      </ul>
+      </div>
     </>
   );
 }

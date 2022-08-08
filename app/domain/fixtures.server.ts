@@ -121,7 +121,7 @@ export async function getFixtureLineups(
       position: x.player_game_states.real_players.positions.name,
       overall: x.player_game_states.real_players.overall,
       potential: x.player_game_states.real_players.potential,
-      team: x.player_game_states.real_players.real_teams.team,
+      team: x.player_game_states.real_players.real_teams.name,
       imageUrl: x.player_game_states.real_players.image_url,
     }));
   }

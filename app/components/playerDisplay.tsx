@@ -2,11 +2,13 @@ import type { GamePlayer } from "~/domain/players.server";
 
 export type PlayerDisplayProps = {
   player?: GamePlayer;
+  hasChemistry?: boolean;
   children?: React.ReactNode | React.ReactNode[];
 };
 
 export default function PlayerDisplay({
   player,
+  hasChemistry,
   children,
 }: PlayerDisplayProps) {
   if (!player) {
@@ -42,6 +44,7 @@ export default function PlayerDisplay({
         height={40}
       />
       <div className="player__team">{player.team}</div>
+      {hasChemistry ? <div className="player__chemistry">★</div> : null}
       {player.captain ? <div className="player__captain">C</div> : null}
       {children && <div className="player__actions">{children}</div>}
     </div>

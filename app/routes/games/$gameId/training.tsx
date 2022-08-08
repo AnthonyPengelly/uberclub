@@ -82,18 +82,21 @@ export default function TrainingPage() {
           submitButtonText="Complete training"
         />
       )}
-      <ul>
+      <div className="players squad-list">
         {players.map((x) => (
-          <li key={x.id}>
-            <PlayerDisplay player={x} />
+          <PlayerDisplay key={x.id} player={x}>
             {x.potential - x.stars && hasTrainingRemaining ? (
-              <LoadingForm method="post" submitButtonText="Train">
+              <LoadingForm
+                method="post"
+                submitButtonText="Train"
+                buttonClass="mini-button"
+              >
                 <input type="hidden" name="player-id" value={x.id} />
               </LoadingForm>
             ) : null}
-          </li>
+          </PlayerDisplay>
         ))}
-      </ul>
+      </div>
     </>
   );
 }

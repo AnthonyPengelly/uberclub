@@ -29,19 +29,22 @@ export default function Index() {
             <th>Season</th>
           </tr>
         </thead>
-        {games.map((game) => (
-          <tr key={game.id}>
-            <td>
-              <Link to={`/games/${game.id}`}>«{game.name}»</Link>
-            </td>
-            <td>{game.players}</td>
-            <td>
-              {game.seasons.length !== 0 &&
-                game.seasons.sort((a, b) => b.seasonNumber - a.seasonNumber)[0]
-                  .seasonNumber}
-            </td>
-          </tr>
-        ))}
+        <tbody>
+          {games.map((game) => (
+            <tr key={game.id}>
+              <td>
+                <Link to={`/games/${game.id}`}>«{game.name}»</Link>
+              </td>
+              <td>{game.players}</td>
+              <td>
+                {game.seasons.length !== 0 &&
+                  game.seasons.sort(
+                    (a, b) => b.seasonNumber - a.seasonNumber
+                  )[0].seasonNumber}
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </Layout>
   );

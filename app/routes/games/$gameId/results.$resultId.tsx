@@ -8,8 +8,11 @@ import type { GamePlayer } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById } from "~/domain/team.server";
 import PlayerDisplay from "~/components/playerDisplay";
+import type { LineupPlayer } from "~/engine/lineup";
 import {
+  findPlayerInPosition,
   getLineupScores,
+  hasChemistry,
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
 } from "~/engine/lineup";
@@ -56,56 +59,111 @@ export default function ResultsPage() {
     <div>
       <h1>Result: {winningText}</h1>
       <h2>{homeTeam.team.teamName}</h2>
-      <Lineup players={homeTeam.lineup} team={homeTeam.team} />
+      <Lineup
+        players={homeTeam.lineup}
+        team={homeTeam.team}
+        direction="top-down"
+      />
       <h2>{awayTeam.team.teamName}</h2>
-      <Lineup players={awayTeam.lineup} team={awayTeam.team} />
+      <Lineup
+        players={awayTeam.lineup}
+        team={awayTeam.team}
+        direction="bottom-up"
+      />
     </div>
   );
 }
 
-function Lineup({ players, team }: { players: GamePlayer[]; team: Team }) {
+function Lineup({
+  players,
+  team,
+  direction,
+}: {
+  players: GamePlayer[];
+  team: Team;
+  direction: "top-down" | "bottom-up";
+}) {
   const sortedPlayers = players.sort(
     (a, b) => (a.lineupPosition as number) - (b.lineupPosition as number)
   );
   const scores = getLineupScores(players, team.captainBoost);
   return (
-    <>
-      <h3 className="centre">GKP</h3>
-      <div className="players">
-        <PlayerDisplay player={sortedPlayers[0]} />
+    <div
+      className={
+        direction === "bottom-up" ? "flex-flow | reverse" : "flex-flow"
+      }
+    >
+      <div className="flow">
+        <h3 className="centre">GKP</h3>
+        <div className="players">
+          <PlayerDisplay player={sortedPlayers[0]} />
+        </div>
       </div>
-      <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
-      <div className="players">
-        {sortedPlayers
-          .filter(
-            (x) =>
-              (x.lineupPosition as number) > 1 &&
-              (x.lineupPosition as number) <= MAX_DEF_POSITION
-          )
-          .map((x) => (
-            <PlayerDisplay key={x.id} player={x} />
-          ))}
+      <div className="flow">
+        <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
+        <div className="players">
+          {sortedPlayers
+            .filter(
+              (x) =>
+                (x.lineupPosition as number) > 1 &&
+                (x.lineupPosition as number) <= MAX_DEF_POSITION
+            )
+            .map((x) => {
+              const previousPlayer = findPlayerInPosition(
+                players,
+                x.lineupPosition! - 1
+              );
+              const chemistry = previousPlayer
+                ? hasChemistry(x as LineupPlayer, previousPlayer)
+                : false;
+              return (
+                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+              );
+            })}
+        </div>
       </div>
-      <h3 className="centre">MID {scores.MID}★</h3>
-      <div className="players">
-        {sortedPlayers
-          .filter(
-            (x) =>
-              (x.lineupPosition as number) > MAX_DEF_POSITION &&
-              (x.lineupPosition as number) <= MAX_MID_POSITION
-          )
-          .map((x) => (
-            <PlayerDisplay key={x.id} player={x} />
-          ))}
+      <div className="flow">
+        <h3 className="centre">MID {scores.MID}★</h3>
+        <div className="players">
+          {sortedPlayers
+            .filter(
+              (x) =>
+                (x.lineupPosition as number) > MAX_DEF_POSITION &&
+                (x.lineupPosition as number) <= MAX_MID_POSITION
+            )
+            .map((x) => {
+              const previousPlayer = findPlayerInPosition(
+                players,
+                x.lineupPosition! - 1
+              );
+              const chemistry = previousPlayer
+                ? hasChemistry(x as LineupPlayer, previousPlayer)
+                : false;
+              return (
+                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+              );
+            })}
+        </div>
       </div>
-      <h3 className="centre">FWD {scores.FWD}★</h3>
-      <div className="players">
-        {sortedPlayers
-          .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)
-          .map((x) => (
-            <PlayerDisplay key={x.id} player={x} />
-          ))}
+      <div className="flow">
+        <h3 className="centre">FWD {scores.FWD}★</h3>
+        <div className="players">
+          {sortedPlayers
+            .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)
+            .map((x) => {
+              const previousPlayer = findPlayerInPosition(
+                players,
+                x.lineupPosition! - 1
+              );
+              const chemistry = previousPlayer
+                ? hasChemistry(x as LineupPlayer, previousPlayer)
+                : false;
+              return (
+                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+              );
+            })}
+        </div>
       </div>
-    </>
+    </div>
   );
 }

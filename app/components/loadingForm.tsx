@@ -16,16 +16,14 @@ export default function LoadingForm({
   ...formProps
 }: LoadingFormProps) {
   const transition = useTransition();
-  const currentFormIsSubmitting =
-    transition.state === "submitting" &&
-    transition.submission.action === formProps.action;
   return (
     <Form {...formProps}>
       <fieldset className={className} disabled={transition.state !== "idle"}>
         {children}
         <button
           className={`button ${buttonClass}`}
-          data-submitting={currentFormIsSubmitting}
+          data-submitting={transition.state === "submitting"}
+          data-loading={transition.state === "loading"}
           type="submit"
         >
           {submitButtonText}

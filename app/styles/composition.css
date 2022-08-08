@@ -2,6 +2,12 @@
   margin-top: var(--flow-space, 1rem);
 }
 
+.flex-flow {
+  column-gap: var(--flow-space, 1rem);
+  display: flex;
+  flex-direction: column;
+}
+
 .horizontal-flow {
   display: flex;
   flex-wrap: wrap;
@@ -17,4 +23,8 @@
   padding-left: clamp(0.69rem, 0.5rem + 0.47vw, 1.33rem);
   padding-right: clamp(0.69rem, 0.5rem + 0.47vw, 1.33rem);
   position: relative;
+}
+
+main {
+  padding-bottom: 3rem;
 }
