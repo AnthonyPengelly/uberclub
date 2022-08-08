@@ -61,7 +61,7 @@ export default function GameDetailsPage() {
     <>
       <h1>🏆{game.name}🏆</h1>
       <article className="quote">
-        <p>
+        <>
           {team.isReady ? (
             <p>
               ✅ Good work <strong>{team.managerName}</strong>,{" "}
@@ -74,7 +74,7 @@ export default function GameDetailsPage() {
               move, <strong>{team.managerName}</strong>!
             </p>
           )}
-        </p>
+        </>
         <p>
           <Link to="team">«View your team here»</Link>
         </p>

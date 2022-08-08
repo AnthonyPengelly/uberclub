@@ -30,15 +30,15 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
       return (
         <PhaseHeading
           heading="Improvements Phase"
-          callToAction="Go To Improvements"
+          callToAction="Improvements"
           href={`/games/${game.id}/improvements`}
         />
       );
     case Stage.DeadlineDay:
       return (
         <PhaseHeading
-          heading="It's Deadline Day!"
-          callToAction="Check out who is up for grabs"
+          heading="Who is up for grabs?"
+          callToAction="Deadline Day"
           href={`/games/${game.id}/deadline-day`}
         />
       );
@@ -46,7 +46,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
       return (
         <PhaseHeading
           heading="Match Day 1"
-          callToAction="Get Your Team Ready"
+          callToAction="Your lineup"
           href={`/games/${game.id}/team`}
         />
       );
@@ -54,7 +54,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
       return (
         <PhaseHeading
           heading="Match Day 2"
-          callToAction="Get Your Team Ready"
+          callToAction="Your lineup"
           href={`/games/${game.id}/team`}
         />
       );
@@ -62,7 +62,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
       return (
         <PhaseHeading
           heading="Final Match Day"
-          callToAction="Get Your Team Ready"
+          callToAction="Your lineup"
           href={`/games/${game.id}/team`}
         />
       );

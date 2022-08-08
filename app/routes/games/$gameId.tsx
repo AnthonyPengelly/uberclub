@@ -10,6 +10,7 @@ import invariant from "tiny-invariant";
 import { isOpenForPlayers, joinGame } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import Layout from "~/components/layout";
+import { useRevalidateOnInterval } from "~/hooks/revalidate";
 
 type LoaderData = {
   game: Game;
@@ -45,6 +46,11 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function GamePage() {
   const { game, team } = useLoaderData<LoaderData>();
+  useRevalidateOnInterval({
+    enabled: true,
+    intervalSeconds: 60,
+    game,
+  });
 
   return (
     <Layout game={game}>

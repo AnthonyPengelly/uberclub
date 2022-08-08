@@ -44,7 +44,7 @@ export default function PlayerSelection({
           <div className="wrapper | players squad-list">
             {/* Undefined provides "remove this player" functionality */}
             {[undefined, ...players].map((x) => (
-              <PlayerDisplay key={x?.id} player={x}>
+              <PlayerDisplay key={x?.id || "no-player"} player={x}>
                 <LoadingForm
                   method="post"
                   buttonClass="mini-button button-secondary"
