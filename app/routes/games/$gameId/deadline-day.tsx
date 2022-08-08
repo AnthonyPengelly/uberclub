@@ -17,6 +17,7 @@ import {
 } from "~/engine/deadlineDay";
 import type { Bid, DeadlineDayPlayer } from "~/domain/deadlineDay.server";
 import LoadingForm from "~/components/loadingForm";
+import PlayerDisplay from "~/components/playerDisplay";
 
 type LoaderData = {
   team: Team;
@@ -76,13 +77,29 @@ export default function DeadlineDayPage() {
   const { game, team, players, bids } = useLoaderData<LoaderData>();
 
   return (
-    <div>
-      <h2>
+    <>
+      <h1>
         {team.teamName} - {team.cash}M
-      </h2>
-      {game.stage === Stage.DeadlineDay && team.isReady && (
-        <div>Waiting for other players</div>
-      )}
+      </h1>
+      <div className="flow | quote">
+        <p>
+          It's deadline day! Here you can see the players available to buy. This
+          is a closed bid though, you can only submit one bid per-player, and
+          you're committed to that spend if you are highest so bid wisely...
+        </p>
+        {game.stage === Stage.DeadlineDay && team.isReady && (
+          <p>
+            Phew. You're bids are all in, now all we can do is cross our fingers
+            🤞
+          </p>
+        )}
+        {game.stage !== Stage.DeadlineDay && (
+          <p>
+            It's not yet deadline day. Come back at the end of the next pre
+            season to find out who you can pick up.
+          </p>
+        )}
+      </div>
       {game.stage === Stage.DeadlineDay && !team.isReady && (
         <LoadingForm
           method="post"
@@ -90,42 +107,49 @@ export default function DeadlineDayPage() {
           submitButtonText="Complete deadline day"
         />
       )}
-      <ul>
+      <div className="players squad-list | justify-left">
         {players.map((x) => (
-          <li key={x.id}>
-            <img src={x.imageUrl} alt={x.name} width={40} height={40} />[
-            {x.position}] {x.name}{" "}
-            {[...Array(x.stars).keys()].map(() => "★").join("")}
-            {[...Array(x.potential - x.stars).keys()]
-              .map(() => "☆")
-              .join("")}{" "}
-            Min: {minBidPrice(x)}M
-            {!bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
-              game.stage === Stage.DeadlineDay &&
-              !team.isReady &&
-              (team.cash < minBidPrice(x) ? (
-                <div>Not enough cash!</div>
-              ) : (
-                <LoadingForm method="post" submitButtonText="Bid">
-                  <input type="hidden" name="id" value={x.deadlineDayId} />
-                  <input
-                    type="number"
-                    name="cost"
-                    min={minBidPrice(x)}
-                    max={team.cash}
-                    placeholder={minBidPrice(x).toString()}
-                    required
-                  />
-                </LoadingForm>
-              ))}
-            {bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
-              ` - ${
-                bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId)
-                  ?.cost
-              }M submitted`}
-          </li>
+          <>
+            <PlayerDisplay key={x.id} player={x} />
+            <div className="deadline-day-info">
+              Min bid: {minBidPrice(x)}M
+              {!bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
+                game.stage === Stage.DeadlineDay &&
+                !team.isReady &&
+                (team.cash < minBidPrice(x) ? (
+                  <div>Not enough cash!</div>
+                ) : (
+                  <LoadingForm
+                    method="post"
+                    submitButtonText="Bid"
+                    buttonClass="mini-button"
+                  >
+                    <input type="hidden" name="id" value={x.deadlineDayId} />
+                    <input
+                      className="mini-input"
+                      type="number"
+                      name="cost"
+                      min={minBidPrice(x)}
+                      max={team.cash}
+                      placeholder={minBidPrice(x).toString()}
+                      required
+                    />
+                  </LoadingForm>
+                ))}
+              {bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) && (
+                <div>
+                  ✅{" "}
+                  {
+                    bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId)
+                      ?.cost
+                  }
+                  M
+                </div>
+              )}
+            </div>
+          </>
         ))}
-      </ul>
-    </div>
+      </div>
+    </>
   );
 }

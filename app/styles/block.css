@@ -32,6 +32,12 @@
   padding: 0 0.5rem;
 }
 
+.mini-input {
+  width: 100%;
+  font-size: 0.5rem;
+  line-height: 0.7rem;
+}
+
 .header {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -152,7 +158,8 @@
   flex-wrap: wrap;
   row-gap: 1rem;
 }
-.scout-info {
+.scout-info,
+.deadline-day-info {
   width: calc(30% - ((6px * 4) / 5));
   flex-grow: 0;
   flex-shrink: 0;
