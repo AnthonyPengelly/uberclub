@@ -20,6 +20,7 @@ import { getResults } from "~/domain/fixtures.server";
 import Season from "~/components/season";
 import PreviousSeasons from "~/components/previousSeasons";
 import DateTime from "~/components/dateTime";
+import { Stage } from "~/engine/game";
 
 type LoaderData = {
   game: Game;
@@ -72,37 +73,46 @@ export default function GameDetailsPage() {
         </div>
       )}
       <article className="flow | quote">
-        <>
-          {team.isReady ? (
-            <p>
-              ✅ Good work <strong>{team.managerName}</strong>,{" "}
-              <strong>{team.teamName}</strong> are ready for the next phase, put
-              your feet up.
-            </p>
-          ) : (
-            <p>
-              ⏳ <strong>{team.teamName}</strong> are waiting for your next
-              move, <strong>{team.managerName}</strong>! The banner above will
-              direct you where you need to go.
-            </p>
-          )}
-        </>
+        {game.stage === Stage.NotStarted ? (
+          <p>
+            Welcome to the <strong>{team.teamName}</strong> back office. We're
+            currently waiting for more players to join.
+          </p>
+        ) : (
+          <>
+            {team.isReady ? (
+              <p>
+                ✅ Good work <strong>{team.managerName}</strong>,{" "}
+                <strong>{team.teamName}</strong> are ready for the next phase,
+                put your feet up.
+              </p>
+            ) : (
+              <p>
+                ⏳ <strong>{team.teamName}</strong> are waiting for your next
+                move, <strong>{team.managerName}</strong>! The banner above will
+                direct you where you need to go.
+              </p>
+            )}
+          </>
+        )}
         <p>Be the first to reach 100 points in one season to win!</p>
       </article>
-      <h2>Current Season</h2>
       {seasons[0] && (
-        <Season
-          season={seasons[0].season}
-          teamSeasons={seasons[0].teamSeasons}
-          results={seasons[0].results}
-          startOpen={true}
-          usersTeamName={team.teamName}
-        />
+        <>
+          <h2>Current Season</h2>
+          <Season
+            season={seasons[0].season}
+            teamSeasons={seasons[0].teamSeasons}
+            results={seasons[0].results}
+            startOpen={true}
+            usersTeamName={team.teamName}
+          />
+          <PreviousSeasons
+            seasons={seasons.slice(1)}
+            usersTeamName={team.teamName}
+          />
+        </>
       )}
-      <PreviousSeasons
-        seasons={seasons.slice(1)}
-        usersTeamName={team.teamName}
-      />
 
       <h2>Game log</h2>
       <table className="table">
