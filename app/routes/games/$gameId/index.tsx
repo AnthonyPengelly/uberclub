@@ -56,10 +56,21 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export default function GameDetailsPage() {
   const { team, logs, seasons, game } = useLoaderData<LoaderData>();
+  const winningSeason = seasons.find((x) =>
+    x.teamSeasons.find((y) => y.score > 100)
+  );
+  const winningTeam =
+    winningSeason && winningSeason.teamSeasons.find((y) => y.score > 100);
 
   return (
     <>
       <h1>🏆{game.name}🏆</h1>
+      {winningTeam && (
+        <div className="winner">
+          🏆Congratulations to <strong>{winningTeam.teamName}</strong> for
+          reaching 100 points in one season!🏆
+        </div>
+      )}
       <article className="flow | quote">
         <>
           {team.isReady ? (

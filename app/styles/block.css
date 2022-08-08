@@ -327,3 +327,12 @@
   background-color: rgba(0, 0, 0, 0.8);
   z-index: 10;
 }
+
+.winner {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  background-color: var(--color-green--background);
+  color: var(--color-secondary);
+  padding: 1rem;
+  border-radius: 12px;
+}
