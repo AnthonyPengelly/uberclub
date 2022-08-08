@@ -47,6 +47,19 @@ export async function getGame(id: string): Promise<Game> {
   throw error;
 }
 
+export async function createGame(name: string): Promise<Game> {
+  const { data, error } = await supabase
+    .from("games")
+    .insert([{ name }])
+    .single();
+
+  if (!error) {
+    return data as Game;
+  }
+
+  throw error;
+}
+
 export async function updateGameStage(gameId: string, stage: number) {
   const { data, error } = await supabase
     .from("games")
