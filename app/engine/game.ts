@@ -23,7 +23,9 @@ export enum Stage {
   Match1 = 5,
   Match2 = 6,
   Match3 = 7,
-  SuperCup = 8,
+  Match4 = 8,
+  Match5 = 9,
+  SuperCup = 10,
 }
 
 export function isOpenForPlayers(game: Game) {
@@ -89,6 +91,12 @@ async function advance(gameId: string) {
       return updateGameStage(gameId, Stage.Match3);
     case Stage.Match3:
       await playFixtures(gameId, Stage.Match3);
+      return updateGameStage(gameId, Stage.Match4);
+    case Stage.Match4:
+      await playFixtures(gameId, Stage.Match4);
+      return updateGameStage(gameId, Stage.Match5);
+    case Stage.Match5:
+      await playFixtures(gameId, Stage.Match5);
       await completeFinancesForAllTeams(gameId);
       await createNextSeason(gameId);
       return updateGameStage(gameId, Stage.Training);
@@ -106,7 +114,7 @@ export async function markTeamAsReady(gameId: string, team: Team) {
   await markAsReady(team.id);
   await createGameLog(gameId, `${team.managerName} is ready to continue`);
   const allTeams = await getTeamsInGame(gameId);
-  if (allTeams.filter((x) => x.isReady).length === 4) {
+  if (allTeams.filter((x) => x.isReady).length === allTeams.length) {
     await createGameLog(gameId, "Everyone is ready, starting next phase");
     await advance(gameId);
     await Promise.all(allTeams.map((x) => markAsReady(x.id as string, false)));

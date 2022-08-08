@@ -110,6 +110,42 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   );
 }
 
+export async function getRealTeamPlayers(
+  realTeamId: string,
+  gameId: string
+): Promise<GamePlayer[]> {
+  const { data, error } = await supabase
+    .from("player_game_states")
+    .select(
+      `id, game_id, lineup_position, captain, injured, stars, team_id,
+        real_players!inner (name, overall, potential, image_url, positions (name), real_team_id, real_teams (id, name))`
+    )
+    .eq("game_id", gameId)
+    .eq("real_players.real_team_id", realTeamId);
+
+  if (error) {
+    throw error;
+  }
+  return (
+    data
+      ?.map((x) => ({
+        id: x.id,
+        teamId: x.team_id,
+        lineupPosition: x.lineup_position,
+        captain: x.captain,
+        injured: x.injured,
+        stars: x.stars,
+        name: x.real_players.name,
+        position: x.real_players.positions.name,
+        overall: x.real_players.overall,
+        potential: x.real_players.potential,
+        team: x.real_players.real_teams.name,
+        imageUrl: x.real_players.image_url,
+      }))
+      .sort(sortPlayers) || []
+  );
+}
+
 export async function getPlayer(id: string): Promise<GamePlayer> {
   const { data, error } = await supabase
     .from("player_game_states")
