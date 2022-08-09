@@ -42,14 +42,32 @@
   padding: 0 0.2rem;
 }
 
-.xs-button-text {
-  font-size: 0.4rem;
-}
-
 .mini-input {
   width: 100%;
   font-size: 0.5rem;
   line-height: 0.7rem;
+}
+
+.xs-button-text {
+  font-size: 0.4rem;
+}
+
+@media only screen and (min-width: 800px) {
+  .mini-button {
+    height: 2rem;
+    line-height: 2rem;
+    font-size: 1rem;
+    border-radius: 4px;
+  }
+
+  .mini-input {
+    font-size: 1rem;
+    line-height: 1.2rem;
+  }
+
+  .xs-button-text {
+    font-size: 0.8rem;
+  }
 }
 
 .header {
