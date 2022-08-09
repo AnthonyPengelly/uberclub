@@ -110,6 +110,9 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
         team: x.real_players.real_teams.name,
         imageUrl: x.real_players.image_url,
       }))
+      .sort((a, b) => b.id.localeCompare(b.id))
+      .sort((a, b) => b.potential - a.potential)
+      .sort((a, b) => b.stars - a.stars)
       .sort(sortPlayers) || []
   );
 }
@@ -294,7 +297,7 @@ export async function drawPlayersFromDeck(
 
 function sortPlayers(a: GamePlayer, b: GamePlayer) {
   if (a.position === b.position) {
-    return b.stars - a.stars;
+    return 0;
   }
   if (a.position === "GKP") {
     return -1;
