@@ -117,7 +117,6 @@ export default function GameDetailsPage() {
       )}
       {seasons[0] && (
         <>
-          <h2>Current Season</h2>
           <Season
             season={seasons[0].season}
             teamSeasons={seasons[0].teamSeasons}
