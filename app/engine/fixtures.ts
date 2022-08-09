@@ -225,7 +225,9 @@ export function hasSim(team: Team, teams: Team[], stage: Stage) {
       return (
         (stage === Stage.Match1 && teamIndex === 2) ||
         (stage === Stage.Match3 && teamIndex === 1) ||
-        (stage === Stage.Match5 && teamIndex === 0)
+        (stage === Stage.Match5 && teamIndex === 0) ||
+        stage === Stage.Match2 ||
+        stage === Stage.Match4
       );
     case 4:
       return stage === Stage.Match2 || stage === Stage.Match4;

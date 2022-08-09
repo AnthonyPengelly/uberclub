@@ -125,7 +125,11 @@ export default function ScoutingPage() {
         </>
       )}
       {hasScoutingRemaining && !team.isReady && (
-        <LoadingForm method="post" submitButtonText="Scout a player">
+        <LoadingForm
+          method="post"
+          submitButtonText="Scout a player"
+          buttonClass="button-secondary"
+        >
           <input type="hidden" name="action" value="scout-a-player" />
         </LoadingForm>
       )}

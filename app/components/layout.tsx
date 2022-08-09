@@ -14,7 +14,11 @@ export default function Layout({ game, children }: LayoutProps) {
     <>
       <nav className="wrapper | header">
         <div className="header__left">
-          <Link to={game ? `/games/${game.id}` : "/"}>Home</Link>
+          {game ? (
+            <Link to={`/games/${game.id}`}>Dashboard</Link>
+          ) : (
+            <Link to="/">Home</Link>
+          )}
         </div>
         <div className="header__logo">
           <Link to="/">
@@ -40,7 +44,11 @@ export default function Layout({ game, children }: LayoutProps) {
       <footer className="footer">
         <div className="wrapper horizontal-flow">
           <Link to="/">All Games</Link>
-          <Link to={game ? `/games/${game.id}` : "/"}>Home</Link>
+          {game ? (
+            <Link to={`/games/${game.id}`}>Dashboard</Link>
+          ) : (
+            <Link to="/">Home</Link>
+          )}
           {game && gameStarted && (
             <>
               <Link to={`/games/${game.id}/team`}>My Team</Link>

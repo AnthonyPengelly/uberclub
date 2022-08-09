@@ -10,16 +10,26 @@
   min-width: 7.5rem;
 }
 
-.button,
-.button.button-secondary:hover {
+.button {
   background-color: var(--color-green--background);
   color: var(--color-secondary);
 }
 
-.button.button-secondary,
-.button:hover {
+.button.button-secondary {
   background-color: var(--background-color-buttons--hover);
   color: var(--color-secondary);
+}
+
+@media (hover: hover) {
+  .button.button-secondary:hover {
+    background-color: var(--color-background--light-grey);
+    color: var(--color-primary);
+    border: 1px solid var(--background-color-buttons--hover);
+  }
+  .button:hover {
+    background-color: var(--background-color-buttons--hover);
+    cursor: pointer;
+  }
 }
 
 .mini-button {

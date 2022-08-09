@@ -217,7 +217,7 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
         awayTeam.team.teamName
       } with ${scoreSummary(fixtureScore.homeScore)} vs. ${scoreSummary(
         fixtureScore.awayScore
-      )}`
+      )} and receives 6 points.`
     );
     return { winner: homeTeam, ...fixtureScore };
   }
@@ -228,7 +228,7 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
         homeTeam.team.teamName
       } with ${scoreSummary(fixtureScore.awayScore)} vs. ${scoreSummary(
         fixtureScore.homeScore
-      )}`
+      )} and receives 6 points.`
     );
     return { winner: awayTeam, ...fixtureScore };
   }
@@ -238,7 +238,7 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
       homeTeam.team.teamName
     } draw! With ${scoreSummary(fixtureScore.awayScore)} vs. ${scoreSummary(
       fixtureScore.homeScore
-    )}`
+    )}, both receive 2 points`
   );
   return { winner: null, ...fixtureScore };
 }
