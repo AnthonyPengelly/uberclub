@@ -5,8 +5,13 @@ export type RealTeam = {
   name: string;
 };
 
-export async function getRandomRealTeam(): Promise<RealTeam> {
-  const { data, error } = await supabase.from("real_teams").select(`*`);
+export async function getRandomRealTeam(
+  playerCollectionId: string
+): Promise<RealTeam> {
+  const { data, error } = await supabase
+    .from("real_teams")
+    .select(`*`)
+    .eq("player_collection_id", playerCollectionId);
   if (error) {
     throw error;
   }
@@ -23,4 +28,18 @@ export async function getRealTeam(id: string): Promise<RealTeam> {
     throw error;
   }
   return data;
+}
+
+export type PlayerCollection = {
+  id: string;
+  name: string;
+};
+
+export async function getPlayerCollections(): Promise<PlayerCollection[]> {
+  const { data, error } = await supabase.from("player_collections").select(`*`);
+
+  if (error) {
+    throw error;
+  }
+  return data || [];
 }

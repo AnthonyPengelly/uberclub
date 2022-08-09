@@ -58,10 +58,15 @@ export type GamePlayer = {
   captainBoost?: number;
 };
 
-export async function getPlayersList(): Promise<RealPlayer[]> {
+export async function getPlayersList(
+  playerCollectionId: string
+): Promise<RealPlayer[]> {
   const { data } = await supabase
     .from("real_players")
-    .select("id, name, overall, potential");
+    .select(
+      "id, name, overall, potential, real_teams!inner ( player_collection_ id )"
+    )
+    .eq("real_teams.player_collection_id", playerCollectionId);
   return data || [];
 }
 

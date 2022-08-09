@@ -1,6 +1,7 @@
 create table public.games (
   id uuid not null default uuid_generate_v4(),
   created_at timestamptz not null default current_timestamp,
+  player_collection_id uuid references public.player_collections not null,
   name varchar not null,
   stage integer not null default 0,
 
@@ -16,9 +17,17 @@ create table public.game_logs (
   primary key (id)
 );
 
+create table public.player_collections (
+  id uuid not null default uuid_generate_v4(),
+  name varchar not null,
+
+  primary key (id)
+)
+
 create table public.real_teams (
   id uuid not null default uuid_generate_v4(),
   name varchar not null,
+  player_collection_id uuid references public.player_collections not null,
 
   primary key (id)
 );

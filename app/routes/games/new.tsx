@@ -6,24 +6,35 @@ import invariant from "tiny-invariant";
 import LoadingForm from "~/components/loadingForm";
 import Layout from "~/components/layout";
 import { createGame } from "~/domain/games.server";
+import type { PlayerCollection } from "~/domain/realTeam.server";
+import { getPlayerCollections } from "~/domain/realTeam.server";
+import { useLoaderData } from "@remix-run/react";
+
+type LoaderData = {
+  playerCollections: PlayerCollection[];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await getUserId(request);
   if (!userId) return redirect("/login");
-  return json({});
+  const playerCollections = await getPlayerCollections();
+  return json({ playerCollections });
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
   const formData = await request.formData();
   let gameName = formData.get("game-name") as string;
   invariant(gameName, "game name not found");
+  let playerCollectionId = formData.get("player-collection") as string;
+  invariant(playerCollectionId, "player collection not found");
 
-  const game = await createGame(gameName);
+  const game = await createGame(gameName, playerCollectionId);
 
   return redirect(`/games/${game.id}`);
 };
 
 export default function NewGamePage() {
+  const { playerCollections } = useLoaderData<LoaderData>();
   return (
     <Layout>
       <h1>New Game</h1>
@@ -33,6 +44,18 @@ export default function NewGamePage() {
         </div>
         <div>
           <input type="text" name="game-name" id="game-name" />
+        </div>
+        <div>
+          <label htmlFor="player-collection">Player Collection</label>
+        </div>
+        <div>
+          <select name="player-collection" id="player-collection">
+            {playerCollections.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.name}
+              </option>
+            ))}
+          </select>
         </div>
       </LoadingForm>
     </Layout>

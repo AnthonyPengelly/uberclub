@@ -73,7 +73,8 @@ async function startGame(gameId: string, teamIds: string[]) {
     "Everyone is here, starting the game and randomising teams"
   );
   console.log("adding all players");
-  await addAllPlayersToGame(gameId);
+  const game = await getGame(gameId);
+  await addAllPlayersToGame(game);
   await createSeason(gameId, 1);
   console.log("doing draft");
   await performDraft(gameId, teamIds);

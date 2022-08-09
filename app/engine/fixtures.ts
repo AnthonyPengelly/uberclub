@@ -1,4 +1,5 @@
 import { createResult } from "~/domain/fixtures.server";
+import type { Game } from "~/domain/games.server";
 import type { RealTeam } from "~/domain/realTeam.server";
 import { getRandomRealTeam } from "~/domain/realTeam.server";
 import type { Team } from "~/domain/team.server";
@@ -15,20 +16,22 @@ export type SimFixture = {
   isSim: true;
 };
 
-export async function createSeasonFixtures(teams: Team[], seasonId: string) {
+export async function createSeasonFixtures(teams: Team[], seasonId: string,
+  game: Game,) {
   await Promise.all([
-    createFixturesForStage(teams, seasonId, Stage.Match1),
-    createFixturesForStage(teams, seasonId, Stage.Match2),
-    createFixturesForStage(teams, seasonId, Stage.Match3),
-    createFixturesForStage(teams, seasonId, Stage.Match4),
-    createFixturesForStage(teams, seasonId, Stage.Match5),
+    createFixturesForStage(teams, seasonId, Stage.Match1, game),
+    createFixturesForStage(teams, seasonId, Stage.Match2, game),
+    createFixturesForStage(teams, seasonId, Stage.Match3, game),
+    createFixturesForStage(teams, seasonId, Stage.Match4, game),
+    createFixturesForStage(teams, seasonId, Stage.Match5, game),
   ]);
 }
 
 async function createFixturesForStage(
   teams: Team[],
   seasonId: string,
-  stage: Stage
+  stage: Stage,
+  game: Game,
 ) {
   const sortedTeams = teams.sort((a, b) =>
     (a.id as string).localeCompare(b.id as string)
@@ -46,16 +49,17 @@ async function createFixturesForStage(
   await Promise.all(
     sortedTeams
       .filter((x) => hasSim(x, sortedTeams, stage))
-      .map((x) => createRandomSimMatch(x, seasonId, stage))
+      .map((x) => createRandomSimMatch(x, seasonId, stage, game))
   );
 }
 
 async function createRandomSimMatch(
   team: Team,
   seasonId: string,
-  stage: Stage
+  stage: Stage,
+  game: Game,
 ) {
-  const opponent = await getRandomRealTeam();
+  const opponent = await getRandomRealTeam(game.playerCollectionId);
   return await createResult({
     seasonId: seasonId,
     stage: stage,

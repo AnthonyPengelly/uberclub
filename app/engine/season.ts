@@ -4,6 +4,7 @@ import {
   createFixtureLineups,
   getResultsForStage,
 } from "~/domain/fixtures.server";
+import { getGame } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
 import type { GamePlayer } from "~/domain/players.server";
 import { getRealTeamPlayers } from "~/domain/players.server";
@@ -38,6 +39,7 @@ type Fixture = Result & { awayTeamId: string };
 type SimFixture = Result & { realTeamId: string };
 
 export async function startSeason(gameId: string) {
+  const game = await getGame(gameId);
   const season = await getCurrentSeason(gameId);
   const allTeams = await getTeamsInGame(gameId);
   await Promise.all(
@@ -47,7 +49,7 @@ export async function startSeason(gameId: string) {
       return createTeamSeason(season.id, x.id, score);
     })
   );
-  await createSeasonFixtures(allTeams, season.id);
+  await createSeasonFixtures(allTeams, season.id, game);
 }
 
 export async function playFixtures(gameId: string, stage: Stage) {
