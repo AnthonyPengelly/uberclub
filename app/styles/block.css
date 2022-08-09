@@ -221,6 +221,9 @@
 
 .player img {
   margin: 0.15rem auto;
+  width: 100%;
+  max-width: 80px;
+  padding: 0 0.3rem;
 }
 
 .player__name {

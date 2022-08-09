@@ -28,13 +28,7 @@ export default function PlayerDisplay({
           .map(() => "☆")
           .join("")}
       </div>
-      <img
-        className="player__image"
-        src={player.imageUrl}
-        alt={player.name}
-        width={40}
-        height={40}
-      />
+      <img className="player__image" src={player.imageUrl} alt={player.name} />
       <div className="player__team">{player.team}</div>
       {children && <div className="player__actions">{children}</div>}
       {hasChemistry ? <div className="player__chemistry">★</div> : null}
