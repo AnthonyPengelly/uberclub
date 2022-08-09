@@ -1,4 +1,6 @@
+import { createResult } from "~/domain/fixtures.server";
 import type { RealTeam } from "~/domain/realTeam.server";
+import { getRandomRealTeam } from "~/domain/realTeam.server";
 import type { Team } from "~/domain/team.server";
 import { Stage } from "./game";
 
@@ -13,21 +15,56 @@ export type SimFixture = {
   isSim: true;
 };
 
-// export async function getFixturesForTeams(teams: Team[], game: Game) {
-//   const sortedTeams = teams.sort((a, b) =>
-//     (a.id as string).localeCompare(b.id as string)
-//   );
-//   switch (teams.length) {
-//     case
-//   }
-// }
+export async function createSeasonFixtures(teams: Team[], seasonId: string) {
+  await Promise.all([
+    createFixturesForStage(teams, seasonId, Stage.Match1),
+    createFixturesForStage(teams, seasonId, Stage.Match2),
+    createFixturesForStage(teams, seasonId, Stage.Match3),
+    createFixturesForStage(teams, seasonId, Stage.Match4),
+    createFixturesForStage(teams, seasonId, Stage.Match5),
+  ]);
+}
 
-export async function createRandomSimFixtures(
+async function createFixturesForStage(
   teams: Team[],
-  seasonId: string
-) {}
+  seasonId: string,
+  stage: Stage
+) {
+  const sortedTeams = teams.sort((a, b) =>
+    (a.id as string).localeCompare(b.id as string)
+  );
+  await Promise.all(
+    getRealFixtures(sortedTeams, stage).map((x) =>
+      createResult({
+        seasonId: seasonId,
+        stage: stage,
+        homeTeamId: x.homeTeam.id,
+        awayTeamId: x.awayTeam.id,
+      })
+    )
+  );
+  await Promise.all(
+    sortedTeams
+      .filter((x) => hasSim(x, sortedTeams, stage))
+      .map((x) => createRandomSimMatch(x, seasonId, stage))
+  );
+}
 
-export function getRealFixtures(teams: Team[], stage: number): Fixture[] {
+async function createRandomSimMatch(
+  team: Team,
+  seasonId: string,
+  stage: Stage
+) {
+  const opponent = await getRandomRealTeam();
+  return await createResult({
+    seasonId: seasonId,
+    stage: stage,
+    homeTeamId: team.id,
+    realTeamId: opponent.id,
+  });
+}
+
+export function getRealFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (teams.length) {
     case 2:
       return getTwoPlayerFixtures(teams, stage);
@@ -45,7 +82,7 @@ export function getRealFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-function getTwoPlayerFixtures(teams: Team[], stage: number): Fixture[] {
+function getTwoPlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (stage) {
     case Stage.Match1:
     case Stage.Match3:
@@ -61,7 +98,7 @@ function getTwoPlayerFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-function getThreePlayerFixtures(teams: Team[], stage: number): Fixture[] {
+function getThreePlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (stage) {
     case Stage.Match2:
     case Stage.Match4:
@@ -78,7 +115,7 @@ function getThreePlayerFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-function getFourPlayerFixtures(teams: Team[], stage: number): Fixture[] {
+function getFourPlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (stage) {
     case Stage.Match2:
     case Stage.Match4:
@@ -104,7 +141,7 @@ function getFourPlayerFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-function getFivePlayerFixtures(teams: Team[], stage: number): Fixture[] {
+function getFivePlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (stage) {
     case Stage.Match1:
       return [
@@ -137,7 +174,7 @@ function getFivePlayerFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-function getSixPlayerFixtures(teams: Team[], stage: number): Fixture[] {
+function getSixPlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (stage) {
     case Stage.Match1:
       return [
@@ -175,14 +212,15 @@ function getSixPlayerFixtures(teams: Team[], stage: number): Fixture[] {
   }
 }
 
-export function hasSim(team: Team, teams: Team[], stage: number) {
-  const sortedTeams = teams.sort((a, b) =>
-    (a.id as string).localeCompare(b.id as string)
-  );
-  const teamIndex = sortedTeams.indexOf(team);
+export function hasSim(team: Team, teams: Team[], stage: Stage) {
+  const teamIndex = teams.indexOf(team);
   switch (teams.length) {
     case 2:
-      return stage === Stage.Match1 || Stage.Match3 || Stage.Match5;
+      return (
+        stage === Stage.Match1 ||
+        stage === Stage.Match3 ||
+        stage === Stage.Match5
+      );
     case 3:
       return (
         (stage === Stage.Match1 && teamIndex === 2) ||
@@ -190,7 +228,7 @@ export function hasSim(team: Team, teams: Team[], stage: number) {
         (stage === Stage.Match5 && teamIndex === 0)
       );
     case 4:
-      return stage === Stage.Match2 || Stage.Match4;
+      return stage === Stage.Match2 || stage === Stage.Match4;
     case 5:
       return (
         (stage === Stage.Match1 && teamIndex === 4) ||

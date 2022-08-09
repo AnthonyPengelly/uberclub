@@ -1,31 +1,39 @@
+import type { Stage } from "~/engine/game";
 import type { GamePlayer } from "./players.server";
 import { supabase } from "./supabase.server";
 
 export type Result = {
   id: string;
+  stage: Stage;
   seasonId: string;
   homeTeamId: string;
-  awayTeamId: string;
-  draw: boolean;
-  winningTeamId: string | null;
+  awayTeamId?: string;
+  draw?: boolean;
+  winningTeamId?: string;
+  simWin?: boolean;
+  realTeamId?: string;
+  homeDef?: number;
+  homeMid?: number;
+  homeFwd?: number;
+  awayDef?: number;
+  awayMid?: number;
+  awayFwd?: number;
 };
 
-export async function createResult(
-  seasonId: string,
-  homeTeamId: string,
-  awayTeamId: string,
-  draw: boolean,
-  winningTeamId: string | null
-) {
+export type ResultSummary = {
+  realTeamName?: string;
+} & Result;
+
+export async function createResult(result: Omit<Result, "id">) {
   const { data, error } = await supabase
     .from("results")
     .insert([
       {
-        season_id: seasonId,
-        home_team_id: homeTeamId,
-        away_team_id: awayTeamId,
-        draw,
-        winning_team_id: winningTeamId,
+        season_id: result.seasonId,
+        home_team_id: result.homeTeamId,
+        away_team_id: result.awayTeamId,
+        real_team_id: result.realTeamId,
+        stage: result.stage,
       },
     ])
     .single();
@@ -37,11 +45,16 @@ export async function createResult(
   throw error;
 }
 
-export async function getResults(seasonId: string) {
+export async function getResults(seasonId: string): Promise<ResultSummary[]> {
   const { data, error } = await supabase
     .from("results")
-    .select("*")
-    .eq("season_id", seasonId);
+    .select(
+      `id, season_id, home_team_id, away_team_id, draw, sim_win, real_team_id,
+      winning_team_id, stage, real_teams (name)`
+    )
+    .eq("season_id", seasonId)
+    .order("id")
+    .order("stage");
 
   if (!error) {
     return data.map((x) => ({
@@ -50,14 +63,50 @@ export async function getResults(seasonId: string) {
       homeTeamId: x.home_team_id,
       awayTeamId: x.away_team_id,
       draw: x.draw,
+      simWin: x.sim_win,
+      realTeamId: x.real_team_id,
       winningTeamId: x.winning_team_id,
+      stage: x.stage,
+      realTeamName: x.real_teams?.name,
     }));
   }
 
   throw error;
 }
 
-export async function getResult(id: string) {
+export async function getResultsForStage(
+  seasonId: string,
+  stage: Stage
+): Promise<ResultSummary[]> {
+  const { data, error } = await supabase
+    .from("results")
+    .select(
+      `id, season_id, home_team_id, away_team_id, draw, sim_win, real_team_id,
+      winning_team_id, stage, real_teams (name)`
+    )
+    .eq("season_id", seasonId)
+    .eq("stage", stage)
+    .order("id");
+
+  if (!error) {
+    return data.map((x) => ({
+      id: x.id,
+      seasonId: x.season_id,
+      homeTeamId: x.home_team_id,
+      awayTeamId: x.away_team_id,
+      draw: x.draw,
+      simWin: x.sim_win,
+      realTeamId: x.real_team_id,
+      winningTeamId: x.winning_team_id,
+      stage: x.stage,
+      realTeamName: x.real_teams?.name,
+    }));
+  }
+
+  throw error;
+}
+
+export async function getResult(id: string): Promise<Result> {
   const { data, error } = await supabase
     .from("results")
     .select("*")
@@ -71,16 +120,88 @@ export async function getResult(id: string) {
       homeTeamId: data.home_team_id,
       awayTeamId: data.away_team_id,
       draw: data.draw,
+      simWin: data.sim_win,
+      realTeamId: data.real_team_id,
       winningTeamId: data.winning_team_id,
+      stage: data.stage,
+      homeDef: data.home_def,
+      homeMid: data.home_mid,
+      homeFwd: data.home_fwd,
+      awayDef: data.away_def,
+      awayMid: data.away_mid,
+      awayFwd: data.away_fwd,
     };
   }
 
   throw error;
 }
 
+export async function updateResult(
+  resultId: string,
+  draw: boolean,
+  winningTeamId: string | null,
+  homeDef: number,
+  homeMid: number,
+  homeFwd: number,
+  awayDef: number,
+  awayMid: number,
+  awayFwd: number
+) {
+  const { error } = await supabase
+    .from("results")
+    .update({
+      draw,
+      winning_team_id: winningTeamId,
+      home_def: homeDef,
+      home_mid: homeMid,
+      home_fwd: homeFwd,
+      away_def: awayDef,
+      away_mid: awayMid,
+      away_fwd: awayFwd,
+    })
+    .eq("id", resultId);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateSimResult(
+  resultId: string,
+  simWin: boolean,
+  draw: boolean,
+  winningTeamId: string | null,
+  homeDef: number,
+  homeMid: number,
+  homeFwd: number,
+  awayDef: number,
+  awayMid: number,
+  awayFwd: number
+) {
+  const { error } = await supabase
+    .from("results")
+    .update({
+      draw,
+      sim_win: simWin,
+      winning_team_id: winningTeamId,
+      home_def: homeDef,
+      home_mid: homeMid,
+      home_fwd: homeFwd,
+      away_def: awayDef,
+      away_mid: awayMid,
+      away_fwd: awayFwd,
+    })
+    .eq("id", resultId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function createFixtureLineups(
   resultId: string,
-  players: GamePlayer[]
+  players: GamePlayer[],
+  realTeamId?: string
 ) {
   const { data, error } = await supabase.from("fixture_lineups").insert(
     players.map((x) => ({
@@ -88,6 +209,7 @@ export async function createFixtureLineups(
       player_game_state_id: x.id,
       lineup_position: x.lineupPosition,
       captain: x.captain,
+      real_team_id: realTeamId,
     }))
   );
 
@@ -104,7 +226,7 @@ export async function getFixtureLineups(
   const { data, error } = await supabase
     .from("fixture_lineups")
     .select(
-      `lineup_position, captain, player_game_states (id, stars, team_id, injured,
+      `lineup_position, captain, real_team_id, player_game_states (id, stars, team_id, injured,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name)))`
     )
     .eq("result_id", resultId);
@@ -123,6 +245,7 @@ export async function getFixtureLineups(
       potential: x.player_game_states.real_players.potential,
       team: x.player_game_states.real_players.real_teams.name,
       imageUrl: x.player_game_states.real_players.image_url,
+      realTeamId: x.real_team_id,
     }));
   }
 

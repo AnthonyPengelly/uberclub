@@ -15,7 +15,7 @@ import type {
 } from "~/domain/season.server";
 import { getAllSeasons } from "~/domain/season.server";
 import { getTeamSeasons } from "~/domain/season.server";
-import type { Result } from "~/domain/fixtures.server";
+import type { ResultSummary } from "~/domain/fixtures.server";
 import { getResults } from "~/domain/fixtures.server";
 import Season from "~/components/season";
 import PreviousSeasons from "~/components/previousSeasons";
@@ -28,7 +28,7 @@ type LoaderData = {
   seasons: {
     season: SeasonModel;
     teamSeasons: TeamSeasonSummary[];
-    results: Result[];
+    results: ResultSummary[];
   }[];
   logs: GameLog[];
 };

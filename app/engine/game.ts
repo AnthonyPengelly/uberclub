@@ -83,7 +83,6 @@ async function advance(gameId: string) {
       await startSeason(gameId);
       return updateGameStage(gameId, Stage.Match1);
     case Stage.Match1:
-      await startSeason(gameId);
       await playFixtures(gameId, Stage.Match1);
       return updateGameStage(gameId, Stage.Match2);
     case Stage.Match2:

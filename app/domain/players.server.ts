@@ -51,6 +51,10 @@ export type GamePlayer = {
   captain: boolean;
   injured: boolean;
   stars: number;
+  /**
+   * this indicates that they are playing for an ai team
+   */
+  realTeamId?: string;
 };
 
 export async function getPlayersList(): Promise<RealPlayer[]> {

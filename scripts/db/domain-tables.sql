@@ -141,9 +141,18 @@ create table public.results (
   id uuid not null default uuid_generate_v4(),
   season_id uuid references public.seasons not null,
   home_team_id uuid references public.teams not null,
-  away_team_id uuid references public.teams not null,
-  draw boolean not null,
+  away_team_id uuid references public.teams null,
+  real_team_id uuid references public.real_teams null,
+  draw boolean null,
   winning_team_id uuid references public.teams null,
+  sim_win boolean null,
+  home_def integer null,
+  home_mid integer null,
+  home_fwd integer null,
+  away_def integer null,
+  away_mid integer null,
+  away_fwd integer null,
+  stage integer not null,
 
   primary key (id)
 );
@@ -154,6 +163,7 @@ create table public.fixture_lineups (
   player_game_state_id uuid references public.player_game_states not null,
   lineup_position integer not null,
   captain boolean not null default false,
+  real_team_id uuid references public.real_teams null,
 
   primary key (id)
 )

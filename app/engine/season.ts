@@ -1,8 +1,15 @@
-import { createFixtureLineups, createResult } from "~/domain/fixtures.server";
+import type { Result } from "~/domain/fixtures.server";
+import { updateResult, updateSimResult } from "~/domain/fixtures.server";
+import {
+  createFixtureLineups,
+  getResultsForStage,
+} from "~/domain/fixtures.server";
 import { createGameLog } from "~/domain/logs.server";
 import type { GamePlayer } from "~/domain/players.server";
+import { getRealTeamPlayers } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
-import type { TeamSeason, TeamSeasonSummary } from "~/domain/season.server";
+import { getRealTeam } from "~/domain/realTeam.server";
+import type { TeamSeasonSummary } from "~/domain/season.server";
 import {
   createTeamSeason,
   getCurrentSeason,
@@ -11,7 +18,9 @@ import {
 } from "~/domain/season.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamsInGame } from "~/domain/team.server";
-import { Stage } from "./game";
+import { getPlayersWithAiPositions } from "./ai-team";
+import { createSeasonFixtures } from "./fixtures";
+import type { Stage } from "./game";
 import { getLineupScores } from "./lineup";
 import { calculateScoreForTeam } from "./team";
 
@@ -19,6 +28,14 @@ type TeamWithPlayer = {
   team: Team;
   players: GamePlayer[];
 };
+
+type BasicTeamWithPlayer = {
+  team: { teamName: string; captainBoost: number };
+  players: GamePlayer[];
+};
+
+type Fixture = Result & { awayTeamId: string };
+type SimFixture = Result & { realTeamId: string };
 
 export async function startSeason(gameId: string) {
   const season = await getCurrentSeason(gameId);
@@ -30,9 +47,9 @@ export async function startSeason(gameId: string) {
       return createTeamSeason(season.id, x.id, score);
     })
   );
+  await createSeasonFixtures(allTeams, season.id);
 }
 
-// TODO for less/more than 4 players
 export async function playFixtures(gameId: string, stage: Stage) {
   const season = await getCurrentSeason(gameId);
   const allTeams = (await getTeamsInGame(gameId)).sort((a, b) =>
@@ -44,126 +61,186 @@ export async function playFixtures(gameId: string, stage: Stage) {
       players: await getTeamPlayers(x.id),
     }))
   );
-  switch (stage) {
-    case Stage.Match1:
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[0],
-        teamsWithPlayers[2]
-      );
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[1],
-        teamsWithPlayers[3]
-      );
-      return;
-    case Stage.Match2:
-      await Promise.all(allTeams.map((x) => playSim(gameId, season.id, x)));
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[0],
-        teamsWithPlayers[1]
-      );
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[2],
-        teamsWithPlayers[3]
-      );
-      return;
-    case Stage.Match3:
-      await Promise.all(allTeams.map((x) => playSim(gameId, season.id, x)));
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[0],
-        teamsWithPlayers[3]
-      );
-      await playFixture(
-        gameId,
-        season.id,
-        teamsWithPlayers[1],
-        teamsWithPlayers[2]
-      );
-      return;
-    default:
-      throw new Error("Invalid stage " + stage);
-  }
+  const fixtures = await getResultsForStage(season.id, stage);
+  await Promise.all(
+    fixtures.map((x) =>
+      x.realTeamId
+        ? playSim(gameId, x as SimFixture, teamsWithPlayers)
+        : playFixture(gameId, x as Fixture, teamsWithPlayers)
+    )
+  );
 }
 
 async function playFixture(
   gameId: string,
-  seasonId: string,
-  homeTeam: TeamWithPlayer,
-  awayTeam: TeamWithPlayer
+  fixture: Fixture,
+  teams: TeamWithPlayer[]
 ) {
-  const winner = await calulateWinner(gameId, homeTeam, awayTeam);
-  const resultId = await createResult(
-    seasonId,
-    homeTeam.team.id,
-    awayTeam.team.id,
+  const homeTeam = teams.find(
+    (x) => x.team.id === fixture.homeTeamId
+  ) as TeamWithPlayer;
+  const awayTeam = teams.find(
+    (x) => x.team.id === fixture.awayTeamId
+  ) as TeamWithPlayer;
+  const { winner, homeScore, awayScore } = await calulateWinner(
+    gameId,
+    homeTeam,
+    awayTeam
+  );
+  await updateResult(
+    fixture.id,
     !winner,
-    winner?.team.id || null
+    winner?.team.id || null,
+    homeScore.DEF,
+    homeScore.MID,
+    homeScore.FWD,
+    awayScore.DEF,
+    awayScore.MID,
+    awayScore.FWD
   );
   if (winner) {
-    const teamSeason = await getTeamSeason(seasonId, winner.team.id);
+    const teamSeason = await getTeamSeason(fixture.seasonId, winner.team.id);
     await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 6);
   } else {
-    const homeTeamSeason = await getTeamSeason(seasonId, homeTeam.team.id);
+    const homeTeamSeason = await getTeamSeason(
+      fixture.seasonId,
+      homeTeam.team.id
+    );
     await updateScoreOnTeamSeason(homeTeamSeason.id, homeTeamSeason.score + 2);
-    const awayTeamSeason = await getTeamSeason(seasonId, awayTeam.team.id);
+    const awayTeamSeason = await getTeamSeason(
+      fixture.seasonId,
+      awayTeam.team.id
+    );
     await updateScoreOnTeamSeason(awayTeamSeason.id, awayTeamSeason.score + 2);
   }
-  await saveFixtureLineup(homeTeam, resultId);
-  await saveFixtureLineup(awayTeam, resultId);
+  await saveFixtureLineup(homeTeam, fixture.id);
+  await saveFixtureLineup(awayTeam, fixture.id);
 }
 
-async function saveFixtureLineup(team: TeamWithPlayer, resultId: string) {
+async function playSim(
+  gameId: string,
+  fixture: SimFixture,
+  teams: TeamWithPlayer[]
+) {
+  const team = teams.find(
+    (x) => x.team.id === fixture.homeTeamId
+  ) as TeamWithPlayer;
+  const realTeam = await getRealTeam(fixture.realTeamId);
+  const realTeamPlayers = await getRealTeamPlayers(fixture.realTeamId, gameId);
+  const realTeamWithPlayers = {
+    team: {
+      teamName: realTeam.name,
+      captainBoost: 1,
+    },
+    players: getPlayersWithAiPositions(realTeamPlayers),
+  };
+  const { winner, homeScore, awayScore } = await calulateWinner(
+    gameId,
+    team,
+    realTeamWithPlayers
+  );
+  const playerWin =
+    winner && (winner as TeamWithPlayer).team.id === team.team.id;
+  await updateSimResult(
+    fixture.id,
+    !playerWin && !!winner,
+    !winner,
+    playerWin ? team.team.id : null,
+    homeScore.DEF,
+    homeScore.MID,
+    homeScore.FWD,
+    awayScore.DEF,
+    awayScore.MID,
+    awayScore.FWD
+  );
+  if (playerWin) {
+    const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
+    await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 6);
+  } else if (!winner) {
+    const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
+    await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 2);
+  }
+  await saveFixtureLineup(team, fixture.id);
+  await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);
+}
+
+async function saveFixtureLineup(
+  team: BasicTeamWithPlayer,
+  resultId: string,
+  realTeamId?: string
+) {
   await createFixtureLineups(
     resultId,
-    team.players.filter((x) => x.lineupPosition)
+    team.players.filter((x) => x.lineupPosition),
+    realTeamId
   );
 }
 
-async function calulateWinner(
+type SegmentScore = {
+  DEF: number;
+  MID: number;
+  FWD: number;
+};
+
+type FixtureScore<T> = {
+  winner: T | null;
+  homeScore: SegmentScore;
+  awayScore: SegmentScore;
+};
+
+async function calulateWinner<T extends BasicTeamWithPlayer>(
   gameId: string,
-  homeTeam: TeamWithPlayer,
-  awayTeam: TeamWithPlayer
-) {
-  const homeScores = getTeamScores(homeTeam);
-  const awayScores = getTeamScores(awayTeam);
-  const defenceResult = calculateSegmentResult(homeScores.DEF, awayScores.FWD);
-  const midfieldResult = calculateSegmentResult(homeScores.MID, awayScores.MID);
-  const forwardResult = calculateSegmentResult(homeScores.FWD, awayScores.DEF);
+  homeTeam: T,
+  awayTeam: T
+): Promise<FixtureScore<T>> {
+  const fixtureScore = {
+    homeScore: getTeamScores(homeTeam),
+    awayScore: getTeamScores(awayTeam),
+  };
+  const defenceResult = calculateSegmentResult(
+    fixtureScore.homeScore.DEF,
+    fixtureScore.awayScore.FWD
+  );
+  const midfieldResult = calculateSegmentResult(
+    fixtureScore.homeScore.MID,
+    fixtureScore.awayScore.MID
+  );
+  const forwardResult = calculateSegmentResult(
+    fixtureScore.homeScore.FWD,
+    fixtureScore.awayScore.DEF
+  );
   const result = defenceResult + midfieldResult + forwardResult;
   if (result > 0) {
     await createGameLog(
       gameId,
       `${homeTeam.team.teamName} beat ${
         awayTeam.team.teamName
-      } with ${scoreSummary(homeScores)} vs. ${scoreSummary(awayScores)}`
+      } with ${scoreSummary(fixtureScore.homeScore)} vs. ${scoreSummary(
+        fixtureScore.awayScore
+      )}`
     );
-    return homeTeam;
+    return { winner: homeTeam, ...fixtureScore };
   }
   if (result < 0) {
     await createGameLog(
       gameId,
       `${awayTeam.team.teamName} beat ${
         homeTeam.team.teamName
-      } with ${scoreSummary(awayScores)} vs. ${scoreSummary(homeScores)}`
+      } with ${scoreSummary(fixtureScore.awayScore)} vs. ${scoreSummary(
+        fixtureScore.homeScore
+      )}`
     );
-    return awayTeam;
+    return { winner: awayTeam, ...fixtureScore };
   }
   await createGameLog(
     gameId,
     `${awayTeam.team.teamName} and ${
       homeTeam.team.teamName
-    } draw! With ${scoreSummary(awayScores)} vs. ${scoreSummary(homeScores)}`
+    } draw! With ${scoreSummary(fixtureScore.awayScore)} vs. ${scoreSummary(
+      fixtureScore.homeScore
+    )}`
   );
-  return null;
+  return { winner: null, ...fixtureScore };
 }
 
 function scoreSummary(scores: { DEF: number; MID: number; FWD: number }) {
@@ -177,52 +254,12 @@ function calculateSegmentResult(homeScore: number, awayScore: number) {
   return 0;
 }
 
-function getTeamScores(team: TeamWithPlayer) {
+function getTeamScores(team: BasicTeamWithPlayer): SegmentScore {
   const scores = getLineupScores(team.players, team.team.captainBoost);
   scores.DEF += Math.floor(Math.random() * 12) + 1;
   scores.MID += Math.floor(Math.random() * 12) + 1;
   scores.FWD += Math.floor(Math.random() * 12) + 1;
   return scores;
-}
-
-async function playSim(gameId: string, seasonId: string, team: Team) {
-  const teamSeason = await getTeamSeason(seasonId, team.id);
-  const roll = Math.floor(Math.random() * 12) + 1;
-  const rollBonus = Math.floor((teamSeason.startingScore - 20) / 20);
-  if (roll >= 10 - rollBonus) {
-    return await recordSimWin(gameId, teamSeason, team);
-  }
-  if (roll >= 8 - rollBonus) {
-    return await recordSimDraw(gameId, teamSeason, team);
-  }
-  return await recordSimLoss(gameId, team);
-}
-
-async function recordSimWin(
-  gameId: string,
-  teamSeason: TeamSeason,
-  team: Team
-) {
-  await createGameLog(gameId, `${team.teamName} win their SIM!`);
-  await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 6);
-}
-
-async function recordSimDraw(
-  gameId: string,
-  teamSeason: TeamSeason,
-  team: Team
-) {
-  await createGameLog(gameId, `${team.teamName} draw their SIM`);
-  await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 2);
-}
-
-async function recordSimLoss(gameId: string, team: Team) {
-  await createGameLog(
-    gameId,
-    `${
-      team.teamName
-    } lose their sim. The fans are chanting "GET ${team.managerName.toUpperCase()} OUT!"`
-  );
 }
 
 export function orderTeamsInSeason(teamSeasons: TeamSeasonSummary[]) {

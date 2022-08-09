@@ -1,4 +1,4 @@
-import type { Result } from "~/domain/fixtures.server";
+import type { ResultSummary } from "~/domain/fixtures.server";
 import type {
   Season as SeasonModel,
   TeamSeasonSummary,
@@ -9,7 +9,7 @@ import Fixtures from "./fixtures";
 export type SeasonProps = {
   season: SeasonModel;
   teamSeasons: TeamSeasonSummary[];
-  results: Result[];
+  results: ResultSummary[];
   startOpen: boolean;
   usersTeamName: string;
 };

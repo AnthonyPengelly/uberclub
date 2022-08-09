@@ -47,7 +47,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 export default function GamePage() {
   const { game, team } = useLoaderData<LoaderData>();
   useRevalidateOnInterval({
-    enabled: team?.isReady || false,
+    enabled: team?.isReady || game.stage === 0 || false,
     intervalSeconds: 60,
     game,
   });

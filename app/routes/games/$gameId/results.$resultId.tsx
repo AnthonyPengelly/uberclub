@@ -16,10 +16,13 @@ import {
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
 } from "~/engine/lineup";
+import { getRealTeam } from "~/domain/realTeam.server";
+
+type BasicTeam = { teamName: string; captainBoost: number };
 
 type LoaderData = {
   homeTeam: { team: Team; lineup: GamePlayer[] };
-  awayTeam: { team: Team; lineup: GamePlayer[] };
+  awayTeam: { team: BasicTeam; lineup: GamePlayer[] };
   result: Result;
 };
 
@@ -31,18 +34,30 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
   const homeTeam = await getTeamById(result.homeTeamId);
-  const awayTeam = await getTeamById(result.awayTeamId);
+  const awayTeam = result.awayTeamId
+    ? await getTeamById(result.awayTeamId)
+    : undefined;
+  const realTeam = result.realTeamId
+    ? await getRealTeam(result.realTeamId)
+    : undefined;
   const players = await getFixtureLineups(result.id);
 
-  return json({
+  return json<LoaderData>({
     homeTeam: {
       team: homeTeam,
-      lineup: players.filter((x) => x.teamId === homeTeam.id),
+      lineup: players.filter((x) => x.teamId === homeTeam.id && !x.realTeamId),
     },
-    awayTeam: {
-      team: awayTeam,
-      lineup: players.filter((x) => x.teamId === awayTeam.id),
-    },
+    awayTeam: awayTeam
+      ? {
+          team: awayTeam,
+          lineup: players.filter(
+            (x) => x.teamId === awayTeam.id && !x.realTeamId
+          ),
+        }
+      : {
+          team: { teamName: realTeam?.name || "", captainBoost: 1 },
+          lineup: players.filter((x) => x.realTeamId === result.realTeamId),
+        },
     result,
   });
 };
@@ -57,32 +72,46 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <h1>Result: {winningText}</h1>
+      <h1>{winningText}</h1>
       <h2>{homeTeam.team.teamName}</h2>
       <Lineup
         players={homeTeam.lineup}
         team={homeTeam.team}
         direction="top-down"
+        totalDefScore={result.homeDef}
+        totalMidScore={result.homeMid}
+        totalFwdScore={result.homeFwd}
       />
       <h2>{awayTeam.team.teamName}</h2>
       <Lineup
         players={awayTeam.lineup}
         team={awayTeam.team}
         direction="bottom-up"
+        totalDefScore={result.awayDef}
+        totalMidScore={result.awayMid}
+        totalFwdScore={result.awayFwd}
       />
     </div>
   );
 }
 
+type LineupProps = {
+  players: GamePlayer[];
+  team: BasicTeam;
+  direction: "top-down" | "bottom-up";
+  totalDefScore?: number;
+  totalMidScore?: number;
+  totalFwdScore?: number;
+};
+
 function Lineup({
   players,
   team,
   direction,
-}: {
-  players: GamePlayer[];
-  team: Team;
-  direction: "top-down" | "bottom-up";
-}) {
+  totalDefScore,
+  totalMidScore,
+  totalFwdScore,
+}: LineupProps) {
   const sortedPlayers = players.sort(
     (a, b) => (a.lineupPosition as number) - (b.lineupPosition as number)
   );
@@ -100,7 +129,11 @@ function Lineup({
         </div>
       </div>
       <div className="flow">
-        <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
+        <h3 className="centre">
+          DEF {scores.DEF}★
+          {totalDefScore &&
+            ` + ${totalDefScore - scores.DEF}🎲 (${totalDefScore})`}
+        </h3>
         <div className="players">
           {sortedPlayers
             .filter(
@@ -123,7 +156,11 @@ function Lineup({
         </div>
       </div>
       <div className="flow">
-        <h3 className="centre">MID {scores.MID}★</h3>
+        <h3 className="centre">
+          MID {scores.MID}★
+          {totalMidScore &&
+            ` + ${totalMidScore - scores.MID}🎲 (${totalMidScore})`}
+        </h3>
         <div className="players">
           {sortedPlayers
             .filter(
@@ -146,7 +183,11 @@ function Lineup({
         </div>
       </div>
       <div className="flow">
-        <h3 className="centre">FWD {scores.FWD}★</h3>
+        <h3 className="centre">
+          FWD {scores.FWD}★
+          {totalFwdScore &&
+            ` + ${totalFwdScore - scores.FWD}🎲 (${totalFwdScore})`}
+        </h3>
         <div className="players">
           {sortedPlayers
             .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)

@@ -1,10 +1,11 @@
 import { Link } from "@remix-run/react";
-import type { Result } from "~/domain/fixtures.server";
+import type { ResultSummary } from "~/domain/fixtures.server";
 import type { TeamSeasonSummary } from "~/domain/season.server";
+import { Stage } from "~/engine/game";
 
 type FixturesProps = {
   teamSeasons: TeamSeasonSummary[];
-  results: Result[];
+  results: ResultSummary[];
   usersTeamName: string;
 };
 
@@ -13,78 +14,101 @@ export default function Fixtures({
   results,
   usersTeamName,
 }: FixturesProps) {
-  const sortedTeamSeasons = teamSeasons.sort((a, b) =>
-    (a.teamId as string).localeCompare(b.teamId as string)
-  );
   return (
     <>
       <h4>Match day 1</h4>
-      <table className="table">
-        <tbody>
-          <Fixture
-            homeTeam={sortedTeamSeasons[0]}
-            awayTeam={sortedTeamSeasons[2]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-          <Fixture
-            homeTeam={sortedTeamSeasons[1]}
-            awayTeam={sortedTeamSeasons[3]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-        </tbody>
-      </table>
+      <FixtureGroup
+        results={results}
+        teamSeasons={teamSeasons}
+        usersTeamName={usersTeamName}
+        stage={Stage.Match1}
+      />
       <h4>Match day 2</h4>
-      <table className="table">
-        <tbody>
-          <Fixture
-            homeTeam={sortedTeamSeasons[0]}
-            awayTeam={sortedTeamSeasons[1]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-          <Fixture
-            homeTeam={sortedTeamSeasons[2]}
-            awayTeam={sortedTeamSeasons[3]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-        </tbody>
-      </table>
+      <FixtureGroup
+        results={results}
+        teamSeasons={teamSeasons}
+        usersTeamName={usersTeamName}
+        stage={Stage.Match2}
+      />
       <h4>Match day 3</h4>
-      <table className="table">
-        <tbody>
-          <Fixture
-            homeTeam={sortedTeamSeasons[0]}
-            awayTeam={sortedTeamSeasons[3]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-          <Fixture
-            homeTeam={sortedTeamSeasons[1]}
-            awayTeam={sortedTeamSeasons[2]}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
-        </tbody>
-      </table>
+      <FixtureGroup
+        results={results}
+        teamSeasons={teamSeasons}
+        usersTeamName={usersTeamName}
+        stage={Stage.Match3}
+      />
+      <h4>Match day 4</h4>
+      <FixtureGroup
+        results={results}
+        teamSeasons={teamSeasons}
+        usersTeamName={usersTeamName}
+        stage={Stage.Match4}
+      />
+      <h4>Match day 5</h4>
+      <FixtureGroup
+        results={results}
+        teamSeasons={teamSeasons}
+        usersTeamName={usersTeamName}
+        stage={Stage.Match5}
+      />
     </>
+  );
+}
+
+type FixtureGroupProps = {
+  teamSeasons: TeamSeasonSummary[];
+  results: ResultSummary[];
+  usersTeamName: string;
+  stage: Stage;
+};
+
+function FixtureGroup({
+  results,
+  teamSeasons,
+  usersTeamName,
+  stage,
+}: FixtureGroupProps) {
+  return (
+    <table className="table">
+      <tbody>
+        {results
+          .filter((x) => x.stage === stage)
+          .map((x) => (
+            <Fixture
+              key={x.id}
+              homeTeam={teamSeasons.find((y) => y.teamId === x.homeTeamId)!}
+              awayTeam={
+                x.awayTeamId
+                  ? teamSeasons.find((y) => y.teamId === x.awayTeamId)
+                  : undefined
+              }
+              realTeamName={x.realTeamName}
+              result={x}
+              usersTeamName={usersTeamName}
+            />
+          ))}
+      </tbody>
+    </table>
   );
 }
 
 type FixtureProps = {
   homeTeam: TeamSeasonSummary;
-  awayTeam: TeamSeasonSummary;
-  results: Result[];
+  awayTeam?: TeamSeasonSummary;
+  realTeamName?: string;
+  result: ResultSummary;
   usersTeamName: string;
 };
 
-function Fixture({ homeTeam, awayTeam, results, usersTeamName }: FixtureProps) {
-  const result = results.find(
-    (x) => x.homeTeamId === homeTeam.teamId && x.awayTeamId === awayTeam.teamId
-  );
-  if (!result) {
+function Fixture({
+  homeTeam,
+  awayTeam,
+  realTeamName,
+  result,
+  usersTeamName,
+}: FixtureProps) {
+  const awayTeamName = awayTeam?.teamName || realTeamName || "";
+  if (!result.draw && !result.simWin && !result.winningTeamId) {
     return (
       <tr>
         <td>
@@ -98,16 +122,18 @@ function Fixture({ homeTeam, awayTeam, results, usersTeamName }: FixtureProps) {
           vs.{" "}
           <span
             className={
-              awayTeam.teamName === usersTeamName ? "highlight-text" : ""
+              awayTeam && awayTeam.teamName === usersTeamName
+                ? "highlight-text"
+                : ""
             }
           >
-            {awayTeam.teamName}
+            {awayTeamName}
           </span>
         </td>
       </tr>
     );
   }
-  if (result && result.draw) {
+  if (result.draw) {
     return (
       <tr>
         <td>
@@ -121,24 +147,26 @@ function Fixture({ homeTeam, awayTeam, results, usersTeamName }: FixtureProps) {
           vs.{" "}
           <span
             className={
-              awayTeam.teamName === usersTeamName ? "highlight-text" : ""
+              awayTeam && awayTeam.teamName === usersTeamName
+                ? "highlight-text"
+                : ""
             }
           >
-            {awayTeam.teamName}
+            {awayTeamName}
           </span>{" "}
-          resulted in a draw.
+          resulted in a draw. <Link to={`results/${result.id}`}>«Details»</Link>
         </td>
       </tr>
     );
   }
   const winningTeamName =
-    result.winningTeamId === homeTeam.teamId
+    result.winningTeamId === homeTeam.teamId && !result.simWin
       ? homeTeam.teamName
-      : awayTeam.teamName;
+      : awayTeamName;
   const losingTeamName =
-    result.winningTeamId !== homeTeam.teamId
+    result.winningTeamId !== homeTeam.teamId || result.simWin
       ? homeTeam.teamName
-      : awayTeam.teamName;
+      : awayTeamName;
   return (
     <tr>
       <td>
@@ -153,8 +181,7 @@ function Fixture({ homeTeam, awayTeam, results, usersTeamName }: FixtureProps) {
         >
           {losingTeamName}
         </span>{" "}
-        resulted in a draw.{" "}
-        <Link to={`results/${result.id}`}>«View lineups»</Link>
+        <Link to={`results/${result.id}`}>«Details»</Link>
       </td>
     </tr>
   );

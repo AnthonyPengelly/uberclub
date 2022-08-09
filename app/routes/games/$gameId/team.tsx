@@ -83,7 +83,9 @@ export default function TeamPage() {
   const isMatchDay =
     game.stage === Stage.Match1 ||
     game.stage === Stage.Match2 ||
-    game.stage === Stage.Match3;
+    game.stage === Stage.Match3 ||
+    game.stage === Stage.Match4 ||
+    game.stage === Stage.Match5;
   const canMakeChanges = !team.isReady || !isMatchDay;
   const canSell = canSellPlayer(game) && players.length > 11;
   const captain = players.find((x) => x.captain);

@@ -61,6 +61,22 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
     case Stage.Match3:
       return (
         <PhaseHeading
+          heading="Match Day 3"
+          callToAction="Your lineup"
+          href={`/games/${game.id}/team`}
+        />
+      );
+    case Stage.Match4:
+      return (
+        <PhaseHeading
+          heading="Match Day 4"
+          callToAction="Your lineup"
+          href={`/games/${game.id}/team`}
+        />
+      );
+    case Stage.Match5:
+      return (
+        <PhaseHeading
           heading="Final Match Day"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}

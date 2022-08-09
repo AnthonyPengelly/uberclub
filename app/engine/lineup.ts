@@ -6,6 +6,10 @@ export const MAX_DEF_POSITION = 6;
 export const MAX_MID_POSITION = 11;
 export const MAX_FWD_POSITION = 15;
 
+export const MIN_DEFENDERS = 3;
+export const MIN_MIDFIELDERS = 3;
+export const MIN_FORWARDS = 2;
+
 export type LineupPlayer = GamePlayer & { lineupPosition: number };
 
 export async function addPlayerToLineup(
@@ -180,7 +184,7 @@ export function validateLineup(players: GamePlayer[]) {
   const defenders = lineup.filter(
     (x) => x.lineupPosition > 1 && x.lineupPosition <= MAX_DEF_POSITION
   );
-  if (defenders.length < 3) {
+  if (defenders.length < MIN_DEFENDERS) {
     return "Not enough Defenders";
   }
   const midfielders = lineup.filter(
@@ -188,7 +192,7 @@ export function validateLineup(players: GamePlayer[]) {
       x.lineupPosition > MAX_DEF_POSITION &&
       x.lineupPosition <= MAX_MID_POSITION
   );
-  if (midfielders.length < 3) {
+  if (midfielders.length < MIN_MIDFIELDERS) {
     return "Not enough Midfielders";
   }
   const forwards = lineup.filter(
@@ -196,7 +200,7 @@ export function validateLineup(players: GamePlayer[]) {
       x.lineupPosition > MAX_MID_POSITION &&
       x.lineupPosition <= MAX_FWD_POSITION
   );
-  if (forwards.length < 2) {
+  if (forwards.length < MIN_FORWARDS) {
     return "Not enough Forwards";
   }
 }
