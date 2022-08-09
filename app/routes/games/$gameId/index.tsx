@@ -3,6 +3,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
+import { countTeamsInGame } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
@@ -21,6 +22,8 @@ import Season from "~/components/season";
 import PreviousSeasons from "~/components/previousSeasons";
 import DateTime from "~/components/dateTime";
 import { Stage } from "~/engine/game";
+import { MIN_TEAMS } from "~/engine/team";
+import LoadingForm from "~/components/loadingForm";
 
 type LoaderData = {
   game: Game;
@@ -31,6 +34,7 @@ type LoaderData = {
     results: ResultSummary[];
   }[];
   logs: GameLog[];
+  teamsInGame: number;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -51,12 +55,19 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   );
   const team = await getTeam(userId, params.gameId);
   const logs = await getGameLogs(params.gameId);
+  const teamsInGame = await countTeamsInGame(params.gameId);
 
-  return json({ game, team, logs, seasons: seasonsMap });
+  return json({ game, team, logs, seasons: seasonsMap, teamsInGame });
 };
 
 export default function GameDetailsPage() {
-  const { team, logs, seasons, game } = useLoaderData<LoaderData>();
+  const { team, logs, seasons, game, teamsInGame } =
+    useLoaderData<LoaderData>();
+
+  // Remove the current season if we're in preseason atm.
+  if (seasons[0] && seasons[0].teamSeasons.length === 0) {
+    seasons.shift();
+  }
   const winningSeason = seasons.find((x) =>
     x.teamSeasons.find((y) => y.score > 100)
   );
@@ -97,6 +108,13 @@ export default function GameDetailsPage() {
         )}
         <p>Be the first to reach 100 points in one season to win!</p>
       </article>
+      {game.stage === Stage.NotStarted && teamsInGame >= MIN_TEAMS && (
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/start`}
+          submitButtonText="Start game"
+        />
+      )}
       {seasons[0] && (
         <>
           <h2>Current Season</h2>

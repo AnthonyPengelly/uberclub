@@ -13,6 +13,7 @@ import { createGameLog } from "~/domain/logs.server";
 import { resolveDeadlineDay, setDeadlineDayPlayers } from "./deadlineDay";
 import { playFixtures, startSeason } from "./season";
 import { completeFinancesForAllTeams } from "./finances";
+import { MAX_TEAMS } from "./team";
 
 export enum Stage {
   NotStarted = 0,
@@ -44,12 +45,26 @@ export async function joinGame(teamInput: {
     `${teamInput.managerName} joined the game!`
   );
   const allTeams = await getTeamsInGame(teamInput.gameId);
-  if (allTeams.length === 4) {
+  if (allTeams.length === MAX_TEAMS) {
     await startGame(
       teamInput.gameId,
       allTeams.map((x) => x.id as string)
     );
   }
+}
+
+export async function startGameEarly(game: Game) {
+  if (game.stage !== Stage.NotStarted) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Game already started!",
+    });
+  }
+  const allTeams = await getTeamsInGame(game.id);
+  await startGame(
+    game.id,
+    allTeams.map((x) => x.id as string)
+  );
 }
 
 async function startGame(gameId: string, teamIds: string[]) {

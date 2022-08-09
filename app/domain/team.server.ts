@@ -38,6 +38,14 @@ export async function getTeamsInGame(gameId: string): Promise<Team[]> {
   );
 }
 
+export async function countTeamsInGame(gameId: string): Promise<number> {
+  const { count } = await supabase
+    .from("teams")
+    .select(`id`, { count: "exact" })
+    .eq("game_id", gameId);
+  return count as number;
+}
+
 export async function getTeam(userId: string, gameId: string): Promise<Team> {
   const { data, error } = await supabase
     .from("teams")
@@ -115,6 +123,7 @@ export async function addTeamToGame({
         team_name: teamName,
         manager_name: managerName,
         cash: STARTING_CASH,
+        captain_boost: 1,
       },
     ])
     .single();

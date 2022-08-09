@@ -17,11 +17,13 @@ import {
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
 import type { Team } from "~/domain/team.server";
+import { countTeamsInGame } from "~/domain/team.server";
 import { getTeamsInGame, updateCash } from "~/domain/team.server";
 import { MAX_SQUAD_SIZE } from "./team";
 
 export async function setDeadlineDayPlayers(gameId: string) {
-  const players = await drawPlayersFromDeck(gameId, 5);
+  const numberOfTeams = await countTeamsInGame(gameId);
+  const players = await drawPlayersFromDeck(gameId, numberOfTeams + 1);
   const season = await getCurrentSeason(gameId);
   await createDeadlineDayPlayers(season.id, players);
   await Promise.all(players.map((x) => markPlayerOutOfDeck(x.id)));
