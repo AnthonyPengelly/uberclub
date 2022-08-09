@@ -38,6 +38,13 @@ create table public.positions (
 
   primary key (id)
 );
+    
+INSERT INTO public.positions (name)
+values 
+    ('GKP'),
+    ('DEF'),
+    ('MID'),
+    ('FWD');
 
 create table public.real_players (
   id uuid not null default uuid_generate_v4(),
