@@ -172,6 +172,7 @@ async function saveFixtureLineup(
   await createFixtureLineups(
     resultId,
     team.players.filter((x) => x.lineupPosition),
+    team.team.captainBoost,
     realTeamId
   );
 }

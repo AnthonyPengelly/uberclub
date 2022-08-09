@@ -107,7 +107,8 @@ function playerScore(
   captainBoost: number,
   previousPlayer: LineupPlayer | undefined
 ) {
-  const captainBonus = player.captain ? captainBoost : 0;
+  const recordedCaptainBoost = player.captainBoost || captainBoost;
+  const captainBonus = player.captain ? recordedCaptainBoost : 0;
   const penalty = positionPenalty(player, position);
   const score = player.stars + captainBonus - penalty;
   return hasChemistry(player, previousPlayer) ? score + 1 : score;

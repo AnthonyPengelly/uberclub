@@ -201,6 +201,7 @@ export async function updateSimResult(
 export async function createFixtureLineups(
   resultId: string,
   players: GamePlayer[],
+  captainBoost: number,
   realTeamId?: string
 ) {
   const { data, error } = await supabase.from("fixture_lineups").insert(
@@ -208,7 +209,7 @@ export async function createFixtureLineups(
       result_id: resultId,
       player_game_state_id: x.id,
       lineup_position: x.lineupPosition,
-      captain: x.captain,
+      captain_boost: x.captain ? captainBoost : null,
       real_team_id: realTeamId,
     }))
   );
@@ -226,7 +227,7 @@ export async function getFixtureLineups(
   const { data, error } = await supabase
     .from("fixture_lineups")
     .select(
-      `lineup_position, captain, real_team_id, player_game_states (id, stars, team_id, injured,
+      `lineup_position, captain_boost, real_team_id, player_game_states (id, stars, team_id, injured,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name)))`
     )
     .eq("result_id", resultId);
@@ -236,7 +237,8 @@ export async function getFixtureLineups(
       id: x.player_game_states.id,
       teamId: x.player_game_states.team_id,
       lineupPosition: x.lineup_position,
-      captain: x.captain,
+      captain: !!x.captain_boost,
+      captainBoost: x.captain_boost,
       injured: x.player_game_states.injured,
       stars: x.player_game_states.stars,
       name: x.player_game_states.real_players.name,

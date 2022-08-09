@@ -162,7 +162,7 @@ create table public.fixture_lineups (
   result_id uuid references public.results not null,
   player_game_state_id uuid references public.player_game_states not null,
   lineup_position integer not null,
-  captain boolean not null default false,
+  captain_boost integer null,
   real_team_id uuid references public.real_teams null,
 
   primary key (id)
