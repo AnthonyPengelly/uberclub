@@ -114,6 +114,15 @@ export default function TeamPage() {
           className="centre"
         />
       )}
+      {isMatchDay && !team.isReady && (
+        <LoadingForm
+          method="post"
+          action={`/games/${game.id}/auto-pick`}
+          submitButtonText="Auto-pick"
+          className="centre"
+          buttonClass="button-secondary"
+        />
+      )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
       {canMakeChanges && (
         <LoadingForm
