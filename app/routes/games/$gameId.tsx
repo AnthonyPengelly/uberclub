@@ -1,6 +1,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Outlet, useLoaderData } from "@remix-run/react";
+import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
@@ -10,7 +10,6 @@ import invariant from "tiny-invariant";
 import { isOpenForPlayers, joinGame } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import Layout from "~/components/layout";
-import { useRevalidateOnInterval } from "~/hooks/revalidate";
 
 type LoaderData = {
   game: Game;
@@ -46,11 +45,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function GamePage() {
   const { game, team } = useLoaderData<LoaderData>();
-  useRevalidateOnInterval({
-    enabled: team?.isReady || game.stage === 0 || false,
-    intervalSeconds: 60,
-    game,
-  });
 
   return (
     <Layout game={game}>
@@ -80,6 +74,16 @@ export default function GamePage() {
             <div>Sorry, this game is not open for registration</div>
           </>
         ))}
+    </Layout>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  console.error(error);
+  return (
+    <Layout>
+      <h1>Something went wrong!</h1>
+      <Link to=".">«Go back to game dashboard»</Link>
     </Layout>
   );
 }

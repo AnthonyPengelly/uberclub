@@ -24,6 +24,7 @@ import DateTime from "~/components/dateTime";
 import { Stage } from "~/engine/game";
 import { MIN_TEAMS } from "~/engine/team";
 import LoadingForm from "~/components/loadingForm";
+import { useRevalidateOnInterval } from "~/hooks/revalidate";
 
 type LoaderData = {
   game: Game;
@@ -63,6 +64,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 export default function GameDetailsPage() {
   const { team, logs, seasons, game, teamsInGame } =
     useLoaderData<LoaderData>();
+  useRevalidateOnInterval({
+    enabled: team.isReady || game.stage === 0 || false,
+    intervalSeconds: 60,
+    game,
+  });
 
   // Remove the current season if we're in preseason atm.
   if (seasons[0] && seasons[0].teamSeasons.length === 0) {
