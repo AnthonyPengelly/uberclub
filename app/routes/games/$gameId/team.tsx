@@ -105,13 +105,12 @@ export default function TeamPage() {
           they're gone they're gone!
         </p>
       </div>
-      {validationMessage && <p className="error centre">{validationMessage}</p>}
+      {validationMessage && <p className="error">{validationMessage}</p>}
       {isMatchDay && !team.isReady && !validationMessage && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/ready`}
           submitButtonText="Submit lineup"
-          className="centre"
         />
       )}
       {isMatchDay && !team.isReady && (
@@ -119,7 +118,6 @@ export default function TeamPage() {
           method="post"
           action={`/games/${game.id}/auto-pick`}
           submitButtonText="Auto-pick"
-          className="centre"
           buttonClass="button-secondary"
         />
       )}
@@ -128,7 +126,7 @@ export default function TeamPage() {
         <LoadingForm
           method="post"
           action={`/games/${game.id}/captain`}
-          className="flow | centre"
+          className="flow"
           onChange={(e) => submit(e.currentTarget, { replace: true })}
         >
           <div>
@@ -161,47 +159,53 @@ export default function TeamPage() {
           />
         </LoadingForm>
       )}
-
-      <h3 className="centre">GKP</h3>
-      <div className="players">
-        <Position
-          players={players}
-          position={1}
-          canMakeChanges={canMakeChanges}
-        />
-      </div>
-      <h3 className="centre">DEF {scores.DEF}★ (incl. GKP)</h3>
-      <div className="players">
-        {[...Array(5).keys()].map((x) => (
-          <Position
-            key={`def-${x}`}
-            players={players}
-            position={x + 1 + 1}
-            canMakeChanges={canMakeChanges}
-          />
-        ))}
-      </div>
-      <h3 className="centre">MID {scores.MID}★</h3>
-      <div className="players">
-        {[...Array(5).keys()].map((x) => (
-          <Position
-            key={`mid-${x}`}
-            players={players}
-            position={x + MAX_DEF_POSITION + 1}
-            canMakeChanges={canMakeChanges}
-          />
-        ))}
-      </div>
-      <h3 className="centre">FWD {scores.FWD}★</h3>
-      <div className="players">
-        {[...Array(4).keys()].map((x) => (
-          <Position
-            key={`fwd-${x}`}
-            players={players}
-            position={x + MAX_MID_POSITION + 1}
-            canMakeChanges={canMakeChanges}
-          />
-        ))}
+      <div className="lineup">
+        <div className="lineup-segment">
+          <div className="lineup-segment__summary">{scores.DEF}★</div>
+          <div className="players margin-bottom">
+            <Position
+              players={players}
+              position={1}
+              canMakeChanges={canMakeChanges}
+            />
+          </div>
+          <div className="players">
+            {[...Array(5).keys()].map((x) => (
+              <Position
+                key={`def-${x}`}
+                players={players}
+                position={x + 1 + 1}
+                canMakeChanges={canMakeChanges}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="lineup-segment">
+          <div className="lineup-segment__summary">{scores.MID}★</div>
+          <div className="players">
+            {[...Array(5).keys()].map((x) => (
+              <Position
+                key={`mid-${x}`}
+                players={players}
+                position={x + MAX_DEF_POSITION + 1}
+                canMakeChanges={canMakeChanges}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="lineup-segment">
+          <div className="lineup-segment__summary">{scores.FWD}★</div>
+          <div className="players">
+            {[...Array(4).keys()].map((x) => (
+              <Position
+                key={`fwd-${x}`}
+                players={players}
+                position={x + MAX_MID_POSITION + 1}
+                canMakeChanges={canMakeChanges}
+              />
+            ))}
+          </div>
+        </div>
       </div>
       <h3 className="centre">Reserves</h3>
       <div className="players squad-list">
@@ -217,7 +221,7 @@ export default function TeamPage() {
                     x.stars,
                     x.potential
                   )}M`}
-                  buttonClass="mini-button xs-button-text button-secondary"
+                  buttonClass="mini-button xs-button-text"
                 >
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>

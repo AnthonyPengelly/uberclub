@@ -2,8 +2,7 @@
   margin-top: var(--flow-space, 1rem);
 }
 
-.flex-flow {
-  column-gap: var(--flow-space, 1rem);
+.flex {
   display: flex;
   flex-direction: column;
 }

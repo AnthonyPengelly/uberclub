@@ -71,9 +71,13 @@ export default function ResultsPage() {
     : `${awayTeam.team.teamName} Win`;
 
   return (
-    <div>
-      <h1>{winningText}</h1>
-      <h2>{homeTeam.team.teamName}</h2>
+    <>
+      <h1>Fixture result</h1>
+      <div className="quote">
+        {homeTeam.team.teamName} vs {awayTeam.team.teamName} resulted in a{" "}
+        <strong>{winningText}</strong>
+      </div>
+      <h2 className="centre">{homeTeam.team.teamName}</h2>
       <Lineup
         players={homeTeam.lineup}
         team={homeTeam.team}
@@ -82,7 +86,7 @@ export default function ResultsPage() {
         totalMidScore={result.homeMid}
         totalFwdScore={result.homeFwd}
       />
-      <h2>{awayTeam.team.teamName}</h2>
+      <h2 className="centre">{awayTeam.team.teamName}</h2>
       <Lineup
         players={awayTeam.lineup}
         team={awayTeam.team}
@@ -91,7 +95,7 @@ export default function ResultsPage() {
         totalMidScore={result.awayMid}
         totalFwdScore={result.awayFwd}
       />
-    </div>
+    </>
   );
 }
 
@@ -119,21 +123,26 @@ function Lineup({
   return (
     <div
       className={
-        direction === "bottom-up" ? "flex-flow | reverse" : "flex-flow"
+        direction === "bottom-up" ? "lineup | flex reverse" : "lineup | flex"
       }
     >
-      <div className="flow">
-        <h3 className="centre">GKP</h3>
-        <div className="players">
-          <PlayerDisplay player={sortedPlayers[0]} />
-        </div>
-      </div>
-      <div className="flow">
-        <h3 className="centre">
-          DEF {scores.DEF}★
+      <div
+        className={`lineup-segment flex  ${
+          direction === "bottom-up" && "reverse"
+        }`}
+      >
+        <div className="lineup-segment__summary">
+          {scores.DEF}★
           {totalDefScore &&
             ` + ${totalDefScore - scores.DEF}🎲 (${totalDefScore})`}
-        </h3>
+        </div>
+        <div
+          className={`players ${
+            direction === "bottom-up" ? "margin-top" : "margin-bottom"
+          }`}
+        >
+          <PlayerDisplay player={sortedPlayers[0]} />
+        </div>
         <div className="players">
           {sortedPlayers
             .filter(
@@ -155,12 +164,12 @@ function Lineup({
             })}
         </div>
       </div>
-      <div className="flow">
-        <h3 className="centre">
-          MID {scores.MID}★
+      <div className="lineup-segment">
+        <div className="lineup-segment__summary">
+          {scores.MID}★
           {totalMidScore &&
             ` + ${totalMidScore - scores.MID}🎲 (${totalMidScore})`}
-        </h3>
+        </div>
         <div className="players">
           {sortedPlayers
             .filter(
@@ -182,12 +191,12 @@ function Lineup({
             })}
         </div>
       </div>
-      <div className="flow">
-        <h3 className="centre">
+      <div className="lineup-segment">
+        <div className="lineup-segment__summary">
           FWD {scores.FWD}★
           {totalFwdScore &&
             ` + ${totalFwdScore - scores.FWD}🎲 (${totalFwdScore})`}
-        </h3>
+        </div>
         <div className="players">
           {sortedPlayers
             .filter((x) => (x.lineupPosition as number) > MAX_MID_POSITION)
