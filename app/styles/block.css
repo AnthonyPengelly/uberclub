@@ -299,41 +299,38 @@
 
 .player__FWD {
   background-color: var(--position-forward);
-  background-image: linear-gradient(
-    to bottom right,
-    white,
-    var(--position-forward) 8%,
-    rgba(0, 0, 0, 0.4)
-  );
 }
 
 .player__MID {
   background-color: var(--position-midfield);
-  background-image: linear-gradient(
-    to bottom right,
-    white,
-    var(--position-midfield) 10%,
-    rgba(0, 0, 0, 0.15)
-  );
 }
 
 .player__DEF {
   background-color: var(--position-defender);
+}
+
+.player__FWD,
+.player__MID,
+.player__DEF {
   background-image: linear-gradient(
-    to bottom right,
-    white,
-    var(--position-defender) 10%,
-    rgba(0, 0, 0, 0.4)
+    -35deg,
+    rgba(0, 0, 0, 0.4),
+    rgba(0, 0, 0, 0.4) 25%,
+    rgba(0, 0, 0, 0.2) 25%,
+    rgba(0, 0, 0, 0.2) 55%,
+    rgba(0, 0, 0, 0) 55%
   );
 }
 
 .player__GKP {
   background-color: var(--position-goalkeeper);
   background-image: linear-gradient(
-    to bottom right,
-    white,
-    var(--position-goalkeeper),
-    rgba(0, 0, 0, 0.15)
+    -35deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0) 45%,
+    rgba(255, 255, 255, 0.4) 45%,
+    rgba(255, 255, 255, 0.4) 75%,
+    rgba(255, 255, 255, 0.75) 75%
   );
   color: var(--position-goalkeeper-text);
 }
@@ -341,11 +338,6 @@
 .player__placeholder {
   background-color: var(--color-background-grey);
   color: var(--color-primary);
-  background-image: linear-gradient(
-    to bottom right,
-    var(--color-background-grey),
-    rgba(0, 0, 0, 0.25)
-  );
 }
 
 .player-selection {

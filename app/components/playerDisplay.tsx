@@ -14,7 +14,7 @@ export default function PlayerDisplay({
   if (!player) {
     return (
       <div className="player player__placeholder">
-        <div className="player__name">None selected</div>
+        <div className="player__name">None</div>
         {children && <div className="player__actions">{children}</div>}
       </div>
     );

@@ -26,9 +26,9 @@
   --font-regular: "Averta Regular", sans-serif;
   --font-bold: "Averta Bold", sans-serif;
   --position-forward: #00963f;
-  --position-midfield: #ffcc00;
+  --position-midfield: #00aeda;
   --position-defender: #e52027;
-  --position-goalkeeper: #fce9e9;
+  --position-goalkeeper: #fdd1d1;
   --position-goalkeeper-text: #e52027;
 }
 
