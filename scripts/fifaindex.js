@@ -4,11 +4,11 @@ script.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(script);
 
 const mapStarRating = (rating) => {
-  if (rating >= 93) return 6;
-  if (rating >= 88) return 5;
-  if (rating >= 83) return 4;
+  if (rating >= 90) return 6;
+  if (rating >= 86) return 5;
+  if (rating >= 82) return 4;
   if (rating >= 79) return 3;
-  if (rating >= 77) return 2;
+  if (rating >= 76) return 2;
   return 1;
 };
 
@@ -48,12 +48,11 @@ const mapPosition = (position) => {
 };
 
 // Grab this id in advance
-const collectionId = "c2bb15fa-7f9b-4bf1-9b42-b54e91f57f5d";
+const collectionId = "4fc0d355-af65-4e1d-8a8e-118fb2e67b1f";
 
 $(".table-players tbody tr[data-playerid]")
   .map((i, e) => {
     const row = $(e);
-    const stats = row.find(".statCol");
     const summary = {
       name: row.find('[data-title="Name"] a').text().trim("\n"),
       team: row
@@ -69,12 +68,7 @@ $(".table-players tbody tr[data-playerid]")
         parseInt(row.find('[data-title="OVR / POT"] span').first().text(), 10)
       ),
       potential: mapStarRating(
-        // TODO Fix this, the 05 potentials are silly so I've taken up to 4 points from it
-        Math.max(
-          parseInt(row.find('[data-title="OVR / POT"] span').eq(1).text(), 10) -
-            4,
-          parseInt(row.find('[data-title="OVR / POT"] span').first().text(), 10)
-        )
+        parseInt(row.find('[data-title="OVR / POT"] span').eq(2).text(), 10)
       ),
       image: row.find(".player img").attr("src"),
     };
