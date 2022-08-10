@@ -4,11 +4,11 @@ script.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(script);
 
 const mapStarRating = (rating) => {
-  if (rating >= 90) return 6;
-  if (rating >= 86) return 5;
-  if (rating >= 82) return 4;
-  if (rating >= 79) return 3;
-  if (rating >= 76) return 2;
+  if (rating >= 91) return 6;
+  if (rating >= 87) return 5;
+  if (rating >= 84) return 4;
+  if (rating >= 81) return 3;
+  if (rating >= 78) return 2;
   return 1;
 };
 
@@ -48,7 +48,7 @@ const mapPosition = (position) => {
 };
 
 // Grab this id in advance
-const collectionId = "4fc0d355-af65-4e1d-8a8e-118fb2e67b1f";
+const collectionId = "cb9d54f8-c9e0-453d-8be7-a7b5d75aeaed";
 
 $(".table-players tbody tr[data-playerid]")
   .map((i, e) => {
@@ -68,7 +68,7 @@ $(".table-players tbody tr[data-playerid]")
         parseInt(row.find('[data-title="OVR / POT"] span').first().text(), 10)
       ),
       potential: mapStarRating(
-        parseInt(row.find('[data-title="OVR / POT"] span').eq(2).text(), 10)
+        parseInt(row.find('[data-title="OVR / POT"] span').eq(1).text(), 10)
       ),
       image: row.find(".player img").attr("src"),
     };
