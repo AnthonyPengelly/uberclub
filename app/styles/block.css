@@ -222,7 +222,6 @@
   margin: 0.15rem auto;
   width: 100%;
   max-width: 80px;
-  padding: 0 0.3rem;
 }
 
 .player__name {
@@ -361,7 +360,7 @@
 
 .lineup-segment {
   margin: 0 -10px;
-  padding: 1.25rem 10px;
+  padding: 1.25rem 10px 0.5rem;
   position: relative;
   border-bottom: 6px solid var(--color-background--light);
   background-color: var(--color-green--background);
@@ -376,14 +375,17 @@
 
 .lineup-segment:last-of-type {
   border-bottom: 0;
+  padding-bottom: 1.25rem;
 }
 
 .reverse .lineup-segment:last-of-type {
   border-bottom: 6px solid var(--color-background--light);
+  padding-bottom: 0.5rem;
 }
 
 .reverse .lineup-segment:first-of-type {
   border-bottom: 0;
+  padding-bottom: 1.25rem;
 }
 
 .lineup-segment__summary {
