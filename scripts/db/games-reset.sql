@@ -1,0 +1,14 @@
+-- Game RESET
+DELETE FROM public.fixture_lineups;
+DELETE FROM public.results;
+DELETE FROM public.training_logs;
+DELETE FROM public.scouting_logs;
+DELETE FROM public.improvement_logs;
+DELETE FROM public.game_logs;
+DELETE FROM public.deadline_day_bids;
+DELETE FROM public.deadline_day_players;
+DELETE FROM public.team_seasons;
+DELETE FROM public.seasons;
+DELETE FROM public.player_game_states;
+DELETE FROM public.teams;
+DELETE FROM public.games;
