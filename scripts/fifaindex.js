@@ -60,7 +60,7 @@ $(".table-players tbody tr[data-playerid]")
         .attr("alt")
         .trim("\n")
         .trim(" ")
-        .replace(/ FIFA \d{2}/, ""),
+        .replace(/ FIFA \d{2}.+/, ""),
       position: mapPosition(
         row.find('[data-title="Preferred Positions"] a').first().attr("title")
       ),
