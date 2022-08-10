@@ -21,7 +21,7 @@ export default function PreviousSeasons({
   return seasons.length !== 0 ? (
     <details className="flow">
       <summary>
-        <h2 className="inline">Previous Seasons</h2>
+        <h2 className="inline">Previous seasons</h2>
       </summary>
       {seasons.map(({ season, teamSeasons, results }) => (
         <Season

@@ -21,7 +21,9 @@ export default function Season({
   startOpen,
   usersTeamName,
 }: SeasonProps) {
-  const seasonComplete = results.length === 6;
+  const seasonComplete = !results.some(
+    (x) => !x.draw && !x.simWin && !x.winningTeamId
+  );
   return (
     <details open={startOpen} className="flow">
       <summary>
@@ -52,11 +54,17 @@ export default function Season({
               ))}
             </tbody>
           </table>
-          <Fixtures
-            teamSeasons={teamSeasons}
-            results={results}
-            usersTeamName={usersTeamName}
-          />
+
+          <details className="flow">
+            <summary>
+              <h3 className="inline">{season.name} fixtures</h3>
+            </summary>
+            <Fixtures
+              teamSeasons={teamSeasons}
+              results={results}
+              usersTeamName={usersTeamName}
+            />
+          </details>
         </>
       ) : (
         <table className="table">
