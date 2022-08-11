@@ -106,20 +106,22 @@ export default function TeamPage() {
         </p>
       </div>
       {validationMessage && <p className="error">{validationMessage}</p>}
-      {isMatchDay && !team.isReady && !validationMessage && (
-        <LoadingForm
-          method="post"
-          action={`/games/${game.id}/ready`}
-          submitButtonText="Submit lineup"
-        />
-      )}
-      {isMatchDay && !team.isReady && (
-        <LoadingForm
-          method="post"
-          action={`/games/${game.id}/auto-pick`}
-          submitButtonText="Auto-pick"
-          buttonClass="button-secondary"
-        />
+      {canMakeChanges && (
+        <div className="horizontal-flow">
+          {isMatchDay && !team.isReady && !validationMessage && (
+            <LoadingForm
+              method="post"
+              action={`/games/${game.id}/ready`}
+              submitButtonText="Submit lineup"
+            />
+          )}
+          <LoadingForm
+            method="post"
+            action={`/games/${game.id}/auto-pick`}
+            submitButtonText="Auto-pick"
+            buttonClass="button-secondary"
+          />
+        </div>
       )}
       {isMatchDay && team.isReady && <div>Waiting for other players</div>}
       {canMakeChanges && (
