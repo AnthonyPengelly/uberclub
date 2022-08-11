@@ -64,10 +64,15 @@ export async function getPlayersList(
   const { data } = await supabase
     .from("real_players")
     .select(
-      "id, name, overall, potential, real_teams!inner ( player_collection_ id )"
+      "id, name, overall, potential, real_team_id, real_teams!inner ( player_collection_ id )"
     )
     .eq("real_teams.player_collection_id", playerCollectionId);
-  return data || [];
+  return (
+    data?.map((x) => ({
+      ...x,
+      realTeamId: x.real_team_id,
+    })) || []
+  );
 }
 
 export async function getPlayersForDraft(

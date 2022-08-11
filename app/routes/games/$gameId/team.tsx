@@ -85,7 +85,10 @@ export default function TeamPage() {
     game.stage === Stage.Match2 ||
     game.stage === Stage.Match3 ||
     game.stage === Stage.Match4 ||
-    game.stage === Stage.Match5;
+    game.stage === Stage.Match5 ||
+    game.stage === Stage.CupQuarterFinal ||
+    game.stage === Stage.CupSemiFinal ||
+    game.stage === Stage.CupFinal;
   const canMakeChanges = !team.isReady || !isMatchDay;
   const canSell = canSellPlayer(game) && players.length > 11;
   const captain = players.find((x) => x.captain);

@@ -3,6 +3,7 @@ import type {
   Season as SeasonModel,
   TeamSeasonSummary,
 } from "~/domain/season.server";
+import { Stage } from "~/engine/game";
 import { orderTeamsInSeason } from "~/engine/season";
 import Fixtures from "./fixtures";
 
@@ -22,7 +23,13 @@ export default function Season({
   usersTeamName,
 }: SeasonProps) {
   const seasonComplete = !results.some(
-    (x) => !x.draw && !x.simWin && !x.winningTeamId
+    (x) =>
+      !x.draw &&
+      !x.simWin &&
+      !x.winningTeamId &&
+      x.stage !== Stage.CupQuarterFinal &&
+      x.stage !== Stage.CupSemiFinal &&
+      Stage.CupFinal
   );
   return (
     <details open={startOpen} className="flow">

@@ -14,6 +14,7 @@ import { resolveDeadlineDay, setDeadlineDayPlayers } from "./deadlineDay";
 import { playFixtures, startSeason } from "./season";
 import { completeFinancesForAllTeams } from "./finances";
 import { MAX_TEAMS } from "./team";
+import { checkForCupWinner, prepareCup, prepareNextRound } from "./cup";
 
 export enum Stage {
   NotStarted = 0,
@@ -26,7 +27,9 @@ export enum Stage {
   Match3 = 7,
   Match4 = 8,
   Match5 = 9,
-  SuperCup = 10,
+  CupQuarterFinal = 10,
+  CupSemiFinal = 11,
+  CupFinal = 12,
 }
 
 export function isOpenForPlayers(game: Game) {
@@ -86,38 +89,79 @@ async function advance(gameId: string) {
   const game = await getGame(gameId);
   switch (game.stage) {
     case Stage.NotStarted:
-      return updateGameStage(gameId, Stage.Training);
+      await updateGameStage(gameId, Stage.Training);
+      break;
     case Stage.Training:
-      return updateGameStage(gameId, Stage.Scouting);
+      await updateGameStage(gameId, Stage.Scouting);
+      break;
     case Stage.Scouting:
-      return updateGameStage(gameId, Stage.Improvements);
+      await updateGameStage(gameId, Stage.Improvements);
+      break;
     case Stage.Improvements:
       await setDeadlineDayPlayers(gameId);
-      return updateGameStage(gameId, Stage.DeadlineDay);
+      await updateGameStage(gameId, Stage.DeadlineDay);
+      break;
     case Stage.DeadlineDay:
       await resolveDeadlineDay(gameId);
       await startSeason(gameId);
-      return updateGameStage(gameId, Stage.Match1);
+      await updateGameStage(gameId, Stage.Match1);
+      break;
     case Stage.Match1:
       await playFixtures(gameId, Stage.Match1);
-      return updateGameStage(gameId, Stage.Match2);
+      await updateGameStage(gameId, Stage.Match2);
+      break;
     case Stage.Match2:
       await playFixtures(gameId, Stage.Match2);
-      return updateGameStage(gameId, Stage.Match3);
+      await updateGameStage(gameId, Stage.Match3);
+      break;
     case Stage.Match3:
       await playFixtures(gameId, Stage.Match3);
-      return updateGameStage(gameId, Stage.Match4);
+      await updateGameStage(gameId, Stage.Match4);
+      break;
     case Stage.Match4:
       await playFixtures(gameId, Stage.Match4);
-      return updateGameStage(gameId, Stage.Match5);
+      await updateGameStage(gameId, Stage.Match5);
+      break;
     case Stage.Match5:
       await playFixtures(gameId, Stage.Match5);
       await completeFinancesForAllTeams(gameId);
+      if (await prepareCup(gameId)) {
+        await updateGameStage(gameId, Stage.CupQuarterFinal);
+        return false;
+      } else {
+        await createNextSeason(gameId);
+        await updateGameStage(gameId, Stage.Training);
+      }
+      break;
+    case Stage.CupQuarterFinal:
+      await playFixtures(gameId, Stage.CupQuarterFinal);
+      if (await prepareNextRound(gameId)) {
+        await updateGameStage(gameId, Stage.CupSemiFinal);
+        return false;
+      } else {
+        await createNextSeason(gameId);
+        await updateGameStage(gameId, Stage.Training);
+      }
+      break;
+    case Stage.CupSemiFinal:
+      await playFixtures(gameId, Stage.CupSemiFinal);
+      if (await prepareNextRound(gameId)) {
+        await updateGameStage(gameId, Stage.CupFinal);
+        return false;
+      } else {
+        await createNextSeason(gameId);
+        await updateGameStage(gameId, Stage.Training);
+      }
+      break;
+    case Stage.CupFinal:
+      await playFixtures(gameId, Stage.CupFinal);
+      await checkForCupWinner(gameId);
       await createNextSeason(gameId);
-      return updateGameStage(gameId, Stage.Training);
-    case Stage.SuperCup:
-      return updateGameStage(gameId, Stage.Training);
+      await updateGameStage(gameId, Stage.Training);
+      break;
   }
+  // Reset all teams to unready
+  return true;
 }
 
 async function createNextSeason(gameId: string) {
@@ -131,8 +175,12 @@ export async function markTeamAsReady(gameId: string, team: Team) {
   const allTeams = await getTeamsInGame(gameId);
   if (allTeams.filter((x) => x.isReady).length === allTeams.length) {
     await createGameLog(gameId, "Everyone is ready, starting next phase");
-    await advance(gameId);
-    await Promise.all(allTeams.map((x) => markAsReady(x.id as string, false)));
+    const resetReady = await advance(gameId);
+    if (resetReady) {
+      await Promise.all(
+        allTeams.map((x) => markAsReady(x.id as string, false))
+      );
+    }
   }
 }
 

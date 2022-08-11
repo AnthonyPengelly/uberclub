@@ -82,11 +82,27 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           href={`/games/${game.id}/team`}
         />
       );
-    case Stage.SuperCup:
+    case Stage.CupQuarterFinal:
       return (
         <PhaseHeading
-          heading="Who knows how this works!"
-          callToAction="Get Your Team Ready"
+          heading="Cup Quarter Final"
+          callToAction="Your lineup"
+          href={`/games/${game.id}/team`}
+        />
+      );
+    case Stage.CupSemiFinal:
+      return (
+        <PhaseHeading
+          heading="Cup Semi Final"
+          callToAction="Your lineup"
+          href={`/games/${game.id}/team`}
+        />
+      );
+    case Stage.CupFinal:
+      return (
+        <PhaseHeading
+          heading="Cup Final!"
+          callToAction="Your lineup"
           href={`/games/${game.id}/team`}
         />
       );

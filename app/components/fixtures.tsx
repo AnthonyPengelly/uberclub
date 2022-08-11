@@ -51,6 +51,40 @@ export default function Fixtures({
         usersTeamName={usersTeamName}
         stage={Stage.Match5}
       />
+      {results.filter((x) => x.stage === Stage.CupQuarterFinal).length !==
+        0 && (
+        <>
+          <h4>Cup quarter final</h4>
+          <FixtureGroup
+            results={results}
+            teamSeasons={teamSeasons}
+            usersTeamName={usersTeamName}
+            stage={Stage.CupQuarterFinal}
+          />
+        </>
+      )}
+      {results.filter((x) => x.stage === Stage.CupSemiFinal).length !== 0 && (
+        <>
+          <h4>Cup semi final</h4>
+          <FixtureGroup
+            results={results}
+            teamSeasons={teamSeasons}
+            usersTeamName={usersTeamName}
+            stage={Stage.CupSemiFinal}
+          />
+        </>
+      )}
+      {results.filter((x) => x.stage === Stage.CupFinal).length !== 0 && (
+        <>
+          <h4>Cup final</h4>
+          <FixtureGroup
+            results={results}
+            teamSeasons={teamSeasons}
+            usersTeamName={usersTeamName}
+            stage={Stage.CupFinal}
+          />
+        </>
+      )}
     </>
   );
 }

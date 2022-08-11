@@ -1,3 +1,4 @@
+import { recordWinner } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
 import {
   getPlayer,
@@ -35,11 +36,12 @@ async function completeFinances(
   position: number
 ) {
   const team = await getTeamById(teamSeason.teamId);
-  if (teamSeason.score >= 100) {
+  if (teamSeason.score >= 100 && position === 1) {
     await createGameLog(
       gameId,
       `******************************* ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! *******************************`
     );
+    await recordWinner(gameId, teamSeason.teamId);
   }
   const placementAward = 110 - 10 * position;
   const stadiumIncome = calculateStadiumIncome(

@@ -85,8 +85,8 @@ export default function GameDetailsPage() {
       <h1>🏆{game.name}🏆</h1>
       {winningTeam && (
         <div className="winner">
-          🏆Congratulations to <strong>{winningTeam.teamName}</strong> for
-          reaching 100 points in one season!🏆
+          🏆Congratulations to our winner,{" "}
+          <strong>{winningTeam.teamName}</strong>!🏆
         </div>
       )}
       <article className="flow | quote">
@@ -112,7 +112,10 @@ export default function GameDetailsPage() {
             )}
           </>
         )}
-        <p>Be the first to reach 100 points in one season to win!</p>
+        <p>
+          Be the first to reach 100 points in one season to win. Alternatively,
+          win 3 seasons and then the Cup!
+        </p>
       </article>
       {game.stage === Stage.NotStarted && teamsInGame >= MIN_TEAMS && (
         <LoadingForm
