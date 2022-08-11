@@ -41,7 +41,7 @@ async function completeFinances(
       gameId,
       `******************************* ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! *******************************`
     );
-    await recordWinner(gameId, teamSeason.teamId);
+    await recordWinner(gameId, team.teamName);
   }
   const placementAward = 110 - 10 * position;
   const stadiumIncome = calculateStadiumIncome(

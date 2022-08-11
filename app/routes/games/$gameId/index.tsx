@@ -74,19 +74,14 @@ export default function GameDetailsPage() {
   if (seasons[0] && seasons[0].teamSeasons.length === 0) {
     seasons.shift();
   }
-  const winningSeason = seasons.find((x) =>
-    x.teamSeasons.find((y) => y.score > 100)
-  );
-  const winningTeam =
-    winningSeason && winningSeason.teamSeasons.find((y) => y.score > 100);
 
   return (
     <>
       <h1>🏆{game.name}🏆</h1>
-      {winningTeam && (
+      {game.winningTeam && (
         <div className="winner">
-          🏆Congratulations to our winner,{" "}
-          <strong>{winningTeam.teamName}</strong>!🏆
+          🏆Congratulations to our winner, <strong>{game.winningTeam}</strong>
+          !🏆
         </div>
       )}
       <article className="flow | quote">

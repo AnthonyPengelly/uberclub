@@ -21,7 +21,7 @@ import type { Team } from "~/domain/team.server";
 import { getTeamsInGame } from "~/domain/team.server";
 import { getPlayersWithAiPositions } from "./ai-team";
 import { createSeasonFixtures } from "./fixtures";
-import type { Stage } from "./game";
+import { Stage } from "./game";
 import { getLineupScores } from "./lineup";
 import { calculateScoreForTeam } from "./team";
 
@@ -67,7 +67,7 @@ export async function playFixtures(gameId: string, stage: Stage) {
   await Promise.all(
     fixtures.map((x) =>
       x.realTeamId
-        ? playSim(gameId, x as SimFixture, teamsWithPlayers)
+        ? playSim(gameId, x as SimFixture, teamsWithPlayers, stage)
         : playFixture(gameId, x as Fixture, teamsWithPlayers)
     )
   );
@@ -122,7 +122,8 @@ async function playFixture(
 async function playSim(
   gameId: string,
   fixture: SimFixture,
-  teams: TeamWithPlayer[]
+  teams: TeamWithPlayer[],
+  stage: Stage
 ) {
   const team = teams.find(
     (x) => x.team.id === fixture.homeTeamId
@@ -155,12 +156,18 @@ async function playSim(
     awayScore.MID,
     awayScore.FWD
   );
-  if (playerWin) {
-    const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
-    await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 6);
-  } else if (!winner) {
-    const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
-    await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 2);
+  if (
+    stage !== Stage.CupQuarterFinal &&
+    stage !== Stage.CupSemiFinal &&
+    stage !== Stage.CupFinal
+  ) {
+    if (playerWin) {
+      const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
+      await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 6);
+    } else if (!winner) {
+      const teamSeason = await getTeamSeason(fixture.seasonId, team.team.id);
+      await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 2);
+    }
   }
   await saveFixtureLineup(team, fixture.id);
   await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);

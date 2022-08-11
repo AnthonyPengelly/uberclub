@@ -89,9 +89,7 @@ async function createRandomCupFixture(
     .filter((id, i, array) => array.indexOf(id) === i)
     .filter((x) => !existingCupMatches.find((y) => y.realTeamId === x))
     .slice(0, 6);
-  console.log(teamIdByBestPlayer);
   const randomTeamId = teamIdByBestPlayer.sort(() => 0.5 - Math.random())[0];
-  console.log(randomTeamId);
   await createCupMatch(teamId, randomTeamId, seasonId, game.stage + 1);
 }
 
@@ -119,6 +117,6 @@ export async function checkForCupWinner(gameId: string) {
       gameId,
       `******************************* ${team.managerName} has led ${team.teamName} to a cup victory, congratulations! *******************************`
     );
-    await recordWinner(gameId, final.homeTeamId);
+    await recordWinner(gameId, team.teamName);
   }
 }
