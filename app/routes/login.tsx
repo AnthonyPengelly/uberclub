@@ -5,11 +5,12 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Link, useActionData, useSearchParams } from "@remix-run/react";
 import { verifyLogin } from "~/domain/user.server";
 import { createUserSession, getUserId } from "~/session.server";
 import { validateEmail } from "~/userUtils";
 import Layout from "~/components/layout";
+import LoadingForm from "~/components/loadingForm";
 
 export const meta: MetaFunction = () => {
   return {
@@ -92,7 +93,7 @@ export default function Login() {
 
   return (
     <Layout>
-      <Form method="post" className="flow" noValidate>
+      <LoadingForm method="post" className="flow" noValidate submitButtonText="Log in">
         <div>
           <label htmlFor="email">
             <div>Email Address</div>
@@ -131,21 +132,18 @@ export default function Login() {
             ref={passwordRef}
           />
         </div>
-        <button className="button" type="submit">
-          Log in
-        </button>
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <div>
           <input id="remember" name="remember" type="checkbox" />
           <label htmlFor="remember">Remember me</label>
         </div>
+      </LoadingForm>
         <div>
           Don't have an account?{" "}
           <Link to={{ pathname: "/join", search: searchParams.toString() }}>
             Sign up
           </Link>
         </div>
-      </Form>
     </Layout>
   );
 }

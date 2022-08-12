@@ -4,12 +4,13 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Link, useActionData, useSearchParams } from "@remix-run/react";
 import { createUserSession, getUserId } from "~/session.server";
 import { createUser, getProfileByEmail } from "~/domain/user.server";
 import { validateEmail } from "~/userUtils";
 import * as React from "react";
 import Layout from "~/components/layout";
+import LoadingForm from "~/components/loadingForm";
 
 export const meta: MetaFunction = () => {
   return {
@@ -100,12 +101,12 @@ export default function Join() {
 
   return (
     <Layout>
-      <Form method="post" className="flow" noValidate>
+      <LoadingForm method="post" className="flow" noValidate submitButtonText="Create account">
         <div>
           <label htmlFor="email">
             <div>Email Address</div>
             {actionData?.errors?.email && (
-              <div id="email-error">{actionData?.errors?.email}</div>
+              <div id="email-error" className="error">{actionData?.errors?.email}</div>
             )}
           </label>
           <input
@@ -122,7 +123,7 @@ export default function Join() {
           <label htmlFor="password">
             <div>Password</div>
             {actionData?.errors?.password && (
-              <div id="password-error">{actionData?.errors?.password}</div>
+              <div id="password-error" className="error">{actionData?.errors?.password}</div>
             )}
           </label>
           <input
@@ -135,10 +136,8 @@ export default function Join() {
             ref={passwordRef}
           />
         </div>
-        <button className="button" type="submit">
-          Create Account
-        </button>
         <input type="hidden" name="redirectTo" value={redirectTo} />
+      </LoadingForm>
         <div>
           <div>
             Already have an account?{" "}
@@ -152,7 +151,6 @@ export default function Join() {
             </Link>
           </div>
         </div>
-      </Form>
     </Layout>
   );
 }
