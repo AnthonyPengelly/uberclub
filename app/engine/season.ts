@@ -266,10 +266,15 @@ function calculateSegmentResult(homeScore: number, awayScore: number) {
 
 function getTeamScores(team: BasicTeamWithPlayer): SegmentScore {
   const scores = getLineupScores(team.players, team.team.captainBoost);
-  scores.DEF += Math.floor(Math.random() * 12) + 1;
-  scores.MID += Math.floor(Math.random() * 12) + 1;
-  scores.FWD += Math.floor(Math.random() * 12) + 1;
+  scores.DEF += explodingDice(6);
+  scores.MID += explodingDice(6);
+  scores.FWD += explodingDice(6);
   return scores;
+}
+
+function explodingDice(diceSize: number): number {
+  const roll = Math.floor(Math.random() * diceSize) + 1
+  return roll === diceSize ? roll + explodingDice(diceSize) : roll;
 }
 
 export function orderTeamsInSeason(teamSeasons: TeamSeasonSummary[]) {

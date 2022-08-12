@@ -100,8 +100,9 @@ export default function TeamPage() {
         <p>
           It's time to set your lineup and choose your captain. In each match
           your midfield star value will be put up against the opponents
-          midfield, plus 2 6 sided dice each! Your attack will play their
-          defence and vice-versa in a best of three. Good luck out there ⚽
+          midfield, plus a 6 sided dice each (add another roll if you get a six)!
+          Your attack will play their defence and vice-versa in a best of three.
+          Good luck out there ⚽
         </p>
         <p>
           During pre season you can also sell players but be careful, when
