@@ -67,10 +67,6 @@ export async function bidForPlayer(
   }
   await createDeadlineDayBid(team.id, player.deadlineDayId, cost);
   await updateCash(team.id, team.cash - cost);
-  await createGameLog(
-    team.gameId,
-    `${team.managerName} submitted a bid for ${player.name}`
-  );
 }
 
 export async function resolveDeadlineDay(gameId: string) {
@@ -108,7 +104,7 @@ export async function resolveDeadlineDayPlayer(
       gameId,
       `The bid was a draw! ${player.name} joins ${
         winner.teamName
-      } as they have a lower budget, soz. They will pay ${
+      } at random, soz. They will pay ${
         sortedBids[0].cost
       }M. With competing bids of ${sortedBids
         .slice(1)
@@ -136,8 +132,8 @@ export async function resolveDeadlineDayPlayer(
 }
 
 export function pickWinnerFromDraw(bids: Bid[], teams: Team[]) {
-  const sortedTeams = teams.sort((a, b) => a.cash - b.cash);
-  return sortedTeams.find((x) => bids.find((y) => y.teamId === x.id)) as Team;
+  const randomlySortedTeams = teams.sort(() => 0.5 - Math.random());
+  return randomlySortedTeams.find((x) => bids.find((y) => y.teamId === x.id)) as Team;
 }
 
 export async function deadlineDayPlayers(gameId: string) {
