@@ -228,6 +228,11 @@ export default function TeamPage() {
                     x.potential
                   )}M`}
                   buttonClass="mini-button xs-button-text"
+                  onSubmit={(event) => {
+                    if (!confirm(`Are you want to sell ${x.name}?`)) {
+                      event.preventDefault();
+                    }
+                  }}
                 >
                   <input type="hidden" name="player-id" value={x.id} />
                 </LoadingForm>
