@@ -1,4 +1,4 @@
-import type { ActionFunction } from "@remix-run/node";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import {
@@ -27,3 +27,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   return redirect(`/games/${params.gameId}/team`);
 };
+
+export const loader: LoaderFunction = async ({request, params}) => {
+  return redirect(`/games/${params.gameId}`);
+}
