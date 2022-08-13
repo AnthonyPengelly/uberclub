@@ -12,33 +12,19 @@ import { getGame } from "~/domain/games.server";
 
 export async function trainPlayer(playerId: string, team: Team) {
   const player = await getPlayer(playerId);
+  if (player.stars === 6) {
+    throw new Response("Bad Request", {status: 400, statusText: "Player already 6 stars!"})
+  }
   const season = await getCurrentSeason(team.gameId);
   await assertCanTrain(team.gameId, season.id, team);
-  const maxImprovement = team.trainingLevel;
-  const diceRoll = Math.floor(Math.random() * 6) + 1;
-  const improvement = Math.max(
-    0,
-    Math.min(
-      maxImprovement,
-      diceRoll - player.stars,
-      player.potential - player.stars
-    )
+  await createGameLog(
+    team.gameId,
+    `${team.managerName} trained ${player.name} from ${player.stars} to ${
+      player.stars + 1
+    } stars`
   );
-  if (improvement === 0) {
-    await createGameLog(
-      team.gameId,
-      `${player.name} didn't turn up to ${team.teamName} training`
-    );
-  } else {
-    await createGameLog(
-      team.gameId,
-      `${team.managerName} trained ${player.name} from ${player.stars} to ${
-        player.stars + improvement
-      } stars`
-    );
-  }
-  await updatePlayerStars(playerId, player.stars + improvement);
-  await createTrainingLog(season.id, team.id, improvement);
+  await updatePlayerStars(playerId, player.stars + 1);
+  await createTrainingLog(season.id, team.id, 1);
 }
 
 export async function getTrainingLogs(team: Team) {

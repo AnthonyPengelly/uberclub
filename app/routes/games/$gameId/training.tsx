@@ -66,7 +66,7 @@ export default function TrainingPage() {
         <p>
           Welcome to the pre season training camp. As a level{" "}
           {team.trainingLevel} club, {team.trainingLevel} player(s) may be
-          improved by up to {team.trainingLevel} star(s), if you're lucky!
+          improved by 1 star!
         </p>
         {!hasTrainingRemaining && (
           <p>
