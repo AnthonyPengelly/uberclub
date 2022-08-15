@@ -160,7 +160,7 @@
 .quote {
   background-color: var(--color-background-grey);
   border-radius: 16px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.7);
   position: relative;
   padding: 1rem;
   margin: 2rem 0;
@@ -176,6 +176,8 @@
   border-left: 10px solid transparent;
   border-right: 10px solid var(--color-background-grey);
   border-bottom: 10px solid var(--color-background-grey);
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.7);
+  z-index: -1;
 }
 
 .players {
