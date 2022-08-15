@@ -108,8 +108,8 @@ export default function GameDetailsPage() {
           </>
         )}
         <p>
-          Be the first to reach 100 points in one season to win. Alternatively,
-          win 3 seasons and then the Cup!
+          Be the first to reach {game.victoryPoints} points in one season to
+          win. Alternatively, win 3 seasons and then the Cup!
         </p>
       </article>
       {game.stage === Stage.NotStarted && teamsInGame >= MIN_TEAMS && (

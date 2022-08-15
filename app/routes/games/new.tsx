@@ -27,8 +27,13 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(gameName, "game name not found");
   let playerCollectionId = formData.get("player-collection") as string;
   invariant(playerCollectionId, "player collection not found");
+  let victoryPoints = formData.get("victory-points") as string;
 
-  const game = await createGame(gameName, playerCollectionId);
+  const game = await createGame(
+    gameName,
+    playerCollectionId,
+    victoryPoints ? parseInt(victoryPoints, 10) : undefined
+  );
 
   return redirect(`/games/${game.id}`);
 };
@@ -44,6 +49,20 @@ export default function NewGamePage() {
         </div>
         <div>
           <input type="text" name="game-name" id="game-name" />
+        </div>
+        <div>
+          <label htmlFor="victory-points">
+            Victory Points Required in 1 season (100 for a normal game)
+          </label>
+        </div>
+        <div>
+          <input
+            type="number"
+            min={40}
+            placeholder="100"
+            name="victory-points"
+            id="victory-points"
+          />
         </div>
         <div>
           <label htmlFor="player-collection">Player Collection</label>

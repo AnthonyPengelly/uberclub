@@ -6,6 +6,7 @@ create table public.games (
   stage integer not null default 0,
   -- Explicitly doesn't join to teams, as it confuses the join in the other direction
   winning_team varchar null,
+  victory_points integer not null default 100,
 
   primary key (id)
 );

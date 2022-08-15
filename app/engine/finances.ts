@@ -1,4 +1,5 @@
-import { recordWinner } from "~/domain/games.server";
+import type { Game } from "~/domain/games.server";
+import { getGame, recordWinner } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
 import {
   getPlayer,
@@ -23,25 +24,26 @@ const TITLE_CONTENDERS_MIN = 80;
 export async function completeFinancesForAllTeams(gameId: string) {
   const season = await getCurrentSeason(gameId);
   const teamSeasons = await getTeamSeasons(season.id);
+  const game = await getGame(gameId);
   await Promise.all(
     teamSeasons
       .sort((a, b) => b.score - a.score)
-      .map((x, i) => completeFinances(gameId, x, i + 1))
+      .map((x, i) => completeFinances(game, x, i + 1))
   );
 }
 
 async function completeFinances(
-  gameId: string,
+  game: Game,
   teamSeason: TeamSeasonSummary,
   position: number
 ) {
   const team = await getTeamById(teamSeason.teamId);
-  if (teamSeason.score >= 100 && position === 1) {
+  if (teamSeason.score >= game.victoryPoints && position === 1) {
     await createGameLog(
-      gameId,
+      game.id,
       `*** ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! ***`
     );
-    await recordWinner(gameId, team.teamName);
+    await recordWinner(game.id, team.teamName);
   }
   const placementAward = 110 - 10 * position;
   const stadiumIncome = calculateStadiumIncome(
@@ -50,14 +52,14 @@ async function completeFinances(
   );
   const captainBoost = position;
   await createGameLog(
-    gameId,
+    game.id,
     `${teamSeason.teamName} finish the season in position: ${position} and gain ${placementAward}M plus ${stadiumIncome}M from stadium income.` +
       `This season they will play with a captain boost of +${captainBoost}`
   );
   const players = await getTeamPlayers(teamSeason.teamId);
   const wages = await calculateScoreForTeam(players);
   await createGameLog(
-    gameId,
+    game.id,
     `${teamSeason.teamName} find ${wages}M to dish out for wages`
   );
   const total = team.cash + stadiumIncome + placementAward - wages;

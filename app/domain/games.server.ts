@@ -7,6 +7,7 @@ export type Game = {
   stage: number;
   playerCollectionId: string;
   winningTeam?: string;
+  victoryPoints: number;
 };
 
 export type DetailedGame = {
@@ -18,7 +19,7 @@ export async function getGamesList(): Promise<DetailedGame[]> {
   const { data, error } = await supabase
     .from("games")
     .select(
-      "id, name, stage, winning_team, player_collection_id, seasons (name, id, season), teams (id)"
+      "id, name, stage, winning_team, player_collection_id, victory_points, seasons (name, id, season), teams (id)"
     );
   if (error) {
     throw error;
@@ -27,6 +28,7 @@ export async function getGamesList(): Promise<DetailedGame[]> {
     data?.map((x) => ({
       id: x.id,
       name: x.name,
+      victoryPoints: x.victory_points,
       stage: x.stage,
       playerCollectionId: x.player_collection_id,
       winningTeam: x.winning_team,
@@ -56,6 +58,7 @@ export async function getGame(id: string): Promise<Game> {
       stage: data.stage,
       playerCollectionId: data.player_collection_id,
       winningTeam: data.winning_team,
+      victoryPoints: data.victory_points,
     } as Game;
   }
 
@@ -64,11 +67,18 @@ export async function getGame(id: string): Promise<Game> {
 
 export async function createGame(
   name: string,
-  playerCollectionId: string
+  playerCollectionId: string,
+  victoryPoints: number | undefined
 ): Promise<Game> {
   const { data, error } = await supabase
     .from("games")
-    .insert([{ name, player_collection_id: playerCollectionId }])
+    .insert([
+      {
+        name,
+        player_collection_id: playerCollectionId,
+        victory_points: victoryPoints || 100,
+      },
+    ])
     .single();
 
   if (!error) {

@@ -14,7 +14,7 @@ import { Stage } from "./game";
 
 export async function prepareCup(gameId: string) {
   const game = await getGame(gameId);
-  if (!(await winnerHasQualifiedForCup(gameId))) {
+  if (!(await winnerHasQualifiedForCup(game))) {
     return false;
   }
   const season = await getCurrentSeason(gameId);
@@ -30,8 +30,8 @@ export async function prepareCup(gameId: string) {
   return true;
 }
 
-async function winnerHasQualifiedForCup(gameId: string) {
-  const seasons = await getAllSeasons(gameId);
+async function winnerHasQualifiedForCup(game: Game) {
+  const seasons = await getAllSeasons(game.id);
   const seasonsMap = await Promise.all(
     seasons.map(async (x) => ({
       season: x,
@@ -42,7 +42,7 @@ async function winnerHasQualifiedForCup(gameId: string) {
   );
   const season = seasonsMap[0];
   const winningTeamSeason = season.teamSeasons[0];
-  if (winningTeamSeason.score >= 100) {
+  if (winningTeamSeason.score >= game.victoryPoints) {
     // Already won anyway
     return false;
   }
