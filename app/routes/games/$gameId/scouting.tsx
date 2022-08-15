@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -93,6 +93,7 @@ export default function ScoutingPage() {
   return (
     <>
       <h1>{team.teamName} scouting</h1>
+      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           Welcome to the scouting hub. As a level {team.scoutingLevel} club, you

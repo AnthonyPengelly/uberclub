@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -88,6 +88,7 @@ export default function DeadlineDayPage() {
       <h1>
         {team.teamName} - {team.cash}M
       </h1>
+      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           It's deadline day! Here you can see the players available to buy. This

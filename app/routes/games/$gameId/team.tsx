@@ -2,6 +2,7 @@ import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import {
   Form,
+  Link,
   useLoaderData,
   useSubmit,
   useTransition,
@@ -26,7 +27,7 @@ import {
 import { Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
-import { updatePlayersBasedOnFormData } from "~/engine/team";
+import { MAX_SQUAD_SIZE, updatePlayersBasedOnFormData } from "~/engine/team";
 import { useState } from "react";
 
 type LoaderData = {
@@ -110,7 +111,11 @@ export default function TeamPage() {
 
   return (
     <>
-      <h1 className="centre">{team.teamName} Lineup</h1>
+      <h1>{team.teamName} lineup</h1>
+      <div>
+        {players.length}/{MAX_SQUAD_SIZE} players in squad
+      </div>
+      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           It's time to set your lineup and choose your captain. In each match
