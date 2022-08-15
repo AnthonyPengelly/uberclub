@@ -1,7 +1,7 @@
 import type { GamePlayer } from "~/domain/players.server";
 
 export const MAX_TEAMS = 6;
-export const MIN_TEAMS = 2;
+export const MIN_TEAMS = 1;
 export const MAX_SQUAD_SIZE = 23;
 
 export async function calculateScoreForTeam(players: GamePlayer[]) {

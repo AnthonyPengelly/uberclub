@@ -70,6 +70,8 @@ async function createRandomSimMatch(
 
 export function getRealFixtures(teams: Team[], stage: Stage): Fixture[] {
   switch (teams.length) {
+    case 1:
+      return [];
     case 2:
       return getTwoPlayerFixtures(teams, stage);
     case 3:
@@ -219,6 +221,8 @@ function getSixPlayerFixtures(teams: Team[], stage: Stage): Fixture[] {
 export function hasSim(team: Team, teams: Team[], stage: Stage) {
   const teamIndex = teams.indexOf(team);
   switch (teams.length) {
+    case 1:
+      return true;
     case 2:
       return (
         stage === Stage.Match1 ||
