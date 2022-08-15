@@ -9,12 +9,14 @@ export type ScoutPlayerProps = {
   player: GamePlayer;
   squadSize: number;
   team: Team;
+  canBuy: boolean;
 };
 
 export default function ScoutPlayer({
   player,
   team,
   squadSize,
+  canBuy,
 }: ScoutPlayerProps) {
   return (
     <>
@@ -22,7 +24,9 @@ export default function ScoutPlayer({
       <div className="scout-info">
         <div>Sign for {getScoutPrice(player.overall, player.potential)}M</div>
         {!player.teamId &&
-          (team.cash < getScoutPrice(player.overall, player.potential) ? (
+          (!canBuy ? (
+            <div>Scouting finished</div>
+          ) : team.cash < getScoutPrice(player.overall, player.potential) ? (
             <div>Not enough cash!</div>
           ) : squadSize >= MAX_SQUAD_SIZE ? (
             <div>Your squad is full!</div>

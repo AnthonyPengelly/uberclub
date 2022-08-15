@@ -141,6 +141,7 @@ export default function ScoutingPage() {
             player={x}
             team={team}
             squadSize={squadSize}
+            canBuy={game.stage === Stage.Scouting && !team.isReady}
           />
         ))}
       </div>
