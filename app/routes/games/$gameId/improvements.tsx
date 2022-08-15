@@ -75,6 +75,11 @@ export default function ImprovementsPage() {
           Welcome to the investment hub. Here you can choose any two investments
           to improve your club for future seasons.
         </p>
+        <p>
+          At the end of each season, you get cash from the stadium income based
+          on how well you did that season. The thresholds are at 40, 60 and 80
+          points. Improving your stadium multiplies this effect.
+        </p>
         {game.stage === Stage.Improvements && team.isReady && (
           <p>
             You don't currently have any investments to make. Make sure to come

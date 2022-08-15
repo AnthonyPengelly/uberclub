@@ -23,10 +23,10 @@ export default function Index() {
       <h1>Games</h1>
       <article className="flow | quote">
         <p>
-          Welcome to Uberclub by post. Build the greatest team in the world
-          using real players and go head to head with your friends. The game is
-          designed to be played asynchronously so there is no time limit, but
-          try to check in at least once a day, or everyone will get bored!
+          Welcome to Uberclub by post. Put together a ragtag group of
+          footballers and guide them to glory. The game is designed to be played
+          asynchronously so there is no time limit, but try to check in at least
+          once a day, or everyone will get bored!
         </p>
         <p>Join a game below to get started 💪</p>
       </article>
