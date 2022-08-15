@@ -38,7 +38,7 @@ export async function getDeadlineDayPlayers(
     .select(
       `id, player_game_states (
       id, lineup_position, captain, injured, stars, team_id,
-        real_players (name, overall, potential, image_url, positions (name), real_teams (name))
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url))
     )`
     )
     .eq("season_id", seasonId);
@@ -57,6 +57,10 @@ export async function getDeadlineDayPlayers(
       potential: x.player_game_states.real_players.potential,
       team: x.player_game_states.real_players.real_teams.name,
       imageUrl: x.player_game_states.real_players.image_url,
+      country: x.player_game_states.real_players.real_countries && {
+        name: x.player_game_states.real_players.real_countries.name,
+        imageUrl: x.player_game_states.real_players.real_countries.image_url,
+      },
     })) || []
   );
 }

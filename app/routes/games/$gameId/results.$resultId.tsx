@@ -12,7 +12,7 @@ import type { LineupPlayer } from "~/engine/lineup";
 import {
   findPlayerInPosition,
   getLineupScores,
-  hasChemistry,
+  getChemistry,
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
 } from "~/engine/lineup";
@@ -156,10 +156,10 @@ function Lineup({
                 x.lineupPosition! - 1
               );
               const chemistry = previousPlayer
-                ? hasChemistry(x as LineupPlayer, previousPlayer)
-                : false;
+                ? getChemistry(x as LineupPlayer, previousPlayer)
+                : 0;
               return (
-                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+                <PlayerDisplay key={x.id} player={x} chemistry={chemistry} />
               );
             })}
         </div>
@@ -183,10 +183,10 @@ function Lineup({
                 x.lineupPosition! - 1
               );
               const chemistry = previousPlayer
-                ? hasChemistry(x as LineupPlayer, previousPlayer)
-                : false;
+                ? getChemistry(x as LineupPlayer, previousPlayer)
+                : 0;
               return (
-                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+                <PlayerDisplay key={x.id} player={x} chemistry={chemistry} />
               );
             })}
         </div>
@@ -206,10 +206,10 @@ function Lineup({
                 x.lineupPosition! - 1
               );
               const chemistry = previousPlayer
-                ? hasChemistry(x as LineupPlayer, previousPlayer)
-                : false;
+                ? getChemistry(x as LineupPlayer, previousPlayer)
+                : 0;
               return (
-                <PlayerDisplay key={x.id} player={x} hasChemistry={chemistry} />
+                <PlayerDisplay key={x.id} player={x} chemistry={chemistry} />
               );
             })}
         </div>

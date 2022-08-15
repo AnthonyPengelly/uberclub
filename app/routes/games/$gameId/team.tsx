@@ -18,7 +18,7 @@ import { getGame } from "~/domain/games.server";
 import {
   findPlayerInPosition,
   getLineupScores,
-  hasChemistry,
+  getChemistry,
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
   updatePlayerPosition,
@@ -294,8 +294,8 @@ function Position({
   const existingPlayer = findPlayerInPosition(players, position);
   const previousPlayer = findPlayerInPosition(players, position - 1);
   const chemistry = existingPlayer
-    ? hasChemistry(existingPlayer, previousPlayer)
-    : false;
+    ? getChemistry(existingPlayer, previousPlayer)
+    : 0;
   return (
     <WithSelection
       enabled={canMakeChanges && !existingPlayer?.injured}
@@ -304,7 +304,7 @@ function Position({
       playerId={existingPlayer?.id}
       position={position}
     >
-      <PlayerDisplay player={existingPlayer} hasChemistry={chemistry} />
+      <PlayerDisplay player={existingPlayer} chemistry={chemistry} />
     </WithSelection>
   );
 }

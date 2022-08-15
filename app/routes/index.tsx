@@ -30,7 +30,9 @@ export default function Index() {
         </p>
         <p>Join a game below to get started 💪</p>
       </article>
-      <Link to="games/new">+ New Game</Link>
+      <Link className="block" to="games/new">
+        + New Game
+      </Link>
       <table className="table">
         <thead>
           <tr>

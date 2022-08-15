@@ -224,7 +224,7 @@
   flex-direction: column;
 }
 
-.player img {
+.player__image {
   margin: 0.15rem auto;
   width: 100%;
   max-width: 80px;
@@ -243,6 +243,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.player__country {
+  width: 30%;
+  max-width: 24px;
+  position: absolute;
+  right: 0;
+  bottom: 0.1rem;
 }
 
 .player__stars {

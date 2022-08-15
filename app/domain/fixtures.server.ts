@@ -211,7 +211,7 @@ export async function createFixtureLineups(
       lineup_position: x.lineupPosition,
       captain_boost: x.captain ? captainBoost : null,
       real_team_id: realTeamId,
-      injured: !!x.injured
+      injured: !!x.injured,
     }))
   );
 
@@ -229,7 +229,7 @@ export async function getFixtureLineups(
     .from("fixture_lineups")
     .select(
       `lineup_position, captain_boost, real_team_id, injured, player_game_states (id, stars, team_id, injured,
-        real_players (name, overall, potential, image_url, positions (name), real_teams (name)))`
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url)))`
     )
     .eq("result_id", resultId);
 
@@ -248,6 +248,10 @@ export async function getFixtureLineups(
       potential: x.player_game_states.real_players.potential,
       team: x.player_game_states.real_players.real_teams.name,
       imageUrl: x.player_game_states.real_players.image_url,
+      country: x.player_game_states.real_players.real_countries && {
+        name: x.player_game_states.real_players.real_countries.name,
+        imageUrl: x.player_game_states.real_players.real_countries.image_url,
+      },
       realTeamId: x.real_team_id,
     }));
   }

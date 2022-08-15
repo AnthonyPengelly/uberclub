@@ -56,6 +56,10 @@ export type GamePlayer = {
    */
   realTeamId?: string;
   captainBoost?: number;
+  country?: {
+    name: string;
+    imageUrl: string;
+  };
 };
 
 export async function getPlayersList(
@@ -99,7 +103,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
     .from("player_game_states")
     .select(
       `id, lineup_position, captain, injured, stars, team_id,
-        real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url))`
     )
     .eq("team_id", teamId);
   if (error) {
@@ -120,6 +124,10 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
         potential: x.real_players.potential,
         team: x.real_players.real_teams.name,
         imageUrl: x.real_players.image_url,
+        country: x.real_players.real_countries && {
+          name: x.real_players.real_countries.name,
+          imageUrl: x.real_players.real_countries.image_url,
+        },
       }))
       .sort((a, b) => b.id.localeCompare(b.id))
       .sort((a, b) => b.potential - a.potential)
@@ -136,7 +144,7 @@ export async function getRealTeamPlayers(
     .from("player_game_states")
     .select(
       `id, game_id, lineup_position, captain, injured, stars, team_id,
-        real_players!inner (name, overall, potential, image_url, positions (name), real_team_id, real_teams (id, name))`
+        real_players!inner (name, overall, potential, image_url, positions (name), real_team_id, real_teams (id, name), real_countries (name, image_url))`
     )
     .eq("game_id", gameId)
     .eq("real_players.real_team_id", realTeamId);
@@ -159,6 +167,10 @@ export async function getRealTeamPlayers(
         potential: x.real_players.potential,
         team: x.real_players.real_teams.name,
         imageUrl: x.real_players.image_url,
+        country: x.real_players.real_countries && {
+          name: x.real_players.real_countries.name,
+          imageUrl: x.real_players.real_countries.image_url,
+        },
       }))
       .sort(sortPlayers) || []
   );
@@ -169,7 +181,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
     .from("player_game_states")
     .select(
       `id, lineup_position, captain, injured, stars, team_id,
-        real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url))`
     )
     .eq("id", id)
     .single();
@@ -189,6 +201,10 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
     potential: data.real_players.potential,
     team: data.real_players.real_teams.name,
     imageUrl: data.real_players.image_url,
+    country: data.real_players.real_countries && {
+      name: data.real_players.real_countries.name,
+      imageUrl: data.real_players.real_countries.image_url,
+    },
   };
 }
 
@@ -303,7 +319,7 @@ export async function drawPlayersFromDeck(
     .from("player_game_states")
     .select(
       `id, lineup_position, captain, injured, stars,
-          real_players (name, overall, potential, image_url, positions (name), real_teams (name))`
+          real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url))`
     )
     .eq("game_id", gameId)
     .is("team_id", null)
@@ -325,6 +341,10 @@ export async function drawPlayersFromDeck(
     potential: x.real_players.potential,
     team: x.real_players.real_teams.name,
     imageUrl: x.real_players.image_url,
+    country: x.real_players.real_countries && {
+      name: x.real_players.real_countries.name,
+      imageUrl: x.real_players.real_countries.image_url,
+    },
   }));
 }
 

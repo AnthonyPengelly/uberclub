@@ -97,15 +97,15 @@ function playerScore(
   const captainBonus = player.captain ? recordedCaptainBoost : 0;
   const penalty = positionPenalty(player, position);
   const score = player.stars + captainBonus - penalty;
-  return hasChemistry(player, previousPlayer) ? score + 1 : score;
+  return score + getChemistry(player, previousPlayer);
 }
 
-export function hasChemistry(
+export function getChemistry(
   player: LineupPlayer,
   previousPlayer: LineupPlayer | undefined
 ) {
   if (player.lineupPosition === 1 || !previousPlayer) {
-    return false;
+    return 0;
   }
   // Don't add chemistry between different lines in the formation
   if (
@@ -113,9 +113,13 @@ export function hasChemistry(
     previousPlayer.lineupPosition === MAX_DEF_POSITION ||
     previousPlayer.lineupPosition === MAX_MID_POSITION
   ) {
-    return false;
+    return 0;
   }
-  return player.team === previousPlayer.team;
+  let chemistry = player.team === previousPlayer.team ? 1 : 0;
+  if (player.country && player.country.name === previousPlayer.country?.name) {
+    chemistry++;
+  }
+  return chemistry;
 }
 
 function positionPenalty(

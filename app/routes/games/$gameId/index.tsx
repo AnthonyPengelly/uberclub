@@ -46,7 +46,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
   const team = await getTeam(userId, params.gameId);
-  overrideGameStageWithTeam(game, team);
+  if (team) {
+    overrideGameStageWithTeam(game, team);
+  }
   const seasons = await getAllSeasons(params.gameId);
   const seasonsMap = await Promise.all(
     seasons
