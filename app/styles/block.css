@@ -236,7 +236,8 @@
   align-items: center;
 }
 
-.player__team {
+.player__team,
+.player__position {
   font-size: 0.35rem;
   display: flex;
   justify-content: center;
@@ -289,6 +290,7 @@
 
 @media only screen and (min-width: 800px) {
   .player,
+  .player__position,
   .player__team,
   .player__stars {
     font-size: 1rem;

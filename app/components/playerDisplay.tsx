@@ -34,6 +34,7 @@ export default function PlayerDisplay({
           .join("")}
       </div>
       <img className="player__image" src={player.imageUrl} alt={player.name} />
+      <div className="player__position">{player.position}</div>
       <div className="player__team">{player.team}</div>
       {children && <div className="player__actions">{children}</div>}
       {hasChemistry ? <div className="player__chemistry">★</div> : null}
