@@ -11,7 +11,7 @@ import type { ActionFunction } from "@remix-run/node";
 import { canTrain, getTrainingLogs, trainPlayer } from "~/engine/training";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import { Stage } from "~/engine/game";
+import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import PlayerDisplay from "~/components/playerDisplay";
 
@@ -26,8 +26,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
   const game = await getGame(params.gameId);
-
   const team = await getTeam(userId, params.gameId);
+  overrideGameStageWithTeam(game, team);
+
   const players = await getTeamPlayers(team.id);
   const trainingLogs = await getTrainingLogs(team);
   if (!team) {
@@ -41,8 +42,10 @@ export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
   const game = await getGame(params.gameId);
-  const formData = await request.formData();
   const team = await getTeam(userId, params.gameId);
+  overrideGameStageWithTeam(game, team);
+
+  const formData = await request.formData();
   let playerId = formData.get("player-id") as string;
   await trainPlayer(playerId, team);
 
@@ -79,7 +82,7 @@ export default function TrainingPage() {
         <>
           <LoadingForm
             method="post"
-            action={`/games/${game.id}/ready`}
+            action={`/games/${game.id}/stage-override`}
             submitButtonText="Complete training"
             onSubmit={(event) => {
               if (
@@ -91,7 +94,9 @@ export default function TrainingPage() {
                 event.preventDefault();
               }
             }}
-          />
+          >
+            <input type="hidden" name="current-stage" value={Stage.Training} />
+          </LoadingForm>
           <p>
             {team.trainingLevel - trainingLogs.length}/{team.trainingLevel}{" "}
             remaining

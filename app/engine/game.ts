@@ -1,6 +1,7 @@
 import type { Game } from "~/domain/games.server";
 import { getGame, updateGameStage } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
+import { getTeamById } from "~/domain/team.server";
 import {
   addTeamToGame,
   getTeamsInGame,
@@ -13,7 +14,7 @@ import { createGameLog } from "~/domain/logs.server";
 import { resolveDeadlineDay, setDeadlineDayPlayers } from "./deadlineDay";
 import { playFixtures, startSeason } from "./season";
 import { completeFinancesForAllTeams } from "./finances";
-import { MAX_TEAMS } from "./team";
+import { MAX_TEAMS, resetStageOverrides } from "./team";
 import { checkForCupWinner, prepareCup, prepareNextRound } from "./cup";
 import { resetInjuredForGame } from "~/domain/players.server";
 
@@ -93,12 +94,9 @@ async function advance(gameId: string) {
       await updateGameStage(gameId, Stage.Training);
       break;
     case Stage.Training:
-      await updateGameStage(gameId, Stage.Scouting);
-      break;
     case Stage.Scouting:
-      await updateGameStage(gameId, Stage.Improvements);
-      break;
     case Stage.Improvements:
+      await resetStageOverrides(gameId);
       await setDeadlineDayPlayers(gameId);
       await updateGameStage(gameId, Stage.DeadlineDay);
       break;
@@ -193,4 +191,15 @@ export function canSellPlayer(game: Game) {
     game.stage === Stage.Improvements ||
     game.stage === Stage.DeadlineDay
   );
+}
+
+export async function getGameWithStageOverride(gameId: string, teamId: string) {
+  const game = await getGame(gameId);
+  const team = await getTeamById(teamId);
+  return overrideGameStageWithTeam(game, team);
+}
+
+export function overrideGameStageWithTeam(game: Game, team: Team) {
+  game.stage = team.stageOverride || game.stage;
+  return game;
 }

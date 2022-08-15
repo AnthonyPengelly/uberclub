@@ -18,7 +18,7 @@ import { getResults } from "~/domain/fixtures.server";
 import Season from "~/components/season";
 import PreviousSeasons from "~/components/previousSeasons";
 import DateTime from "~/components/dateTime";
-import { Stage } from "~/engine/game";
+import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import { MIN_TEAMS } from "~/engine/team";
 import LoadingForm from "~/components/loadingForm";
 import { useRevalidateOnInterval } from "~/hooks/revalidate";
@@ -45,6 +45,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   if (!game) {
     throw new Response("Not Found", { status: 404 });
   }
+  const team = await getTeam(userId, params.gameId);
+  overrideGameStageWithTeam(game, team);
   const seasons = await getAllSeasons(params.gameId);
   const seasonsMap = await Promise.all(
     seasons
@@ -59,7 +61,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         results: (await x).results,
       }))
   );
-  const team = await getTeam(userId, params.gameId);
   const logs = await getGameLogs(params.gameId);
   const teamsInGame = await countTeamsInGame(params.gameId);
 

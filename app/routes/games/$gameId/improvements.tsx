@@ -8,7 +8,7 @@ import invariant from "tiny-invariant";
 import type { ActionFunction } from "@remix-run/node";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import { Stage } from "~/engine/game";
+import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import {
   hasImprovementsRemaining,
   improve,
@@ -29,6 +29,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
   const canInvest = await hasImprovementsRemaining(team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
@@ -47,6 +48,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(params.gameId, "gameId not found");
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
 
   if (!team) {
     throw new Response("Not Found", { status: 404 });

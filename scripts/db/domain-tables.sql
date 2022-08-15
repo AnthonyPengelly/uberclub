@@ -73,6 +73,7 @@ create table public.teams (
   training_level integer not null default 1,
   scouting_level integer not null default 1,
   stadium_level integer not null default 1,
+  stage_override integer null,
 
   primary key (id),
   unique (game_id, user_id)

@@ -6,14 +6,17 @@ import {
 } from "~/domain/logs.server";
 import { getPlayer, updatePlayerStars } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
-import { Stage } from "./game";
+import { overrideGameStageWithTeam, Stage } from "./game";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 
 export async function trainPlayer(playerId: string, team: Team) {
   const player = await getPlayer(playerId);
   if (player.stars === 6) {
-    throw new Response("Bad Request", {status: 400, statusText: "Player already 6 stars!"})
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Player already 6 stars!",
+    });
   }
   const season = await getCurrentSeason(team.gameId);
   await assertCanTrain(team.gameId, season.id, team);
@@ -34,6 +37,7 @@ export async function getTrainingLogs(team: Team) {
 
 async function assertCanTrain(gameId: string, seasonId: string, team: Team) {
   const game = await getGame(gameId);
+  overrideGameStageWithTeam(game, team);
   const trainingLogs = await getTrainingLogsForSeason(seasonId, team.id);
   if (!canTrain(game, trainingLogs, team)) {
     throw new Error("Not currently able to train");

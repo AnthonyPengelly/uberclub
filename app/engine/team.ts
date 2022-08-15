@@ -1,4 +1,5 @@
 import type { GamePlayer } from "~/domain/players.server";
+import { getTeamsInGame, updateStageOverride } from "~/domain/team.server";
 
 export const MAX_TEAMS = 6;
 export const MIN_TEAMS = 1;
@@ -38,4 +39,9 @@ function setPlayerIdToPosition(
       player.captain = false;
     }
   }
+}
+
+export async function resetStageOverrides(gameId: string) {
+  const teams = await getTeamsInGame(gameId);
+  await Promise.all(teams.map((x) => updateStageOverride(x.id, undefined)));
 }

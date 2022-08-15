@@ -17,7 +17,7 @@ import {
 } from "~/engine/scouting";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import { Stage } from "~/engine/game";
+import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import ScoutPlayer from "~/components/scoutPlayer";
 
@@ -37,8 +37,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
-  const squad = await getTeamPlayers(team.id);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
+  const squad = await getTeamPlayers(team.id);
   const scoutedPlayers = await getScoutedPlayers(team);
   const scoutingLogs = await getScoutingLogs(team);
 
@@ -57,6 +58,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(params.gameId, "gameId not found");
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
 
   if (!team) {
     throw new Response("Not Found", { status: 404 });
@@ -116,7 +118,7 @@ export default function ScoutingPage() {
         <>
           <LoadingForm
             method="post"
-            action={`/games/${game.id}/ready`}
+            action={`/games/${game.id}/stage-override`}
             submitButtonText="Complete scouting"
             onSubmit={(event) => {
               if (
@@ -128,7 +130,9 @@ export default function ScoutingPage() {
                 event.preventDefault();
               }
             }}
-          />
+          >
+            <input type="hidden" name="current-stage" value={Stage.Scouting} />
+          </LoadingForm>
           <p>
             {team.scoutingLevel - scoutingLogs.length}/{team.scoutingLevel}{" "}
             searches remaining

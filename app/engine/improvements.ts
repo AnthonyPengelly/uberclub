@@ -6,7 +6,7 @@ import {
   getImprovementLogsForSeason,
 } from "~/domain/logs.server";
 import { getCurrentSeason } from "~/domain/season.server";
-import { Stage } from "./game";
+import { overrideGameStageWithTeam, Stage } from "./game";
 import { getGame } from "~/domain/games.server";
 
 export enum Improvements {
@@ -60,6 +60,7 @@ async function assertCanImprove(gameId: string, seasonId: string, team: Team) {
 
 async function canImprove(gameId: string, seasonId: string, team: Team) {
   const game = await getGame(gameId);
+  overrideGameStageWithTeam(game, team);
   const improvementLogs = await getImprovementLogsForSeason(seasonId, team.id);
   if (game.stage !== Stage.Improvements) {
     return false;

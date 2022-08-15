@@ -7,7 +7,11 @@ import { getTeam } from "~/domain/team.server";
 import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
-import { isOpenForPlayers, joinGame } from "~/engine/game";
+import {
+  isOpenForPlayers,
+  joinGame,
+  overrideGameStageWithTeam,
+} from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import Layout from "~/components/layout";
 
@@ -24,6 +28,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const team = await getTeam(userId, params.gameId);
   if (!game) {
     throw new Response("Not Found", { status: 404 });
+  }
+  if (team) {
+    overrideGameStageWithTeam(game, team);
   }
 
   return json({ game, team });

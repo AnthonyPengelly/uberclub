@@ -24,7 +24,7 @@ import {
   updatePlayerPosition,
   validateLineup,
 } from "~/engine/lineup";
-import { Stage } from "~/engine/game";
+import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
 import { MAX_SQUAD_SIZE, updatePlayersBasedOnFormData } from "~/engine/team";
@@ -48,6 +48,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const team = await getTeam(userId, params.gameId);
   const players = await getTeamPlayers(team.id);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
@@ -59,8 +60,9 @@ export const action: ActionFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
   const game = await getGame(params.gameId);
-  const formData = await request.formData();
   const team = await getTeam(userId, params.gameId);
+  overrideGameStageWithTeam(game, team);
+  const formData = await request.formData();
   const player1Id = formData.get("player1-id") as string;
   const position1 = parseInt(formData.get("position1") as string, 10);
   const player2Id = formData.get("player2-id") as string;

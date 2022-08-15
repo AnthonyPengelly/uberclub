@@ -12,6 +12,7 @@ export type Team = {
   trainingLevel: number;
   scoutingLevel: number;
   stadiumLevel: number;
+  stageOverride: number | null;
 };
 
 const STARTING_CASH = 120;
@@ -34,6 +35,7 @@ export async function getTeamsInGame(gameId: string): Promise<Team[]> {
       trainingLevel: team.training_level,
       scoutingLevel: team.scouting_level,
       stadiumLevel: team.stadium_level,
+      stageOverride: team.stage_override,
     })) || []
   );
 }
@@ -68,6 +70,7 @@ export async function getTeam(userId: string, gameId: string): Promise<Team> {
         trainingLevel: data.training_level,
         scoutingLevel: data.scouting_level,
         stadiumLevel: data.stadium_level,
+        stageOverride: data.stage_override,
       }
     );
   }
@@ -96,6 +99,7 @@ export async function getTeamById(id: string): Promise<Team> {
         trainingLevel: data.training_level,
         scoutingLevel: data.scouting_level,
         stadiumLevel: data.stadium_level,
+        stageOverride: data.stage_override,
       }
     );
   }
@@ -178,6 +182,22 @@ export async function updateImprovements(
       training_level: trainingLevel,
       scouting_level: scoutingLevel,
       stadium_level: stadiumLevel,
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function updateStageOverride(
+  id: string,
+  stageOverride: number | undefined
+) {
+  const { error } = await supabase
+    .from("teams")
+    .update({
+      stage_override: stageOverride || null,
     })
     .eq("id", id);
 

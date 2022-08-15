@@ -11,7 +11,7 @@ import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { sellPlayer } from "~/engine/finances";
-import { canSellPlayer } from "~/engine/game";
+import { canSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
 import { getScoutPrice } from "~/engine/scouting";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { requireUserId } from "~/session.server";
@@ -26,8 +26,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const userId = await requireUserId(request);
   invariant(params.gameId, "gameId not found");
   const game = await getGame(params.gameId);
-
   const team = await getTeam(userId, params.gameId);
+  overrideGameStageWithTeam(game, team);
+
   const players = await getTeamPlayers(team.id);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
@@ -41,6 +42,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   invariant(params.gameId, "gameId not found");
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
+  overrideGameStageWithTeam(game, team);
   const formData = await request.formData();
   const playerId = formData.get("player-id") as string;
   invariant(playerId, "playerId not found");

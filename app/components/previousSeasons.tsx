@@ -1,14 +1,12 @@
 import type { Result } from "~/domain/fixtures.server";
-import type {
-  Season as SeasonModel,
-  TeamSeasonSummary,
-} from "~/domain/season.server";
+import type { Season as SeasonModel } from "~/domain/season.server";
+import type { PositionedTeamSeason } from "~/engine/leagueTable";
 import Season from "./season";
 
 export type PreviousSeasonsProps = {
   seasons: {
     season: SeasonModel;
-    teamSeasons: TeamSeasonSummary[];
+    teamSeasons: PositionedTeamSeason[];
     results: Result[];
   }[];
   usersTeamName: string;

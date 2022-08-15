@@ -15,7 +15,7 @@ import {
 import { getCurrentSeason } from "~/domain/season.server";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import { Stage } from "./game";
+import { overrideGameStageWithTeam, Stage } from "./game";
 import { MAX_SQUAD_SIZE } from "./team";
 
 export async function getScoutedPlayers(team: Team) {
@@ -99,6 +99,7 @@ export async function getScoutingLogs(team: Team) {
 
 async function assertCanScout(gameId: string, seasonId: string, team: Team) {
   const game = await getGame(gameId);
+  overrideGameStageWithTeam(game, team);
   const scoutingLogs = await getScoutingLogsForSeason(seasonId, team.id);
   if (!canScout(game, scoutingLogs, team)) {
     throw new Error("Not currently able to scout");
