@@ -66,19 +66,19 @@ async function completeFinances(
 }
 
 function calculateStadiumIncome(level: number, score: number) {
-  if (score > TITLE_CONTENDERS_MIN) {
+  if (score >= TITLE_CONTENDERS_MIN) {
     if (level === 4) {
       return 150;
     }
     return 25 + level * 25;
   }
-  if (score > MID_TABLE_MIN) {
+  if (score >= MID_TABLE_MIN) {
     if (level === 4) {
       return 100;
     }
     return 20 + level * 20;
   }
-  if (score > ESTABLISHED_MIN) {
+  if (score >= ESTABLISHED_MIN) {
     if (level === 4) {
       return 75;
     }
