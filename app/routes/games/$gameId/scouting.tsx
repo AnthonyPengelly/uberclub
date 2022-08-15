@@ -118,6 +118,16 @@ export default function ScoutingPage() {
             method="post"
             action={`/games/${game.id}/ready`}
             submitButtonText="Complete scouting"
+            onSubmit={(event) => {
+              if (
+                team.scoutingLevel - scoutingLogs.length !== 0 &&
+                !confirm(
+                  `You still have scouting remaining, are you sure you want to continue?`
+                )
+              ) {
+                event.preventDefault();
+              }
+            }}
           />
           <p>
             {team.scoutingLevel - scoutingLogs.length}/{team.scoutingLevel}{" "}

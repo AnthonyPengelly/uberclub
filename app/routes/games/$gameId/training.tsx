@@ -81,6 +81,16 @@ export default function TrainingPage() {
             method="post"
             action={`/games/${game.id}/ready`}
             submitButtonText="Complete training"
+            onSubmit={(event) => {
+              if (
+                team.trainingLevel - trainingLogs.length !== 0 &&
+                !confirm(
+                  `You still have training remaining, are you sure you want to continue?`
+                )
+              ) {
+                event.preventDefault();
+              }
+            }}
           />
           <p>
             {team.trainingLevel - trainingLogs.length}/{team.trainingLevel}{" "}
