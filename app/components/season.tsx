@@ -1,15 +1,13 @@
 import type { ResultSummary } from "~/domain/fixtures.server";
-import type {
-  Season as SeasonModel,
-  TeamSeasonSummary,
-} from "~/domain/season.server";
+import type { Season as SeasonModel } from "~/domain/season.server";
 import { Stage } from "~/engine/game";
-import { orderTeamsInSeason } from "~/engine/season";
+import type { PositionedTeamSeason } from "~/engine/leagueTable";
+import { orderTeamsInSeason } from "~/engine/leagueTable";
 import Fixtures from "./fixtures";
 
 export type SeasonProps = {
   season: SeasonModel;
-  teamSeasons: TeamSeasonSummary[];
+  teamSeasons: PositionedTeamSeason[];
   results: ResultSummary[];
   startOpen: boolean;
   usersTeamName: string;
@@ -41,6 +39,7 @@ export default function Season({
           <table className="table">
             <thead>
               <tr>
+                <th></th>
                 <th>Name (squad score)</th>
                 <th>Score</th>
               </tr>
@@ -48,13 +47,15 @@ export default function Season({
             <tbody>
               {orderTeamsInSeason(teamSeasons).map((x, i) => (
                 <tr key={x.id}>
+                  <td className="centre">
+                    {x.position === 1 && seasonComplete ? "🏆" : x.position}
+                  </td>
                   <td
                     className={
                       x.teamName === usersTeamName ? "highlight-text" : ""
                     }
                   >
-                    {x.teamName} ({x.startingScore}){" "}
-                    {i === 0 && seasonComplete && "🏆"}
+                    {x.teamName} ({x.startingScore})
                   </td>
                   <td>{x.score}</td>
                 </tr>

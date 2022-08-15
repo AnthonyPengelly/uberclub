@@ -6,11 +6,14 @@ import {
 } from "~/domain/fixtures.server";
 import { getGame } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
-import { GamePlayer, setInjured, updatePlayerLineupPosition } from "~/domain/players.server";
+import type { GamePlayer } from "~/domain/players.server";
+import {
+  setInjured,
+  updatePlayerLineupPosition,
+} from "~/domain/players.server";
 import { getRealTeamPlayers } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import { getRealTeam } from "~/domain/realTeam.server";
-import type { TeamSeasonSummary } from "~/domain/season.server";
 import {
   createTeamSeason,
   getCurrentSeason,
@@ -117,7 +120,10 @@ async function playFixture(
   }
   await saveFixtureLineup(homeTeam, fixture.id);
   await saveFixtureLineup(awayTeam, fixture.id);
-  await removeInjuredPlayersFromSquads([...homeTeam.players, ...awayTeam.players]);
+  await removeInjuredPlayersFromSquads([
+    ...homeTeam.players,
+    ...awayTeam.players,
+  ]);
 }
 
 async function playSim(
@@ -172,7 +178,10 @@ async function playSim(
   }
   await saveFixtureLineup(team, fixture.id);
   await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);
-  await removeInjuredPlayersFromSquads([...team.players, ...realTeamWithPlayers.players]);
+  await removeInjuredPlayersFromSquads([
+    ...team.players,
+    ...realTeamWithPlayers.players,
+  ]);
 }
 
 async function saveFixtureLineup(
@@ -256,7 +265,11 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
 }
 
 async function removeInjuredPlayersFromSquads(players: GamePlayer[]) {
-  await Promise.all(players.filter(x => x.injured).map(x => updatePlayerLineupPosition(x.id, undefined, false)));
+  await Promise.all(
+    players
+      .filter((x) => x.injured)
+      .map((x) => updatePlayerLineupPosition(x.id, undefined, false))
+  );
 }
 
 function scoreSummary(scores: { DEF: number; MID: number; FWD: number }) {
@@ -270,34 +283,60 @@ function calculateSegmentResult(homeScore: number, awayScore: number) {
   return 0;
 }
 
-async function getTeamScores(team: BasicTeamWithPlayer, gameId: string): Promise<SegmentScore> {
+async function getTeamScores(
+  team: BasicTeamWithPlayer,
+  gameId: string
+): Promise<SegmentScore> {
   const scores = getLineupScores(team.players, team.team.captainBoost);
-  scores.DEF += await rollForScores(6, 2, team.players,gameId);
-  scores.MID += await rollForScores(6, MAX_DEF_POSITION + 1, team.players, gameId);
-  scores.FWD += await rollForScores(6, MAX_MID_POSITION + 1, team.players, gameId);
+  scores.DEF += await rollForScores(6, 2, team.players, gameId);
+  scores.MID += await rollForScores(
+    6,
+    MAX_DEF_POSITION + 1,
+    team.players,
+    gameId
+  );
+  scores.FWD += await rollForScores(
+    6,
+    MAX_MID_POSITION + 1,
+    team.players,
+    gameId
+  );
   return scores;
 }
 
-async function rollForScores(diceSize: number, startingLineupPosition: number, players: GamePlayer[], gameId: string, hasExploded: boolean = false): Promise<number> {
+async function rollForScores(
+  diceSize: number,
+  startingLineupPosition: number,
+  players: GamePlayer[],
+  gameId: string,
+  hasExploded: boolean = false
+): Promise<number> {
   const roll = Math.floor(Math.random() * diceSize) + 1;
   if (roll === diceSize) {
-    return roll + await rollForScores(diceSize, startingLineupPosition, players, gameId, true);
+    return (
+      roll +
+      (await rollForScores(
+        diceSize,
+        startingLineupPosition,
+        players,
+        gameId,
+        true
+      ))
+    );
   }
   if (hasExploded) {
-    const player = players.find(x => x.lineupPosition === startingLineupPosition + (roll -1))
+    const player = players.find(
+      (x) => x.lineupPosition === startingLineupPosition + (roll - 1)
+    );
     if (player) {
       await setInjured(player.id, true);
-      await createGameLog(gameId, `Ouch! ${player.name} pushed themselves too hard and picked up an injury. They'll be out for the rest of the season!`)
+      await createGameLog(
+        gameId,
+        `Ouch! ${player.name} pushed themselves too hard and picked up an injury. They'll be out for the rest of the season!`
+      );
       // Set in memory too
       player.injured = true;
     }
   }
   return roll;
-}
-
-export function orderTeamsInSeason(teamSeasons: TeamSeasonSummary[]) {
-  return teamSeasons
-    .sort((a, b) => b.id.localeCompare(a.id))
-    .sort((a, b) => b.startingScore - a.startingScore)
-    .sort((a, b) => b.score - a.score);
 }

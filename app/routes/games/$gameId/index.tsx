@@ -10,10 +10,7 @@ import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import type { GameLog } from "~/domain/logs.server";
 import { getGameLogs } from "~/domain/logs.server";
-import type {
-  Season as SeasonModel,
-  TeamSeasonSummary,
-} from "~/domain/season.server";
+import type { Season as SeasonModel } from "~/domain/season.server";
 import { getAllSeasons } from "~/domain/season.server";
 import { getTeamSeasons } from "~/domain/season.server";
 import type { ResultSummary } from "~/domain/fixtures.server";
@@ -25,13 +22,15 @@ import { Stage } from "~/engine/game";
 import { MIN_TEAMS } from "~/engine/team";
 import LoadingForm from "~/components/loadingForm";
 import { useRevalidateOnInterval } from "~/hooks/revalidate";
+import type { PositionedTeamSeason } from "~/engine/leagueTable";
+import { mapTeamSeasonsToPosition } from "~/engine/leagueTable";
 
 type LoaderData = {
   game: Game;
   team: Team;
   seasons: {
     season: SeasonModel;
-    teamSeasons: TeamSeasonSummary[];
+    teamSeasons: PositionedTeamSeason[];
     results: ResultSummary[];
   }[];
   logs: GameLog[];
@@ -48,11 +47,17 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
   const seasons = await getAllSeasons(params.gameId);
   const seasonsMap = await Promise.all(
-    seasons.map(async (x) => ({
-      season: x,
-      teamSeasons: await getTeamSeasons(x.id),
-      results: await getResults(x.id),
-    }))
+    seasons
+      .map(async (x) => ({
+        season: x,
+        teamSeasons: await getTeamSeasons(x.id),
+        results: await getResults(x.id),
+      }))
+      .map(async (x) => ({
+        season: (await x).season,
+        teamSeasons: mapTeamSeasonsToPosition(await x),
+        results: (await x).results,
+      }))
   );
   const team = await getTeam(userId, params.gameId);
   const logs = await getGameLogs(params.gameId);

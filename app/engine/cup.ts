@@ -1,4 +1,8 @@
-import { createResult, getResultsForStage } from "~/domain/fixtures.server";
+import {
+  createResult,
+  getResults,
+  getResultsForStage,
+} from "~/domain/fixtures.server";
 import type { Game } from "~/domain/games.server";
 import { getGame, recordWinner } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
@@ -11,6 +15,7 @@ import {
 import { markAsReady } from "~/domain/team.server";
 import { getTeamById } from "~/domain/team.server";
 import { Stage } from "./game";
+import { mapTeamSeasonsToPosition } from "./leagueTable";
 
 export async function prepareCup(gameId: string) {
   const game = await getGame(gameId);
@@ -33,21 +38,29 @@ export async function prepareCup(gameId: string) {
 async function winnerHasQualifiedForCup(game: Game) {
   const seasons = await getAllSeasons(game.id);
   const seasonsMap = await Promise.all(
-    seasons.map(async (x) => ({
-      season: x,
-      teamSeasons: (
-        await getTeamSeasons(x.id)
-      ).sort((a, b) => b.score - a.score),
-    }))
+    seasons
+      .map(async (x) => ({
+        season: x,
+        teamSeasons: await getTeamSeasons(x.id),
+        results: await getResults(x.id),
+      }))
+      .map(async (x) => ({
+        season: (await x).season,
+        teamSeasons: mapTeamSeasonsToPosition(await x),
+      }))
   );
-  const season = seasonsMap[0];
-  const winningTeamSeason = season.teamSeasons[0];
+  const season = seasonsMap.filter(
+    (x) => x.season.seasonNumber === seasons.length
+  )[0];
+  const winningTeamSeason = season.teamSeasons.filter(
+    (x) => x.position === 1
+  )[0];
   if (winningTeamSeason.score >= game.victoryPoints) {
     // Already won anyway
     return false;
   }
   const totalWins = seasonsMap
-    .map((x) => x.teamSeasons[0].teamId)
+    .map((x) => x.teamSeasons.filter((y) => y.position === 1)[0].teamId)
     .filter((x) => x === winningTeamSeason.teamId).length;
   return totalWins >= 3;
 }

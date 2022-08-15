@@ -1,3 +1,4 @@
+import { getResults } from "~/domain/fixtures.server";
 import type { Game } from "~/domain/games.server";
 import { getGame, recordWinner } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
@@ -6,7 +7,6 @@ import {
   getTeamPlayers,
   removePlayerFromTeam,
 } from "~/domain/players.server";
-import type { TeamSeasonSummary } from "~/domain/season.server";
 import { getCurrentSeason, getTeamSeasons } from "~/domain/season.server";
 import type { Team } from "~/domain/team.server";
 import {
@@ -14,6 +14,8 @@ import {
   updateCaptainBoost,
   updateCash,
 } from "~/domain/team.server";
+import type { PositionedTeamSeason } from "./leagueTable";
+import { mapTeamSeasonsToPosition } from "./leagueTable";
 import { getScoutPrice } from "./scouting";
 import { calculateScoreForTeam } from "./team";
 
@@ -22,45 +24,52 @@ const MID_TABLE_MIN = 60;
 const TITLE_CONTENDERS_MIN = 80;
 
 export async function completeFinancesForAllTeams(gameId: string) {
-  const season = await getCurrentSeason(gameId);
-  const teamSeasons = await getTeamSeasons(season.id);
   const game = await getGame(gameId);
+  const season = await getCurrentSeason(gameId);
+  const seasonAndResults = {
+    season,
+    teamSeasons: await getTeamSeasons(season.id),
+    results: await getResults(season.id),
+  };
+  const positionedTeamSeasons = mapTeamSeasonsToPosition(seasonAndResults);
   await Promise.all(
-    teamSeasons
-      .sort((a, b) => b.score - a.score)
-      .map((x, i) => completeFinances(game, x, i + 1))
+    positionedTeamSeasons
+      .sort((a, b) => b.position - a.position)
+      .map((x) => completeFinances(game, x))
   );
 }
 
 async function completeFinances(
   game: Game,
-  teamSeason: TeamSeasonSummary,
-  position: number
+  positionedTeamSeason: PositionedTeamSeason
 ) {
-  const team = await getTeamById(teamSeason.teamId);
-  if (teamSeason.score >= game.victoryPoints && position === 1) {
+  const team = await getTeamById(positionedTeamSeason.teamId);
+  if (
+    positionedTeamSeason.score >= game.victoryPoints &&
+    positionedTeamSeason.position === 1
+  ) {
     await createGameLog(
       game.id,
       `*** ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! ***`
     );
     await recordWinner(game.id, team.teamName);
   }
-  const placementAward = 110 - 10 * position;
+  const placementAward = 110 - 10 * positionedTeamSeason.position;
   const stadiumIncome = calculateStadiumIncome(
     team.stadiumLevel,
-    teamSeason.score
+    positionedTeamSeason.score
   );
-  const captainBoost = position;
+  const captainBoost = positionedTeamSeason.position;
   await createGameLog(
     game.id,
-    `${teamSeason.teamName} finish the season in position: ${position} and gain ${placementAward}M plus ${stadiumIncome}M from stadium income.` +
+    `${positionedTeamSeason.teamName} finish the season in position: ${positionedTeamSeason.position} and gain ${placementAward}M plus ${stadiumIncome}M from stadium income.` +
       `This season they will play with a captain boost of +${captainBoost}`
   );
-  const players = await getTeamPlayers(teamSeason.teamId);
+  const players = await getTeamPlayers(positionedTeamSeason.teamId);
   const wages = await calculateScoreForTeam(players);
   await createGameLog(
     game.id,
-    `${teamSeason.teamName} find ${wages}M to dish out for wages`
+    `${positionedTeamSeason.teamName} find ${wages}M to dish out for wages`
   );
   const total = team.cash + stadiumIncome + placementAward - wages;
   await updateCash(team.id, total);
