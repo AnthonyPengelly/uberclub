@@ -4,6 +4,8 @@ create table public.games (
   player_collection_id uuid references public.player_collections not null,
   name varchar not null,
   stage integer not null default 0,
+  -- Explicitly doesn't join to teams, as it confuses the join in the other direction
+  winning_team varchar null,
 
   primary key (id)
 );

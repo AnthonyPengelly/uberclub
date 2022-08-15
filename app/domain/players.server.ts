@@ -47,7 +47,7 @@ export type GamePlayer = {
   team: string;
   position: string;
   imageUrl: string;
-  lineupPosition?: number;
+  lineupPosition?: number | null;
   captain: boolean;
   injured: boolean;
   stars: number;
@@ -260,7 +260,7 @@ export async function removePlayerFromTeam(id: string) {
 
 export async function updatePlayerLineupPosition(
   id: string,
-  lineupPosition: number | undefined,
+  lineupPosition: number | undefined | null,
   captain: boolean
 ) {
   const { error } = await supabase
@@ -273,10 +273,7 @@ export async function updatePlayerLineupPosition(
   }
 }
 
-export async function setInjured(
-  id: string,
-  injured: boolean
-) {
+export async function setInjured(id: string, injured: boolean) {
   const { error } = await supabase
     .from("player_game_states")
     .update({ injured })
@@ -287,9 +284,7 @@ export async function setInjured(
   }
 }
 
-export async function resetInjuredForGame(
-  gameId: string,
-) {
+export async function resetInjuredForGame(gameId: string) {
   const { error } = await supabase
     .from("player_game_states")
     .update({ injured: false })

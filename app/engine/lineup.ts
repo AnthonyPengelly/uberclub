@@ -12,23 +12,16 @@ export const MIN_FORWARDS = 2;
 
 export type LineupPlayer = GamePlayer & { lineupPosition: number };
 
-export async function addPlayerToLineup(
+export async function updatePlayerPosition(
   playerId: string,
-  position: number,
-  existingPlayerId: string
+  position: number | undefined
 ) {
   const player = await getPlayer(playerId);
-  const existingPlayer =
-    existingPlayerId && (await getPlayer(existingPlayerId));
-  const existingPosition = player.lineupPosition;
-  await updatePlayerLineupPosition(player.id, position, player.captain);
-  if (existingPlayer) {
-    await updatePlayerLineupPosition(
-      existingPlayer.id,
-      existingPosition,
-      existingPosition ? existingPlayer.captain : false
-    );
-  }
+  await updatePlayerLineupPosition(
+    player.id,
+    position,
+    position ? player.captain : false
+  );
 }
 
 export async function updateCaptain(
@@ -48,13 +41,6 @@ export async function updateCaptain(
       false
     );
   }
-}
-
-export async function removePlayerFromLineup(playerId: string) {
-  if (!playerId) {
-    return;
-  }
-  await updatePlayerLineupPosition(playerId, undefined, false);
 }
 
 export function getLineupScores(players: GamePlayer[], captainBoost: number) {

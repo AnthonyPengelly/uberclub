@@ -1,6 +1,11 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useSubmit, useTransition } from "@remix-run/react";
+import {
+  Form,
+  useLoaderData,
+  useSubmit,
+  useTransition,
+} from "@remix-run/react";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
@@ -10,26 +15,29 @@ import { getTeamPlayers } from "~/domain/players.server";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import {
-  addPlayerToLineup,
   findPlayerInPosition,
   getLineupScores,
   hasChemistry,
   MAX_DEF_POSITION,
   MAX_MID_POSITION,
-  removePlayerFromLineup,
+  updatePlayerPosition,
   validateLineup,
 } from "~/engine/lineup";
-import { canSellPlayer, Stage } from "~/engine/game";
+import { Stage } from "~/engine/game";
 import PlayerDisplay from "~/components/playerDisplay";
 import LoadingForm from "~/components/loadingForm";
 import { updatePlayersBasedOnFormData } from "~/engine/team";
-import PlayerSelection from "~/components/playerSelection";
-import { getScoutPrice } from "~/engine/scouting";
+import { useState } from "react";
 
 type LoaderData = {
   team: Team;
   players: GamePlayer[];
   game: Game;
+};
+
+type SelectedPlayerPosition = {
+  id: string | undefined;
+  position: number | undefined;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -52,15 +60,17 @@ export const action: ActionFunction = async ({ request, params }) => {
   const game = await getGame(params.gameId);
   const formData = await request.formData();
   const team = await getTeam(userId, params.gameId);
-  const playerId = formData.get("player-id") as string;
-  const existingPlayerId = formData.get("existing-player-id") as string;
-  const position = parseInt(formData.get("position") as string, 10);
-  invariant(position, "position not found");
+  const player1Id = formData.get("player1-id") as string;
+  const position1 = parseInt(formData.get("position1") as string, 10);
+  const player2Id = formData.get("player2-id") as string;
+  const position2 = parseInt(formData.get("position2") as string, 10);
 
-  if (playerId === "null" || !playerId) {
-    await removePlayerFromLineup(existingPlayerId);
-  } else {
-    await addPlayerToLineup(playerId, position, existingPlayerId);
+  if (player1Id) {
+    await updatePlayerPosition(player1Id, position2);
+  }
+
+  if (player2Id) {
+    await updatePlayerPosition(player2Id, position1);
   }
 
   const players = await getTeamPlayers(team.id);
@@ -75,7 +85,13 @@ export default function TeamPage() {
   const { submission } = useTransition();
   const submit = useSubmit();
   const { team, players, game } = useLoaderData<LoaderData>();
-  if (submission && submission.formData.get("position")) {
+  const [selectedPlayerPosition, setSelectedPlayerPosition] =
+    useState<SelectedPlayerPosition>();
+  if (
+    submission &&
+    (submission.formData.get("position1") ||
+      submission.formData.get("position2"))
+  ) {
     updatePlayersBasedOnFormData(players, submission.formData);
   }
   const scores = getLineupScores(players, team.captainBoost);
@@ -90,7 +106,6 @@ export default function TeamPage() {
     game.stage === Stage.CupSemiFinal ||
     game.stage === Stage.CupFinal;
   const canMakeChanges = !team.isReady || !isMatchDay;
-  const canSell = canSellPlayer(game) && players.length > 11;
   const captain = players.find((x) => x.captain);
 
   return (
@@ -100,13 +115,9 @@ export default function TeamPage() {
         <p>
           It's time to set your lineup and choose your captain. In each match
           your midfield star value will be put up against the opponents
-          midfield, plus a 6 sided dice each (add another roll if you get a six, though
-          you might pick up an injury)! Your attack will play their defence and vice-versa
-          in a best of three. Good luck out there ⚽
-        </p>
-        <p>
-          During pre season you can also sell players but be careful, when
-          they're gone they're gone!
+          midfield, plus a 6 sided dice each (add another roll if you get a six,
+          though you might pick up an injury)! Your attack will play their
+          defence and vice-versa in a best of three. Good luck out there ⚽
         </p>
       </div>
       {validationMessage && <p className="error">{validationMessage}</p>}
@@ -173,6 +184,8 @@ export default function TeamPage() {
               players={players}
               position={1}
               canMakeChanges={canMakeChanges}
+              selectedPlayerPosition={selectedPlayerPosition}
+              setSelectedPlayerPosition={setSelectedPlayerPosition}
             />
           </div>
           <div className="players">
@@ -182,6 +195,8 @@ export default function TeamPage() {
                 players={players}
                 position={x + 1 + 1}
                 canMakeChanges={canMakeChanges}
+                selectedPlayerPosition={selectedPlayerPosition}
+                setSelectedPlayerPosition={setSelectedPlayerPosition}
               />
             ))}
           </div>
@@ -195,6 +210,8 @@ export default function TeamPage() {
                 players={players}
                 position={x + MAX_DEF_POSITION + 1}
                 canMakeChanges={canMakeChanges}
+                selectedPlayerPosition={selectedPlayerPosition}
+                setSelectedPlayerPosition={setSelectedPlayerPosition}
               />
             ))}
           </div>
@@ -208,6 +225,8 @@ export default function TeamPage() {
                 players={players}
                 position={x + MAX_MID_POSITION + 1}
                 canMakeChanges={canMakeChanges}
+                selectedPlayerPosition={selectedPlayerPosition}
+                setSelectedPlayerPosition={setSelectedPlayerPosition}
               />
             ))}
           </div>
@@ -218,27 +237,31 @@ export default function TeamPage() {
         {players
           .filter((x) => x.lineupPosition === null)
           .map((x) => (
-            <PlayerDisplay key={x.id} player={x}>
-              {canSell && (
-                <LoadingForm
-                  method="post"
-                  action={`/games/${game.id}/sell`}
-                  submitButtonText={`Sell: ${getScoutPrice(
-                    x.stars,
-                    x.potential
-                  )}M`}
-                  buttonClass="mini-button xs-button-text"
-                  onSubmit={(event) => {
-                    if (!confirm(`Are you want to sell ${x.name}?`)) {
-                      event.preventDefault();
-                    }
-                  }}
-                >
-                  <input type="hidden" name="player-id" value={x.id} />
-                </LoadingForm>
-              )}
-            </PlayerDisplay>
+            <WithSelection
+              key={x.id}
+              selectedPlayerPosition={selectedPlayerPosition}
+              setSelectedPlayerPosition={setSelectedPlayerPosition}
+              enabled={canMakeChanges && !x.injured}
+              playerId={x.id}
+              position={undefined}
+            >
+              <PlayerDisplay player={x} />
+            </WithSelection>
           ))}
+        {selectedPlayerPosition?.position && (
+          <WithSelection
+            selectedPlayerPosition={selectedPlayerPosition}
+            setSelectedPlayerPosition={setSelectedPlayerPosition}
+            enabled={canMakeChanges}
+            playerId={undefined}
+            position={undefined}
+          >
+            <PlayerDisplay
+              player={undefined}
+              noPlayerText="Move to bench"
+            ></PlayerDisplay>
+          </WithSelection>
+        )}
       </div>
     </>
   );
@@ -248,10 +271,14 @@ function Position({
   position,
   players,
   canMakeChanges,
+  selectedPlayerPosition,
+  setSelectedPlayerPosition,
 }: {
   position: number;
   players: GamePlayer[];
   canMakeChanges: boolean;
+  selectedPlayerPosition: SelectedPlayerPosition | undefined;
+  setSelectedPlayerPosition: (id: SelectedPlayerPosition | undefined) => void;
 }) {
   const existingPlayer = findPlayerInPosition(players, position);
   const previousPlayer = findPlayerInPosition(players, position - 1);
@@ -259,14 +286,75 @@ function Position({
     ? hasChemistry(existingPlayer, previousPlayer)
     : false;
   return (
-    <PlayerDisplay player={existingPlayer} hasChemistry={chemistry}>
-      {canMakeChanges && (
-        <PlayerSelection
-          position={position}
-          players={players}
-          existingPlayer={existingPlayer}
+    <WithSelection
+      enabled={canMakeChanges && !existingPlayer?.injured}
+      selectedPlayerPosition={selectedPlayerPosition}
+      setSelectedPlayerPosition={setSelectedPlayerPosition}
+      playerId={existingPlayer?.id}
+      position={position}
+    >
+      <PlayerDisplay player={existingPlayer} hasChemistry={chemistry} />
+    </WithSelection>
+  );
+}
+
+function WithSelection({
+  children,
+  selectedPlayerPosition,
+  setSelectedPlayerPosition,
+  playerId,
+  position,
+  enabled,
+}: {
+  children: React.ReactNode | React.ReactNode[];
+  selectedPlayerPosition: SelectedPlayerPosition | undefined;
+  setSelectedPlayerPosition: (id: SelectedPlayerPosition | undefined) => void;
+  playerId: string | undefined;
+  position: number | undefined;
+  enabled: boolean;
+}) {
+  if (!enabled) {
+    return <>{children}</>;
+  }
+  if (selectedPlayerPosition) {
+    return (
+      <Form
+        method="post"
+        onSubmit={() => {
+          setSelectedPlayerPosition(undefined);
+        }}
+        className="wrapper-form"
+        data-selected-player={
+          selectedPlayerPosition.id === playerId &&
+          selectedPlayerPosition.position === position
+        }
+      >
+        <input type="hidden" name="player1-id" value={playerId} />
+        <input type="hidden" name="position1" value={position} />
+        <input
+          type="hidden"
+          name="player2-id"
+          value={selectedPlayerPosition.id}
         />
-      )}
-    </PlayerDisplay>
+        <input
+          type="hidden"
+          name="position2"
+          value={selectedPlayerPosition.position}
+        />
+        <button className="wrapper-button" type="submit">
+          {children}
+        </button>
+      </Form>
+    );
+  }
+  return (
+    <button
+      className="wrapper-button"
+      onClick={(e) => {
+        setSelectedPlayerPosition({ id: playerId, position });
+      }}
+    >
+      {children}
+    </button>
   );
 }
