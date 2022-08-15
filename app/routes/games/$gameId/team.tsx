@@ -126,6 +126,10 @@ export default function TeamPage() {
           though you might pick up an injury)! Your attack will play their
           defence and vice-versa in a best of three. Good luck out there ⚽
         </p>
+        <p>
+          🧪 You can gain extra stars by positioning players of the same team
+          next to each other 🧪
+        </p>
       </div>
       {validationMessage && <p className="error">{validationMessage}</p>}
       {canMakeChanges && (

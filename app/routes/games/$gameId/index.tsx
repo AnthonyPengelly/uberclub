@@ -108,7 +108,7 @@ export default function GameDetailsPage() {
               <p>
                 ⏳ <strong>{team.teamName}</strong> are waiting for your next
                 move, <strong>{team.managerName}</strong>! The banner above will
-                direct you where you need to go.
+                direct you where you need to go 👆
               </p>
             )}
           </>
