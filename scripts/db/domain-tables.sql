@@ -35,6 +35,15 @@ create table public.real_teams (
   primary key (id)
 );
 
+create table public.real_countries (
+  id uuid not null default uuid_generate_v4(),
+  name varchar not null,
+  player_collection_id uuid references public.player_collections not null,
+  image_url varchar not null,
+
+  primary key (id)
+);
+
 create table public.positions (
   id uuid not null default uuid_generate_v4(),
   name varchar not null,
@@ -55,6 +64,7 @@ create table public.real_players (
   overall integer not null,
   potential integer not null,
   real_team_id uuid references public.real_teams not null,
+  real_country_id uuid references public.real_countries null,
   position_id uuid references public.positions not null,
   image_url varchar not null,
 
