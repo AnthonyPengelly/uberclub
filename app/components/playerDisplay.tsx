@@ -20,7 +20,7 @@ export default function PlayerDisplay({
     );
   }
   return (
-    <div className={`player player__${player.position}`}>
+    <div className={`player player__${player.position}`} data-injured={!!player.injured}>
       <div className="player__name">{player.name}</div>
       <div className="player__stars">
         {[...Array(player.stars).keys()].map(() => "★").join("")}

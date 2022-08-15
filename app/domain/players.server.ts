@@ -273,6 +273,33 @@ export async function updatePlayerLineupPosition(
   }
 }
 
+export async function setInjured(
+  id: string,
+  injured: boolean
+) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ injured })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function resetInjuredForGame(
+  gameId: string,
+) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ injured: false })
+    .eq("game_id", gameId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function drawPlayersFromDeck(
   gameId: string,
   numberOfPlayers: number

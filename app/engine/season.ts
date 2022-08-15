@@ -6,7 +6,7 @@ import {
 } from "~/domain/fixtures.server";
 import { getGame } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
-import type { GamePlayer } from "~/domain/players.server";
+import { GamePlayer, setInjured, updatePlayerLineupPosition } from "~/domain/players.server";
 import { getRealTeamPlayers } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import { getRealTeam } from "~/domain/realTeam.server";
@@ -22,7 +22,7 @@ import { getTeamsInGame } from "~/domain/team.server";
 import { getPlayersWithAiPositions } from "./ai-team";
 import { createSeasonFixtures } from "./fixtures";
 import { Stage } from "./game";
-import { getLineupScores } from "./lineup";
+import { getLineupScores, MAX_DEF_POSITION, MAX_MID_POSITION } from "./lineup";
 import { calculateScoreForTeam } from "./team";
 
 type TeamWithPlayer = {
@@ -117,6 +117,7 @@ async function playFixture(
   }
   await saveFixtureLineup(homeTeam, fixture.id);
   await saveFixtureLineup(awayTeam, fixture.id);
+  await removeInjuredPlayersFromSquads([...homeTeam.players, ...awayTeam.players]);
 }
 
 async function playSim(
@@ -171,6 +172,7 @@ async function playSim(
   }
   await saveFixtureLineup(team, fixture.id);
   await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);
+  await removeInjuredPlayersFromSquads([...team.players, ...realTeamWithPlayers.players]);
 }
 
 async function saveFixtureLineup(
@@ -204,8 +206,8 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
   awayTeam: T
 ): Promise<FixtureScore<T>> {
   const fixtureScore = {
-    homeScore: getTeamScores(homeTeam),
-    awayScore: getTeamScores(awayTeam),
+    homeScore: await getTeamScores(homeTeam, gameId),
+    awayScore: await getTeamScores(awayTeam, gameId),
   };
   const defenceResult = calculateSegmentResult(
     fixtureScore.homeScore.DEF,
@@ -253,6 +255,10 @@ async function calulateWinner<T extends BasicTeamWithPlayer>(
   return { winner: null, ...fixtureScore };
 }
 
+async function removeInjuredPlayersFromSquads(players: GamePlayer[]) {
+  await Promise.all(players.filter(x => x.injured).map(x => updatePlayerLineupPosition(x.id, undefined, false)));
+}
+
 function scoreSummary(scores: { DEF: number; MID: number; FWD: number }) {
   return `DEF: ${scores.DEF}, MID: ${scores.MID}, FWD: ${scores.FWD}`;
 }
@@ -264,17 +270,29 @@ function calculateSegmentResult(homeScore: number, awayScore: number) {
   return 0;
 }
 
-function getTeamScores(team: BasicTeamWithPlayer): SegmentScore {
+async function getTeamScores(team: BasicTeamWithPlayer, gameId: string): Promise<SegmentScore> {
   const scores = getLineupScores(team.players, team.team.captainBoost);
-  scores.DEF += explodingDice(6);
-  scores.MID += explodingDice(6);
-  scores.FWD += explodingDice(6);
+  scores.DEF += await rollForScores(6, 2, team.players,gameId);
+  scores.MID += await rollForScores(6, MAX_DEF_POSITION + 1, team.players, gameId);
+  scores.FWD += await rollForScores(6, MAX_MID_POSITION + 1, team.players, gameId);
   return scores;
 }
 
-function explodingDice(diceSize: number): number {
-  const roll = Math.floor(Math.random() * diceSize) + 1
-  return roll === diceSize ? roll + explodingDice(diceSize) : roll;
+async function rollForScores(diceSize: number, startingLineupPosition: number, players: GamePlayer[], gameId: string, hasExploded: boolean = false): Promise<number> {
+  const roll = Math.floor(Math.random() * diceSize) + 1;
+  if (roll === diceSize) {
+    return roll + await rollForScores(diceSize, startingLineupPosition, players, gameId, true);
+  }
+  if (hasExploded) {
+    const player = players.find(x => x.lineupPosition === startingLineupPosition + (roll -1))
+    if (player) {
+      await setInjured(player.id, true);
+      await createGameLog(gameId, `Ouch! ${player.name} pushed themselves too hard and picked up an injury. They'll be out for the rest of the season!`)
+      // Set in memory too
+      player.injured = true;
+    }
+  }
+  return roll;
 }
 
 export function orderTeamsInSeason(teamSeasons: TeamSeasonSummary[]) {

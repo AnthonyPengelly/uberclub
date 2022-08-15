@@ -13,7 +13,7 @@ export function getPlayersWithAiPositions(players: GamePlayer[]) {
     x.lineupPosition = undefined;
     x.captain = false;
   });
-  const orderedPlayers = players.sort((a, b) => b.stars - a.stars);
+  const orderedPlayers = players.filter(x => !x.injured).sort((a, b) => b.stars - a.stars);
   orderedPlayers[0].captain = true;
 
   const goalkeeper = orderedPlayers.find((x) => x.position === "GKP");

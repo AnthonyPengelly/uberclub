@@ -39,7 +39,7 @@ async function completeFinances(
   if (teamSeason.score >= 100 && position === 1) {
     await createGameLog(
       gameId,
-      `******************************* ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! *******************************`
+      `*** ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! ***`
     );
     await recordWinner(gameId, team.teamName);
   }

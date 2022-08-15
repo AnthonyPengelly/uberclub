@@ -180,6 +180,7 @@ create table public.fixture_lineups (
   lineup_position integer not null,
   captain_boost integer null,
   real_team_id uuid references public.real_teams null,
+  injured boolean not null,
 
   primary key (id)
 )
