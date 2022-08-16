@@ -163,6 +163,7 @@ create table public.transfer_bids (
   player_game_state_id uuid references public.player_game_states not null,
   cost integer not null,
   status integer not null,
+  created_at timestamptz not null default current_timestamp,
 
   primary key (id)
 );

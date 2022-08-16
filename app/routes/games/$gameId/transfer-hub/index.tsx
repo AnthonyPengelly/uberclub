@@ -1,4 +1,4 @@
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
@@ -8,17 +8,28 @@ import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import type { GamePlayer } from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
+import { getPlayer } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
+import { getTeamsInGame } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
-import { sellPlayer } from "~/engine/finances";
+import type { TransferBid } from "~/domain/transferBids.server";
+import { getTransferBidsForTeam } from "~/domain/transferBids.server";
 import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
-import { getScoutPrice } from "~/engine/scouting";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
+import { Status } from "~/engine/transfers";
 import { requireUserId } from "~/session.server";
+
+type BidSummary = {
+  bid: TransferBid;
+  player: GamePlayer;
+  buyingTeam: Team;
+  sellingTeam: Team;
+};
 
 type LoaderData = {
   team: Team;
   game: Game;
+  bids: BidSummary[];
   players: GamePlayer[];
 };
 
@@ -29,78 +40,202 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const team = await getTeam(userId, params.gameId);
   overrideGameStageWithTeam(game, team);
 
-  const players = await getTeamPlayers(team.id);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ game, team, players });
-};
+  const allTeams = await getTeamsInGame(game.id);
+  const bids = await Promise.all(
+    (
+      await getTransferBidsForTeam(team.id)
+    ).map(async (x) => ({
+      bid: x,
+      player: await getPlayer(x.playerGameStateId),
+      buyingTeam: allTeams.find((y) => y.id === x.buyingTeamId) as Team,
+      sellingTeam: allTeams.find((y) => y.id === x.sellingTeamId) as Team,
+    }))
+  );
 
-export const action: ActionFunction = async ({ request, params }) => {
-  const userId = await requireUserId(request);
-  invariant(params.gameId, "gameId not found");
-  const team = await getTeam(userId, params.gameId);
-  const game = await getGame(params.gameId);
-  overrideGameStageWithTeam(game, team);
-  const formData = await request.formData();
-  const playerId = formData.get("player-id") as string;
-  invariant(playerId, "playerId not found");
-  if (!team) {
-    throw new Response("Not Found", { status: 404 });
-  }
-  if (!canBuyOrSellPlayer(game)) {
-    throw new Error("Cannot currently sell");
-  }
-
-  await sellPlayer(params.gameId, playerId, team);
   const players = await getTeamPlayers(team.id);
-
-  return json({ game, team, players });
+  return json<LoaderData>({ game, team, bids, players });
 };
 
 export default function OffersPage() {
-  const { game, team, players } = useLoaderData<LoaderData>();
-  const canBuy = canBuyOrSellPlayer(game) && players.length > 11;
+  const { game, team, bids, players } = useLoaderData<LoaderData>();
+  const canBuyOrSell = canBuyOrSellPlayer(game);
+  const incomingBids = bids.filter(
+    (x) => x.sellingTeam.id === team.id && x.bid.status === Status.Pending
+  );
+  const outgoingBids = bids.filter(
+    (x) => x.buyingTeam.id === team.id && x.bid.status === Status.Pending
+  );
+  const olderIncomingBids = bids.filter(
+    (x) => x.sellingTeam.id === team.id && x.bid.status !== Status.Pending
+  );
+  const olderOutgoingBids = bids.filter(
+    (x) => x.buyingTeam.id === team.id && x.bid.status !== Status.Pending
+  );
 
   return (
     <>
       <div className="flow | quote">
-        <p>Here you can put in offers for players on opponent teams.</p>
-        {!canBuy && (
-          <p>
-            You can only sell players during pre-season, and as long as you have
-            more than 11 players currently in your squad.
-          </p>
+        <p>Here you can view offers that you've sent and received.</p>
+        {!canBuyOrSell && (
+          <p>You can only buy/sell players during pre-season..</p>
         )}
       </div>
       <h2>{team.cash}M cash available</h2>
       <div>
         {players.length}/{MAX_SQUAD_SIZE} players in squad
       </div>
-      <div className="players squad-list">
-        {players.map((x) => (
-          <PlayerDisplay key={x.id} player={x}>
-            {canBuy ? (
-              <LoadingForm
-                method="post"
-                submitButtonText={`Sell: ${getScoutPrice(
-                  x.stars,
-                  x.potential
-                )}M`}
-                buttonClass="mini-button xs-button-text"
-                onSubmit={(event) => {
-                  if (!confirm(`Are you want to sell ${x.name}?`)) {
-                    event.preventDefault();
-                  }
-                }}
-              >
-                <input type="hidden" name="player-id" value={x.id} />
-              </LoadingForm>
-            ) : null}
-          </PlayerDisplay>
+      <BidList
+        bids={incomingBids}
+        heading="Incoming offers"
+        canBuyOrSell={canBuyOrSell}
+        notEnoughPlayers={players.length === 11}
+        gameId={game.id}
+        teamId={team.id}
+      />
+      <BidList
+        bids={outgoingBids}
+        heading="Outgoing offers"
+        canBuyOrSell={canBuyOrSell}
+        notEnoughPlayers={players.length === 11}
+        gameId={game.id}
+        teamId={team.id}
+      />
+      <BidList
+        bids={olderIncomingBids}
+        heading="Previous incoming offers"
+        canBuyOrSell={canBuyOrSell}
+        notEnoughPlayers={players.length === 11}
+        gameId={game.id}
+        teamId={team.id}
+      />
+      <BidList
+        bids={olderOutgoingBids}
+        heading="Previous outgoing offers"
+        canBuyOrSell={canBuyOrSell}
+        notEnoughPlayers={players.length === 11}
+        gameId={game.id}
+        teamId={team.id}
+      />
+    </>
+  );
+}
+
+type BidListProps = {
+  bids: BidSummary[];
+  heading: string;
+  canBuyOrSell: boolean;
+  notEnoughPlayers: boolean;
+  gameId: string;
+  teamId: string;
+};
+
+function BidList({
+  bids,
+  heading,
+  canBuyOrSell,
+  notEnoughPlayers,
+  gameId,
+  teamId,
+}: BidListProps) {
+  if (bids.length === 0) {
+    return null;
+  }
+  return (
+    <>
+      <h3>{heading}</h3>
+      <div className="players squad-list | justify-left">
+        {bids.map((x) => (
+          <>
+            <PlayerDisplay key={x.bid.id} player={x.player} />
+            <div className="bid-info">
+              <div className="flow">
+                <div>
+                  Offer: <strong>{x.bid.cost}M</strong>
+                </div>
+                <div>
+                  {x.buyingTeam.id === teamId ? "Made to" : "From"}{" "}
+                  <strong>{x.buyingTeam.managerName}</strong>
+                </div>
+              </div>
+              <BidForm
+                canBuyOrSell={canBuyOrSell}
+                notEnoughPlayers={notEnoughPlayers}
+                bid={x}
+                gameId={gameId}
+                teamId={teamId}
+              />
+            </div>
+          </>
         ))}
       </div>
     </>
+  );
+}
+
+type BidFormProps = {
+  canBuyOrSell: boolean;
+  notEnoughPlayers: boolean;
+  bid: BidSummary;
+  gameId: string;
+  teamId: string;
+};
+
+function BidForm({
+  canBuyOrSell,
+  notEnoughPlayers,
+  bid,
+  gameId,
+  teamId,
+}: BidFormProps) {
+  if (bid.bid.status !== Status.Pending) {
+    return (
+      <div>
+        {bid.bid.status === Status.Accepted ? "✅" : "❌"}{" "}
+        {Status[bid.bid.status]}
+      </div>
+    );
+  }
+  if (!canBuyOrSell) {
+    return <div>Can only use the transfer hub in pre-season</div>;
+  }
+  if (bid.buyingTeam.id === teamId) {
+    return (
+      <LoadingForm
+        method="post"
+        submitButtonText="Withdraw"
+        buttonClass="mini-button button-secondary"
+        action={`/games/${gameId}/transfer-hub/withdraw`}
+      >
+        <input type="hidden" name="bid-id" value={bid.bid.id} />
+      </LoadingForm>
+    );
+  }
+  if (notEnoughPlayers) {
+    return <div>You don't have enough players to sell!</div>;
+  }
+  return (
+    <div className="flow">
+      <LoadingForm
+        method="post"
+        submitButtonText="Accept"
+        buttonClass="mini-button"
+        action={`/games/${gameId}/transfer-hub/accept`}
+      >
+        <input type="hidden" name="bid-id" value={bid.bid.id} />
+      </LoadingForm>
+
+      <LoadingForm
+        method="post"
+        submitButtonText="Reject"
+        buttonClass="mini-button button-secondary"
+        action={`/games/${gameId}/transfer-hub/reject`}
+      >
+        <input type="hidden" name="bid-id" value={bid.bid.id} />
+      </LoadingForm>
+    </div>
   );
 }

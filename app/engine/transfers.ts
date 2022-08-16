@@ -7,6 +7,7 @@ import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById, updateCash } from "~/domain/team.server";
 import type { TransferBid } from "~/domain/transferBids.server";
+import { getTransferBidsForTeam } from "~/domain/transferBids.server";
 import {
   getTransferBid,
   updateTransferBidStatus,
@@ -73,7 +74,7 @@ export async function rejectBid(bidId: string, team: Team) {
   const newTeam = await getTeamById(bid.buyingTeamId);
   const player = await getPlayer(bid.playerGameStateId);
   await updateTransferBidStatus(bidId, Status.Rejected);
-  await updateCash(newTeam.id, team.cash + bid.cost);
+  await updateCash(newTeam.id, newTeam.cash + bid.cost);
   await createGameLog(
     game.id,
     `${team.teamName} have rejected a ${bid.cost}M bid from ${newTeam.teamName} for ${player.name}!`
@@ -95,7 +96,7 @@ export async function withdrawBid(bidId: string, team: Team) {
   await updateCash(team.id, team.cash + bid.cost);
   await createGameLog(
     game.id,
-    `${team.teamName} have withdraw their bid for ${player.name}!`
+    `${team.teamName} have withdrawn their bid for ${player.name}!`
   );
 }
 
@@ -137,4 +138,10 @@ export async function acceptBid(bidId: string, team: Team) {
     game.id,
     `${team.teamName} have sold ${player.name} to ${newTeam.teamName} for ${bid.cost}M!`
   );
+  const otherBids = (await getTransferBidsForTeam(team.id)).filter(
+    (x) =>
+      x.playerGameStateId === bid.playerGameStateId &&
+      x.status === Status.Pending
+  );
+  await Promise.all(otherBids.map((x) => rejectBid(x.id, team)));
 }

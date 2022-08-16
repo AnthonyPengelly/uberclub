@@ -11,31 +11,38 @@ export type TransferBid = {
   status: Status;
 };
 
+export async function teamHasPendingBids(teamId: string): Promise<boolean> {
+  const { count } = await supabase
+    .from("transfer_bids")
+    .select(`id`, { count: "exact" })
+    .eq("selling_team_id", teamId)
+    .eq("status", Status.Pending);
+  return count ? count > 0 : false;
+}
+
 export async function getTransferBidsForTeam(
   teamId: string
 ): Promise<TransferBid[]> {
   const { data, error } = await supabase
     .from("transfer_bids")
     .select(
-      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status"
+      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, created_at"
     )
-    .or(`buying_team_id.eq.${teamId},selling_team_id.eq.${teamId}`);
+    .or(`buying_team_id.eq.${teamId},selling_team_id.eq.${teamId}`)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw error;
   }
   return (
-    data
-      ?.map((x) => ({
-        id: x.id,
-        buyingTeamId: x.buying_team_id,
-        sellingTeamId: x.selling_team_id,
-        playerGameStateId: x.player_game_state_id,
-        cost: x.cost,
-        status: x.status,
-      }))
-      .sort((a, b) => b.id.localeCompare(b.id))
-      .sort((a, b) => b.cost - a.cost) || []
+    data?.map((x) => ({
+      id: x.id,
+      buyingTeamId: x.buying_team_id,
+      sellingTeamId: x.selling_team_id,
+      playerGameStateId: x.player_game_state_id,
+      cost: x.cost,
+      status: x.status,
+    })) || []
   );
 }
 

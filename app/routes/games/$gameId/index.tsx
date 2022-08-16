@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
 import { countTeamsInGame } from "~/domain/team.server";
@@ -18,12 +18,17 @@ import { getResults } from "~/domain/fixtures.server";
 import Season from "~/components/season";
 import PreviousSeasons from "~/components/previousSeasons";
 import DateTime from "~/components/dateTime";
-import { overrideGameStageWithTeam, Stage } from "~/engine/game";
+import {
+  canBuyOrSellPlayer,
+  overrideGameStageWithTeam,
+  Stage,
+} from "~/engine/game";
 import { MIN_TEAMS } from "~/engine/team";
 import LoadingForm from "~/components/loadingForm";
 import { useRevalidateOnInterval } from "~/hooks/revalidate";
 import type { PositionedTeamSeason } from "~/engine/leagueTable";
 import { mapTeamSeasonsToPosition } from "~/engine/leagueTable";
+import { teamHasPendingBids } from "~/domain/transferBids.server";
 
 type LoaderData = {
   game: Game;
@@ -35,6 +40,7 @@ type LoaderData = {
   }[];
   logs: GameLog[];
   teamsInGame: number;
+  hasPendingBids: boolean;
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -66,11 +72,18 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const logs = await getGameLogs(params.gameId);
   const teamsInGame = await countTeamsInGame(params.gameId);
 
-  return json({ game, team, logs, seasons: seasonsMap, teamsInGame });
+  return json<LoaderData>({
+    game,
+    team,
+    logs,
+    seasons: seasonsMap,
+    teamsInGame,
+    hasPendingBids: await teamHasPendingBids(team.id),
+  });
 };
 
 export default function GameDetailsPage() {
-  const { team, logs, seasons, game, teamsInGame } =
+  const { team, logs, seasons, game, teamsInGame, hasPendingBids } =
     useLoaderData<LoaderData>();
   useRevalidateOnInterval({
     enabled: team.isReady || game.stage === 0 || false,
@@ -85,6 +98,12 @@ export default function GameDetailsPage() {
 
   return (
     <>
+      {canBuyOrSellPlayer(game) && hasPendingBids && (
+        <div className="notice">
+          You have pending offers! 👉&nbsp;
+          <Link to={`/games/${game.id}/transfer-hub`}>«Transfer hub»</Link>
+        </div>
+      )}
       <h1>🏆{game.name}🏆</h1>
       {game.winningTeam && (
         <div className="winner">
@@ -119,6 +138,12 @@ export default function GameDetailsPage() {
           Be the first to reach {game.victoryPoints} points in one season to
           win. Alternatively, win 3 seasons and then the Cup!
         </p>
+        {canBuyOrSellPlayer(game) && !hasPendingBids ? (
+          <p>
+            The transfer window is open, check out the{" "}
+            <Link to={`/games/${game.id}/transfer-hub`}>«Transfer hub»</Link>.
+          </p>
+        ) : null}
       </article>
       {game.stage === Stage.NotStarted && teamsInGame >= MIN_TEAMS && (
         <LoadingForm
