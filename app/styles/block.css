@@ -445,3 +445,10 @@
   background-color: var(--color-green--background);
   color: var(--color-secondary);
 }
+
+.filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  flex-direction: column;
+}

@@ -2,6 +2,7 @@ import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
+import { FiltersWidget } from "~/components/filtersWidget";
 import LoadingForm from "~/components/loadingForm";
 import PlayerDisplay from "~/components/playerDisplay";
 import type { Game } from "~/domain/games.server";
@@ -17,6 +18,7 @@ import { minBidPrice } from "~/engine/deadlineDay";
 import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { makeBidForPlayer, Status } from "~/engine/transfers";
+import { usePlayerFilters } from "~/hooks/usePlayerFilters";
 import { requireUserId } from "~/session.server";
 
 type LoaderData = {
@@ -112,6 +114,7 @@ async function otherTeamPlayers(team: Team) {
 
 export default function BuyPage() {
   const { game, team, players, bids, ownPlayers } = useLoaderData<LoaderData>();
+  const { filteredPlayers, filters } = usePlayerFilters(players);
   const canBuy = canBuyOrSellPlayer(game);
 
   return (
@@ -128,8 +131,9 @@ export default function BuyPage() {
       <div>
         {ownPlayers.length}/{MAX_SQUAD_SIZE} players in squad
       </div>
+      <FiltersWidget players={players} filters={filters} />
       <div className="players squad-list | justify-left">
-        {players.map((x) => (
+        {filteredPlayers.map((x) => (
           <>
             <PlayerDisplay key={x.id} player={x} />
             <div className="bid-info">
@@ -149,6 +153,7 @@ export default function BuyPage() {
             </div>
           </>
         ))}
+        {filteredPlayers.length === 0 && <div>No players found</div>}
       </div>
     </>
   );

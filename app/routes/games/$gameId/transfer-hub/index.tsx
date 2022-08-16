@@ -15,6 +15,7 @@ import { getTeam } from "~/domain/team.server";
 import type { TransferBid } from "~/domain/transferBids.server";
 import { getTransferBidsForTeam } from "~/domain/transferBids.server";
 import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
+import { getScoutPrice } from "~/engine/scouting";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { Status } from "~/engine/transfers";
 import { requireUserId } from "~/session.server";
@@ -155,6 +156,11 @@ function BidList({
               <div className="flow">
                 <div>
                   Offer: <strong>{x.bid.cost}M</strong>
+                  <br />
+                  <span className="small-text">
+                    (Sell-on value:{" "}
+                    {getScoutPrice(x.player.stars, x.player.potential)}M)
+                  </span>
                 </div>
                 <div>
                   {x.buyingTeam.id === teamId ? "Made to" : "From"}{" "}

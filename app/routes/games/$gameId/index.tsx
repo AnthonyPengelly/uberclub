@@ -78,7 +78,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     logs,
     seasons: seasonsMap,
     teamsInGame,
-    hasPendingBids: await teamHasPendingBids(team.id),
+    hasPendingBids: team && (await teamHasPendingBids(team.id)),
   });
 };
 
