@@ -95,7 +95,7 @@ export default function ScoutingPage() {
   return (
     <>
       <h1>{team.teamName} scouting</h1>
-      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
+      <Link to={`/games/${game.id}/transfer-hub/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           Welcome to the scouting hub. As a level {team.scoutingLevel} club, you

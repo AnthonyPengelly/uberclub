@@ -90,7 +90,7 @@ export default function DeadlineDayPage() {
       <h1>
         {team.teamName} - {team.cash}M
       </h1>
-      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
+      <Link to={`/games/${game.id}/transfer-hub/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           It's deadline day! Here you can see the players available to buy. This
@@ -121,7 +121,7 @@ export default function DeadlineDayPage() {
         {players.map((x) => (
           <>
             <PlayerDisplay key={x.id} player={x} />
-            <div className="deadline-day-info">
+            <div className="bid-info">
               Min bid: {minBidPrice(x)}M
               {!bids.find((y) => y.deadlineDayPlayerId === x.deadlineDayId) &&
                 game.stage === Stage.DeadlineDay &&

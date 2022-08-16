@@ -184,7 +184,7 @@ export async function markTeamAsReady(gameId: string, team: Team) {
   }
 }
 
-export function canSellPlayer(game: Game) {
+export function canBuyOrSellPlayer(game: Game) {
   return (
     game.stage === Stage.Training ||
     game.stage === Stage.Scouting ||

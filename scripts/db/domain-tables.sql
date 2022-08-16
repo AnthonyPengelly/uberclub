@@ -156,6 +156,17 @@ create table public.deadline_day_bids (
   primary key (id)
 );
 
+create table public.transfer_bids (
+  id uuid not null default uuid_generate_v4(),
+  buying_team_id uuid references public.teams not null,
+  selling_team_id uuid references public.teams not null,
+  player_game_state_id uuid references public.player_game_states not null,
+  cost integer not null,
+  status integer not null,
+
+  primary key (id)
+);
+
 create table public.team_seasons (
   id uuid not null default uuid_generate_v4(),
   team_id uuid references public.teams not null,

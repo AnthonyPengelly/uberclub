@@ -116,8 +116,11 @@ export default function TeamPage() {
       <h1>{team.teamName} lineup</h1>
       <div>
         {players.length}/{MAX_SQUAD_SIZE} players in squad
+        <br />
+        Check out the{" "}
+        <Link to={`/games/${game.id}/transfer-hub`}>«Transfer hub»</Link> to buy
+        and sell players.
       </div>
-      <Link to={`/games/${game.id}/sell`}>«Sell players»</Link>
       <div className="flow | quote">
         <p>
           It's time to set your lineup and choose your captain. In each match
@@ -129,6 +132,10 @@ export default function TeamPage() {
         <p>
           🧪 You can gain extra stars by positioning players of the same team
           next to each other 🧪
+        </p>
+        <p>
+          Simply click a player or position, and then click another
+          player/position to swap them.
         </p>
       </div>
       {validationMessage && <p className="error">{validationMessage}</p>}

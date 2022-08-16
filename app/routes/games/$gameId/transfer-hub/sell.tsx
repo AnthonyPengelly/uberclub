@@ -11,7 +11,7 @@ import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { sellPlayer } from "~/engine/finances";
-import { canSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
+import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
 import { getScoutPrice } from "~/engine/scouting";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { requireUserId } from "~/session.server";
@@ -49,7 +49,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
-  if (!canSellPlayer(game)) {
+  if (!canBuyOrSellPlayer(game)) {
     throw new Error("Cannot currently sell");
   }
 
@@ -61,15 +61,16 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function SellPage() {
   const { game, team, players } = useLoaderData<LoaderData>();
-  const canSell = canSellPlayer(game) && players.length > 11;
+  const canSell = canBuyOrSellPlayer(game) && players.length > 11;
 
   return (
     <>
-      <h1>{team.teamName} sales</h1>
       <div className="flow | quote">
         <p>
           Here you can sell players from your squad for a small profit. But be
-          careful, once they are sold, there is no going back!
+          careful, once they are sold, there is no going back! These are sold at
+          a fixed rate, if you think they are worth more than this, see if you
+          can persuade one of your opponents to put in a higher offer for them.
         </p>
         {!canSell && (
           <p>

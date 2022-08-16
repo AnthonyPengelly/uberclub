@@ -91,6 +91,7 @@ export function ErrorBoundary({ error }: { error: Error }) {
     <Layout>
       <h1>Something went wrong!</h1>
       <Link to=".">«Go back to game dashboard»</Link>
+      <div>{error?.message}</div>
     </Layout>
   );
 }

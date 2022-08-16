@@ -52,6 +52,7 @@ export default function Layout({ game, children }: LayoutProps) {
           {game && gameStarted && (
             <>
               <Link to={`/games/${game.id}/team`}>My Team</Link>
+              <Link to={`/games/${game.id}/transfer-hub`}>Transfer hub</Link>
               <Link to={`/games/${game.id}/training`}>Training</Link>
               <Link to={`/games/${game.id}/scouting`}>Scouting</Link>
               <Link to={`/games/${game.id}/improvements`}>Improvements</Link>

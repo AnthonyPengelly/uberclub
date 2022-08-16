@@ -44,8 +44,8 @@
 
 .mini-input {
   width: 100%;
-  font-size: 0.5rem;
-  line-height: 0.7rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
 }
 
 .xs-button-text {
@@ -197,7 +197,7 @@
   row-gap: 1rem;
 }
 .scout-info,
-.deadline-day-info {
+.bid-info {
   width: calc(30% - ((6px * 4) / 5));
   flex-grow: 0;
   flex-shrink: 0;
