@@ -418,3 +418,22 @@
   border-bottom-right-radius: 4px;
   z-index: 2;
 }
+
+.tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-green--background);
+  gap: 2px;
+}
+
+.tabs > * {
+  width: calc((100% - 4px) / 3);
+  padding: 1rem;
+  background-color: var(--color-background--light-grey);
+  color: var(--color-primary);
+  text-align: center;
+}
+
+.tabs > .active {
+  background-color: var(--color-green--background);
+  color: var(--color-secondary);
+}

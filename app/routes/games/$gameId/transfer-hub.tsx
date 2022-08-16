@@ -1,6 +1,6 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { NavLink, Outlet, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
 type LoaderData = {
@@ -20,9 +20,25 @@ export default function TransferHubPage() {
     <>
       <h1>Transfer hub</h1>
       <div className="tabs">
-        <Link to={`/games/${gameId}/transfer-hub`}>Offers</Link>
-        <Link to={`/games/${gameId}/transfer-hub/buy`}>Buy</Link>
-        <Link to={`/games/${gameId}/transfer-hub/sell`}>Sell</Link>
+        <NavLink
+          to={`/games/${gameId}/transfer-hub`}
+          className={({ isActive }) => `${isActive ? "active" : ""}`}
+          end
+        >
+          Offers
+        </NavLink>
+        <NavLink
+          to={`/games/${gameId}/transfer-hub/buy`}
+          className={({ isActive }) => `${isActive ? "active" : ""}`}
+        >
+          Buy
+        </NavLink>
+        <NavLink
+          to={`/games/${gameId}/transfer-hub/sell`}
+          className={({ isActive }) => `${isActive ? "active" : ""}`}
+        >
+          Sell
+        </NavLink>
       </div>
       <Outlet />
     </>
