@@ -71,6 +71,12 @@ export async function rejectBid(bidId: string, team: Team) {
       statusText: "Not your bid to reject!",
     });
   }
+  if (bid.status !== Status.Pending) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Bid is no longer valid!",
+    });
+  }
   const newTeam = await getTeamById(bid.buyingTeamId);
   const player = await getPlayer(bid.playerGameStateId);
   await updateTransferBidStatus(bidId, Status.Rejected);
@@ -89,6 +95,12 @@ export async function withdrawBid(bidId: string, team: Team) {
     throw new Response("Bad Request", {
       status: 400,
       statusText: "Not your bid to withdraw!",
+    });
+  }
+  if (bid.status !== Status.Pending) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Bid is no longer valid!",
     });
   }
   const player = await getPlayer(bid.playerGameStateId);
