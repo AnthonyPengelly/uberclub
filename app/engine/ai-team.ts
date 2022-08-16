@@ -1,11 +1,9 @@
 import type { GamePlayer } from "~/domain/players.server";
-import {
-  MAX_DEF_POSITION,
-  MAX_MID_POSITION,
-  MIN_DEFENDERS,
-  MIN_FORWARDS,
-  MIN_MIDFIELDERS,
-} from "./lineup";
+import { MAX_DEF_POSITION, MAX_MID_POSITION } from "./lineup";
+
+const MIN_DEFENDERS = 2;
+const MIN_MIDFIELDERS = 2;
+const MIN_FORWARDS = 2;
 
 export function getPlayersWithAiPositions(players: GamePlayer[]) {
   // Clear positions that other teams may have set
@@ -13,7 +11,9 @@ export function getPlayersWithAiPositions(players: GamePlayer[]) {
     x.lineupPosition = undefined;
     x.captain = false;
   });
-  const orderedPlayers = players.filter(x => !x.injured).sort((a, b) => b.stars - a.stars);
+  const orderedPlayers = players
+    .filter((x) => !x.injured)
+    .sort((a, b) => b.stars - a.stars);
   orderedPlayers[0].captain = true;
 
   const goalkeeper = orderedPlayers.find((x) => x.position === "GKP");
@@ -42,14 +42,19 @@ export function getPlayersWithAiPositions(players: GamePlayer[]) {
   orderedPlayers
     .filter((x) => x.position !== "GKP")
     .filter((x) => !x.lineupPosition)
-    .slice(0, 2)
     .forEach((x) => {
-      const maxPosition = Math.max(
-        ...orderedPlayers
-          .filter((y) => x.position === y.position)
-          .map((y) => y.lineupPosition || 0)
+      const playersInPosition = orderedPlayers.filter(
+        (y) => x.position === y.position && y.lineupPosition
       );
-      x.lineupPosition = maxPosition + 1;
+      const allPlayers = orderedPlayers.filter((y) => y.lineupPosition);
+      if (playersInPosition.length < 5 && allPlayers.length < 11) {
+        const maxPosition = Math.max(
+          ...orderedPlayers
+            .filter((y) => x.position === y.position)
+            .map((y) => y.lineupPosition || 0)
+        );
+        x.lineupPosition = maxPosition + 1;
+      }
     });
   return orderedPlayers;
 }

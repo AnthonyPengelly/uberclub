@@ -237,7 +237,7 @@ export default function TeamPage() {
         <div className="lineup-segment">
           <div className="lineup-segment__summary">{scores.FWD}★</div>
           <div className="players">
-            {[...Array(4).keys()].map((x) => (
+            {[...Array(5).keys()].map((x) => (
               <Position
                 key={`fwd-${x}`}
                 players={players}

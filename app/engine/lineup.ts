@@ -4,10 +4,10 @@ import { getPlayer } from "~/domain/players.server";
 
 export const MAX_DEF_POSITION = 6;
 export const MAX_MID_POSITION = 11;
-export const MAX_FWD_POSITION = 15;
+export const MAX_FWD_POSITION = 16;
 
-export const MIN_DEFENDERS = 3;
-export const MIN_MIDFIELDERS = 3;
+export const MIN_DEFENDERS = 2;
+export const MIN_MIDFIELDERS = 2;
 export const MIN_FORWARDS = 2;
 
 export type LineupPlayer = GamePlayer & { lineupPosition: number };
