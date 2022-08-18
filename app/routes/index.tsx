@@ -42,20 +42,44 @@ export default function Index() {
           </tr>
         </thead>
         <tbody>
-          {games.map((game) => (
-            <tr key={game.id}>
-              <td>
-                <Link to={`/games/${game.id}`}>«{game.name}»</Link>
-              </td>
-              <td>{game.players}</td>
-              <td>
-                {game.seasons.length !== 0 &&
-                  game.seasons.sort(
-                    (a, b) => b.seasonNumber - a.seasonNumber
-                  )[0].seasonNumber}
-              </td>
-            </tr>
-          ))}
+          {games
+            .filter((x) => !x.winningTeam)
+            .map((game) => (
+              <tr key={game.id}>
+                <td>
+                  <Link to={`/games/${game.id}`}>«{game.name}»</Link>
+                </td>
+                <td>{game.players}</td>
+                <td>
+                  {game.seasons.length !== 0 &&
+                    game.seasons.sort(
+                      (a, b) => b.seasonNumber - a.seasonNumber
+                    )[0].seasonNumber}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+      <h2>Past games</h2>
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Game</th>
+            <th>Winner</th>
+          </tr>
+        </thead>
+        <tbody>
+          {games
+            .filter((x) => x.winningTeam)
+            .map((game) => (
+              <tr key={game.id}>
+                <td>
+                  <Link to={`/games/${game.id}`}>«{game.name}»</Link>
+                </td>
+                <td>{game.winningTeam}</td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </Layout>

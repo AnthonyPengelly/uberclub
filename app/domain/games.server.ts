@@ -20,7 +20,8 @@ export async function getGamesList(): Promise<DetailedGame[]> {
     .from("games")
     .select(
       "id, name, stage, winning_team, player_collection_id, victory_points, seasons (name, id, season), teams (id)"
-    );
+    )
+    .order("created_at", { ascending: false });
   if (error) {
     throw error;
   }
