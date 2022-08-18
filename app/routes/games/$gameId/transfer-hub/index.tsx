@@ -163,8 +163,15 @@ function BidList({
                   </span>
                 </div>
                 <div>
-                  {x.buyingTeam.id === teamId ? "Made to" : "From"}{" "}
-                  <strong>{x.buyingTeam.managerName}</strong>
+                  {x.buyingTeam.id === teamId ? (
+                    <>
+                      Made to <strong>{x.sellingTeam.managerName}</strong>
+                    </>
+                  ) : (
+                    <>
+                      From <strong>{x.buyingTeam.managerName}</strong>
+                    </>
+                  )}
                 </div>
               </div>
               <BidForm
