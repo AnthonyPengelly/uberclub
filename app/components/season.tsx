@@ -1,8 +1,8 @@
 import type { ResultSummary } from "~/domain/fixtures.server";
 import type { Season as SeasonModel } from "~/domain/season.server";
-import { Stage } from "~/engine/game";
 import type { PositionedTeamSeason } from "~/engine/leagueTable";
 import { orderTeamsInSeason } from "~/engine/leagueTable";
+import { seasonIsComplete } from "~/engine/season";
 import Fixtures from "./fixtures";
 
 export type SeasonProps = {
@@ -20,15 +20,7 @@ export default function Season({
   startOpen,
   usersTeamName,
 }: SeasonProps) {
-  const seasonComplete = !results.some(
-    (x) =>
-      !x.draw &&
-      !x.simWin &&
-      !x.winningTeamId &&
-      x.stage !== Stage.CupQuarterFinal &&
-      x.stage !== Stage.CupSemiFinal &&
-      Stage.CupFinal
-  );
+  const seasonComplete = seasonIsComplete(results);
   return (
     <details open={startOpen} className="flow">
       <summary>

@@ -3,7 +3,7 @@ import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
-import { countTeamsInGame } from "~/domain/team.server";
+import { getTeamsInGame } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import { getGame } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
@@ -29,6 +29,7 @@ import { useRevalidateOnInterval } from "~/hooks/revalidate";
 import type { PositionedTeamSeason } from "~/engine/leagueTable";
 import { mapTeamSeasonsToPosition } from "~/engine/leagueTable";
 import { teamHasPendingBids } from "~/domain/transferBids.server";
+import TeamList from "~/components/teamList";
 
 type LoaderData = {
   game: Game;
@@ -39,7 +40,7 @@ type LoaderData = {
     results: ResultSummary[];
   }[];
   logs: GameLog[];
-  teamsInGame: number;
+  teamsInGame: Team[];
   hasPendingBids: boolean;
 };
 
@@ -70,7 +71,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       }))
   );
   const logs = await getGameLogs(params.gameId);
-  const teamsInGame = await countTeamsInGame(params.gameId);
+  const teamsInGame = await getTeamsInGame(params.gameId);
 
   return json<LoaderData>({
     game,
@@ -145,13 +146,14 @@ export default function GameDetailsPage() {
           </p>
         ) : null}
       </article>
-      {game.stage === Stage.NotStarted && teamsInGame >= MIN_TEAMS && (
+      {game.stage === Stage.NotStarted && teamsInGame.length >= MIN_TEAMS && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/start`}
           submitButtonText="Start game"
         />
       )}
+      <TeamList teams={teamsInGame} seasons={seasons} />
       {seasons[0] && (
         <>
           <Season

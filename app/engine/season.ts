@@ -340,3 +340,15 @@ async function rollForScores(
   }
   return roll;
 }
+
+export function seasonIsComplete(results: Result[]) {
+  return !results.some(
+    (x) =>
+      !x.draw &&
+      !x.simWin &&
+      !x.winningTeamId &&
+      x.stage !== Stage.CupQuarterFinal &&
+      x.stage !== Stage.CupSemiFinal &&
+      Stage.CupFinal
+  );
+}
