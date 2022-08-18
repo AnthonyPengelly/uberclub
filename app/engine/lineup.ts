@@ -95,7 +95,7 @@ function playerScore(
 ) {
   const recordedCaptainBoost = player.captainBoost || captainBoost;
   const captainBonus = player.captain ? recordedCaptainBoost : 0;
-  const penalty = positionPenalty(player, position);
+  const penalty = Math.min(positionPenalty(player, position), player.stars);
   const score = player.stars + captainBonus - penalty;
   return score + getChemistry(player, previousPlayer);
 }
@@ -127,11 +127,11 @@ function positionPenalty(
   position: "GKP" | "DEF" | "MID" | "FWD"
 ) {
   if (player.position === "GKP" && position !== "GKP") {
-    return player.stars - 1;
+    return player.stars;
   }
   switch (position) {
     case "GKP":
-      return player.position === "GKP" ? 0 : player.stars - 1;
+      return player.position === "GKP" ? 0 : player.stars;
     case "DEF":
       if (player.position === "FWD") {
         return 2;
