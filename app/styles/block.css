@@ -261,6 +261,14 @@
   bottom: 0.1rem;
 }
 
+.player__team-badge {
+  width: 30%;
+  max-width: 24px;
+  position: absolute;
+  left: 0;
+  bottom: 0.1rem;
+}
+
 .player__stars {
   font-size: 0.4rem;
   margin: 0.15rem auto;

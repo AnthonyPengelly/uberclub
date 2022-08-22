@@ -31,6 +31,7 @@ create table public.real_teams (
   id uuid not null default uuid_generate_v4(),
   name varchar not null,
   player_collection_id uuid references public.player_collections not null,
+  image_url varchar null,
 
   primary key (id)
 );

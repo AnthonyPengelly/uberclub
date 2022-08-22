@@ -229,7 +229,7 @@ export async function getFixtureLineups(
     .from("fixture_lineups")
     .select(
       `lineup_position, captain_boost, real_team_id, injured, player_game_states (id, stars, team_id, injured,
-        real_players (name, overall, potential, image_url, positions (name), real_teams (name), real_countries (name, image_url)))`
+        real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url)))`
     )
     .eq("result_id", resultId);
 
@@ -247,6 +247,7 @@ export async function getFixtureLineups(
       overall: x.player_game_states.real_players.overall,
       potential: x.player_game_states.real_players.potential,
       team: x.player_game_states.real_players.real_teams.name,
+      teamImage: x.player_game_states.real_players.real_teams.image_url,
       imageUrl: x.player_game_states.real_players.image_url,
       country: x.player_game_states.real_players.real_countries && {
         name: x.player_game_states.real_players.real_countries.name,

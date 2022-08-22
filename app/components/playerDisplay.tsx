@@ -47,6 +47,14 @@ export default function PlayerDisplay({
             title={player.country.name}
           />
         ) : null}
+        {player.teamImage ? (
+          <img
+            className="player__team-badge"
+            src={player.teamImage}
+            alt={player.team}
+            title={player.team}
+          />
+        ) : null}
       </div>
       <div className="player__position">{player.position}</div>
       <div className="player__team">{player.team}</div>
