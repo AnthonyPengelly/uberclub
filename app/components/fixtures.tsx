@@ -146,6 +146,7 @@ function Fixture({
     return (
       <tr>
         <td>
+          ⏳{" "}
           <span
             className={
               homeTeam.teamName === usersTeamName ? "highlight-text" : ""
@@ -162,7 +163,8 @@ function Fixture({
             }
           >
             {awayTeamName}
-          </span>
+          </span>{" "}
+          <Link to={`squads/${result.id}`}>«Squads»</Link>
         </td>
       </tr>
     );
@@ -171,6 +173,7 @@ function Fixture({
     return (
       <tr>
         <td>
+          ✅{" "}
           <span
             className={
               homeTeam.teamName === usersTeamName ? "highlight-text" : ""
@@ -204,6 +207,7 @@ function Fixture({
   return (
     <tr>
       <td>
+        ✅{" "}
         <span
           className={winningTeamName === usersTeamName ? "highlight-text" : ""}
         >

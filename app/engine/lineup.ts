@@ -204,3 +204,11 @@ export function findPlayerInPosition(
     | LineupPlayer
     | undefined;
 }
+
+export function maskLineupInfo(players: GamePlayer[]) {
+  players.forEach((x) => {
+    x.captain = false;
+    x.lineupPosition = undefined;
+  });
+  return players;
+}
