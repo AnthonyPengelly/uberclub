@@ -16,8 +16,12 @@ export type SimFixture = {
   isSim: true;
 };
 
-export async function createSeasonFixtures(teams: Team[], seasonId: string,
-  game: Game,) {
+export async function createSeasonFixtures(
+  teams: Team[],
+  seasonId: string,
+  game: Game
+) {
+  teams.sort(() => 0.5 - Math.random());
   await Promise.all([
     createFixturesForStage(teams, seasonId, Stage.Match1, game),
     createFixturesForStage(teams, seasonId, Stage.Match2, game),
@@ -31,13 +35,10 @@ async function createFixturesForStage(
   teams: Team[],
   seasonId: string,
   stage: Stage,
-  game: Game,
+  game: Game
 ) {
-  const sortedTeams = teams.sort((a, b) =>
-    (a.id as string).localeCompare(b.id as string)
-  );
   await Promise.all(
-    getRealFixtures(sortedTeams, stage).map((x) =>
+    getRealFixtures(teams, stage).map((x) =>
       createResult({
         seasonId: seasonId,
         stage: stage,
@@ -47,8 +48,8 @@ async function createFixturesForStage(
     )
   );
   await Promise.all(
-    sortedTeams
-      .filter((x) => hasSim(x, sortedTeams, stage))
+    teams
+      .filter((x) => hasSim(x, teams, stage))
       .map((x) => createRandomSimMatch(x, seasonId, stage, game))
   );
 }
@@ -57,7 +58,7 @@ async function createRandomSimMatch(
   team: Team,
   seasonId: string,
   stage: Stage,
-  game: Game,
+  game: Game
 ) {
   const opponent = await getRandomRealTeam(game.playerCollectionId);
   return await createResult({
