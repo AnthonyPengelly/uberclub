@@ -67,3 +67,11 @@
   box-shadow: 0 0 2px 3px var(--color-orange);
   border-radius: 8px;
 }
+
+[data-result="Win"] {
+  background-color: var(--position-midfield);
+}
+
+[data-result="Loss"] {
+  background-color: var(--position-defender);
+}

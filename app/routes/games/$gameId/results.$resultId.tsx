@@ -17,6 +17,7 @@ import {
   MAX_MID_POSITION,
 } from "~/engine/lineup";
 import { getRealTeam } from "~/domain/realTeam.server";
+import { getSegmentResult } from "~/engine/season";
 
 type BasicTeam = { teamName: string; captainBoost: number };
 
@@ -85,6 +86,9 @@ export default function ResultsPage() {
         totalDefScore={result.homeDef}
         totalMidScore={result.homeMid}
         totalFwdScore={result.homeFwd}
+        opponentDefScore={result.awayDef}
+        opponentMidScore={result.awayMid}
+        opponentFwdScore={result.awayFwd}
       />
       <h2 className="centre">{awayTeam.team.teamName}</h2>
       <Lineup
@@ -94,6 +98,9 @@ export default function ResultsPage() {
         totalDefScore={result.awayDef}
         totalMidScore={result.awayMid}
         totalFwdScore={result.awayFwd}
+        opponentDefScore={result.homeDef}
+        opponentMidScore={result.homeMid}
+        opponentFwdScore={result.homeFwd}
       />
     </>
   );
@@ -106,6 +113,9 @@ type LineupProps = {
   totalDefScore?: number;
   totalMidScore?: number;
   totalFwdScore?: number;
+  opponentDefScore?: number;
+  opponentMidScore?: number;
+  opponentFwdScore?: number;
 };
 
 function Lineup({
@@ -115,11 +125,15 @@ function Lineup({
   totalDefScore,
   totalMidScore,
   totalFwdScore,
+  opponentDefScore,
+  opponentMidScore,
+  opponentFwdScore,
 }: LineupProps) {
   const sortedPlayers = players.sort(
     (a, b) => (a.lineupPosition as number) - (b.lineupPosition as number)
   );
   const scores = getLineupScores(players, team.captainBoost);
+
   return (
     <div
       className={
@@ -131,7 +145,10 @@ function Lineup({
           direction === "bottom-up" && "reverse"
         }`}
       >
-        <div className="lineup-segment__summary">
+        <div
+          className="lineup-segment__summary"
+          data-result={getSegmentResult(totalDefScore, opponentFwdScore)}
+        >
           {scores.DEF}★
           {totalDefScore &&
             ` + ${totalDefScore - scores.DEF}🎲 (${totalDefScore})`}
@@ -165,7 +182,10 @@ function Lineup({
         </div>
       </div>
       <div className="lineup-segment">
-        <div className="lineup-segment__summary">
+        <div
+          className="lineup-segment__summary"
+          data-result={getSegmentResult(totalMidScore, opponentMidScore)}
+        >
           {scores.MID}★
           {totalMidScore &&
             ` + ${totalMidScore - scores.MID}🎲 (${totalMidScore})`}
@@ -192,7 +212,10 @@ function Lineup({
         </div>
       </div>
       <div className="lineup-segment">
-        <div className="lineup-segment__summary">
+        <div
+          className="lineup-segment__summary"
+          data-result={getSegmentResult(totalFwdScore, opponentDefScore)}
+        >
           FWD {scores.FWD}★
           {totalFwdScore &&
             ` + ${totalFwdScore - scores.FWD}🎲 (${totalFwdScore})`}

@@ -352,3 +352,13 @@ export function seasonIsComplete(results: Result[]) {
       Stage.CupFinal
   );
 }
+
+export function getSegmentResult(
+  score: number | undefined,
+  opponentScore: number | undefined
+): "Win" | "Loss" | "Draw" {
+  if (!score || !opponentScore || score === opponentScore) {
+    return "Draw";
+  }
+  return score > opponentScore ? "Win" : "Loss";
+}
