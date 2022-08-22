@@ -44,6 +44,7 @@ export default function PlayerDisplay({
             className="player__country"
             src={player.country.imageUrl}
             alt={player.country.name}
+            title={player.country.name}
           />
         ) : null}
       </div>
