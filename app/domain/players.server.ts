@@ -129,7 +129,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
           imageUrl: x.real_players.real_countries.image_url,
         },
       }))
-      .sort((a, b) => b.id.localeCompare(b.id))
+      .sort((a, b) => b.id.localeCompare(a.id))
       .sort((a, b) => b.potential - a.potential)
       .sort((a, b) => b.stars - a.stars)
       .sort(sortPlayers) || []
@@ -172,7 +172,7 @@ export async function getRealTeamPlayers(
           imageUrl: x.real_players.real_countries.image_url,
         },
       }))
-      .sort((a, b) => b.id.localeCompare(b.id))
+      .sort((a, b) => b.id.localeCompare(a.id))
       .sort((a, b) => b.potential - a.potential)
       .sort((a, b) => b.stars - a.stars)
       .sort(sortPlayers) || []
