@@ -4,11 +4,11 @@ script.type = "text/javascript";
 document.getElementsByTagName("head")[0].appendChild(script);
 
 const mapStarRating = (rating) => {
-  if (rating >= 90) return 6;
+  if (rating >= 91) return 6;
   if (rating >= 87) return 5;
   if (rating >= 83) return 4;
-  if (rating >= 79) return 3;
-  if (rating >= 77) return 2;
+  if (rating >= 78) return 3;
+  if (rating >= 74) return 2;
   return 1;
 };
 
@@ -48,7 +48,7 @@ const mapPosition = (position) => {
 };
 
 // Grab this id in advance
-const collectionId = "7e239fbe-d723-4343-8e1c-c0b9c4665a1b";
+const collectionId = "f15c4de8-0b68-41d4-97dc-54b07cbf7dd8";
 // Use the timeout to click into the webpage and focus
 setTimeout(() => {
   navigator.clipboard.readText().then((copied) => {
@@ -63,6 +63,11 @@ setTimeout(() => {
             .trim("\n")
             .trim(" ")
             .replace(/ FIFA \d{2}/, ""),
+          teamImage: row
+            .find(".team")
+            .first()
+            .attr("src")
+            .replace(".png", "@2x.png"),
           position: mapPosition(
             row
               .find('[data-title="Preferred Positions"] a')
@@ -80,10 +85,15 @@ setTimeout(() => {
           ),
           image: row.find(".player img").attr("src"),
           countryName: row.find(".link-nation").first().attr("title"),
-          countryImage: row.find(".link-nation img").first().attr("src"),
+          countryImage: row
+            .find(".link-nation img")
+            .first()
+            .attr("src")
+            .replace(".png", "@2x.png"),
         };
+        summary.potential = Math.max(summary.potential, summary.overall);
         return (
-          `INSERT INTO public.real_teams (name, player_collection_id) SELECT '${summary.team}', '${collectionId}' ` +
+          `INSERT INTO public.real_teams (name, player_collection_id, image_url) SELECT '${summary.team}', '${collectionId}', '${summary.teamImage}' ` +
           `WHERE NOT EXISTS (SELECT id FROM public.real_teams WHERE name = '${summary.team}' AND player_collection_id = '${collectionId}');` +
           `INSERT INTO public.real_countries (name, player_collection_id, image_url) SELECT '${summary.countryName}', '${collectionId}', '${summary.countryImage}' ` +
           `WHERE NOT EXISTS (SELECT id FROM public.real_countries WHERE name = '${summary.countryName}' AND player_collection_id = '${collectionId}');` +
