@@ -1,4 +1,7 @@
 -- Game RESET
+DELETE FROM public.transfer_bids
+WHERE buying_team_id IN (SELECT id FROM public.teams WHERE game_id = 'b5dc2f56-3135-4ece-b8a4-ca0955acefd7');
+
 DELETE FROM public.fixture_lineups
 WHERE player_game_state_id IN (SELECT id FROM public.player_game_states WHERE game_id = 'b5dc2f56-3135-4ece-b8a4-ca0955acefd7');
 
