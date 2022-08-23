@@ -60,15 +60,7 @@ setTimeout(() => {
           name: row.find('[data-title="Name"] a').text().trim("\n"),
           team: row
             .find(".team")
-            .attr("alt")
-            .trim("\n")
-            .trim(" ")
-            .replace(/ FIFA \d{2}/, ""),
-          teamImage: row
-            .find(".team")
-            .first()
-            .attr("src")
-            .replace(".png", "@2x.png"),
+            .attr("alt"),
           position: mapPosition(
             row
               .find('[data-title="Preferred Positions"] a')
@@ -93,8 +85,10 @@ setTimeout(() => {
             .replace(".png", "@2x.png"),
         };
         summary.potential = Math.max(summary.potential, summary.overall);
+          if (summary.team) { return ""}
+          summary.team = 'Icons';
         return (
-          `INSERT INTO public.real_teams (name, player_collection_id, image_url) SELECT '${summary.team}', '${collectionId}', '${summary.teamImage}' ` +
+          `INSERT INTO public.real_teams (name, player_collection_id) SELECT '${summary.team}', '${collectionId}' ` +
           `WHERE NOT EXISTS (SELECT id FROM public.real_teams WHERE name = '${summary.team}' AND player_collection_id = '${collectionId}');` +
           `INSERT INTO public.real_countries (name, player_collection_id, image_url) SELECT '${summary.countryName}', '${collectionId}', '${summary.countryImage}' ` +
           `WHERE NOT EXISTS (SELECT id FROM public.real_countries WHERE name = '${summary.countryName}' AND player_collection_id = '${collectionId}');` +
