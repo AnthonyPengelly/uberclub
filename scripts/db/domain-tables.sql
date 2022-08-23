@@ -11,6 +11,19 @@ create table public.games (
   primary key (id)
 );
 
+create table public.cup_leaderboard_entries (
+  id uuid not null default uuid_generate_v4(),
+  game varchar not null,
+  fixture_url varchar not null,
+  team_name varchar not null,
+  manager_name varchar not null,
+  season integer not null,
+  season_points integer not null,
+  number_of_teams integer not null,
+
+  primary key (id)
+);
+
 create table public.game_logs (
   id uuid not null default uuid_generate_v4(),
   created_at timestamptz not null default current_timestamp,

@@ -1,3 +1,4 @@
+import { createCupLeaderboardEntry } from "~/domain/cupLeaderboard.server";
 import {
   createResult,
   getResults,
@@ -10,9 +11,10 @@ import { getPlayersList } from "~/domain/players.server";
 import {
   getAllSeasons,
   getCurrentSeason,
+  getTeamSeason,
   getTeamSeasons,
 } from "~/domain/season.server";
-import { markAsReady } from "~/domain/team.server";
+import { getTeamsInGame, markAsReady } from "~/domain/team.server";
 import { getTeamById } from "~/domain/team.server";
 import { Stage } from "./game";
 import { mapTeamSeasonsToPosition } from "./leagueTable";
@@ -55,10 +57,6 @@ async function winnerHasQualifiedForCup(game: Game) {
   const winningTeamSeason = season.teamSeasons.filter(
     (x) => x.position === 1
   )[0];
-  if (winningTeamSeason.score >= game.victoryPoints) {
-    // Already won anyway
-    return false;
-  }
   const totalWins = seasonsMap
     .map((x) => x.teamSeasons.filter((y) => y.position === 1)[0].teamId)
     .filter((x) => x === winningTeamSeason.teamId).length;
@@ -131,5 +129,16 @@ export async function checkForCupWinner(gameId: string) {
       `******************************* ${team.managerName} has led ${team.teamName} to a cup victory, congratulations! *******************************`
     );
     await recordWinner(gameId, team.teamName);
+    const teamSeason = await getTeamSeason(season.id, team.id);
+    const teams = await getTeamsInGame(game.id);
+    await createCupLeaderboardEntry(
+      game.name,
+      team.teamName,
+      team.managerName,
+      season.seasonNumber,
+      teamSeason.score,
+      teams.length,
+      `/spectator/results/${final.id}`
+    );
   }
 }

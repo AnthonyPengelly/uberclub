@@ -1,23 +1,28 @@
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
+import CupLeaderboard from "~/components/cupLeaderboard";
 import Layout from "~/components/layout";
+import type { CupLeaderboardEntry } from "~/domain/cupLeaderboard.server";
+import { getCupLeaderboard } from "~/domain/cupLeaderboard.server";
 import type { DetailedGame } from "~/domain/games.server";
 import { getGamesList } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 
 type LoaderData = {
   games: DetailedGame[];
+  cupLeaderboardEntries: CupLeaderboardEntry[];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   await requireUserId(request);
   const games = await getGamesList();
-  return json({ games });
+  const cupLeaderboardEntries = await getCupLeaderboard();
+  return json({ games, cupLeaderboardEntries });
 };
 
 export default function Index() {
-  const { games } = useLoaderData<LoaderData>();
+  const { games, cupLeaderboardEntries } = useLoaderData<LoaderData>();
   return (
     <Layout>
       <h1>Games</h1>
@@ -60,6 +65,7 @@ export default function Index() {
             ))}
         </tbody>
       </table>
+      <CupLeaderboard cupLeaderboardEntries={cupLeaderboardEntries} />
       <h2>Past games</h2>
 
       <table className="table">

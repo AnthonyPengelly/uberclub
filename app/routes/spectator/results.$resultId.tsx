@@ -8,8 +8,10 @@ import type { GamePlayer } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById } from "~/domain/team.server";
 import { getRealTeam } from "~/domain/realTeam.server";
-import type { BasicTeam } from "~/components/lineup";
 import Lineup from "~/components/lineup";
+import Layout from "~/components/layout";
+
+type BasicTeam = { teamName: string; captainBoost: number };
 
 type LoaderData = {
   homeTeam: { team: Team; lineup: GamePlayer[] };
@@ -18,7 +20,6 @@ type LoaderData = {
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  invariant(params.gameId, "gameId not found");
   invariant(params.resultId, "resultId not found");
   const result = await getResult(params.resultId);
   if (!result) {
@@ -62,7 +63,7 @@ export default function ResultsPage() {
     : `${awayTeam.team.teamName} Win`;
 
   return (
-    <>
+    <Layout>
       <h1>Fixture result</h1>
       <div className="quote">
         {homeTeam.team.teamName} vs {awayTeam.team.teamName} resulted in a{" "}
@@ -92,6 +93,6 @@ export default function ResultsPage() {
         opponentMidScore={result.homeMid}
         opponentFwdScore={result.homeFwd}
       />
-    </>
+    </Layout>
   );
 }
