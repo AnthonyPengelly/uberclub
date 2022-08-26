@@ -113,6 +113,7 @@ create table public.player_game_states (
   injured boolean not null default false,
   out_of_deck boolean not null default false,
   stars integer not null,
+  loanee_id uuid references public.teams null,
 
   primary key (id),
   unique (player_id, game_id)
@@ -175,6 +176,7 @@ create table public.transfer_bids (
   buying_team_id uuid references public.teams not null,
   selling_team_id uuid references public.teams not null,
   player_game_state_id uuid references public.player_game_states not null,
+  loan boolean not null default false,
   cost integer not null,
   status integer not null,
   created_at timestamptz not null default current_timestamp,

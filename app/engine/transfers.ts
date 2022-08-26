@@ -2,7 +2,12 @@ import invariant from "tiny-invariant";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
-import { addPlayerToTeam, getPlayer } from "~/domain/players.server";
+import {
+  addPlayerToTeam,
+  getPlayer,
+  updateLoanee,
+  updatePlayerLineupPosition,
+} from "~/domain/players.server";
 import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById, updateCash } from "~/domain/team.server";
@@ -28,7 +33,8 @@ export async function makeBidForPlayer(
   playerId: string,
   cost: number,
   bids: TransferBid[],
-  game: Game
+  game: Game,
+  loan: boolean
 ) {
   invariant(playerId, "invalid player");
   const player = await getPlayer(playerId);
@@ -53,7 +59,7 @@ export async function makeBidForPlayer(
       statusText: "Too many players! Sell first",
     });
   }
-  await createTransferBidForPlayer(team.id, player, cost);
+  await createTransferBidForPlayer(team.id, player, cost, loan);
   await updateCash(team.id, team.cash - cost);
   await createGameLog(
     team.gameId,
@@ -83,7 +89,9 @@ export async function rejectBid(bidId: string, team: Team) {
   await updateCash(newTeam.id, newTeam.cash + bid.cost);
   await createGameLog(
     game.id,
-    `${team.teamName} have rejected a ${bid.cost}M bid from ${newTeam.teamName} for ${player.name}!`
+    `${team.teamName} have rejected a ${bid.cost}M ${
+      bid.loan ? "loan" : "transfer"
+    } bid from ${newTeam.teamName} for ${player.name}!`
   );
 }
 
@@ -146,9 +154,15 @@ export async function acceptBid(bidId: string, team: Team) {
   await updateTransferBidStatus(bidId, Status.Accepted);
   await updateCash(team.id, team.cash + bid.cost);
   await addPlayerToTeam(bid.playerGameStateId, bid.buyingTeamId);
+  await updatePlayerLineupPosition(bid.playerGameStateId, null, false);
+  if (bid.loan) {
+    await updateLoanee(bid.playerGameStateId, bid.sellingTeamId);
+  }
   await createGameLog(
     game.id,
-    `${team.teamName} have sold ${player.name} to ${newTeam.teamName} for ${bid.cost}M!`
+    `${team.teamName} have ${bid.loan ? "loaned" : "sold"} ${player.name} to ${
+      newTeam.teamName
+    } for ${bid.cost}M!`
   );
   const otherBids = (await getTransferBidsForTeam(team.id)).filter(
     (x) =>

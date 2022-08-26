@@ -173,6 +173,9 @@ function BidList({
                     </>
                   )}
                 </div>
+                <div>
+                  Type: <strong>{x.bid.loan ? "Loan" : "Transfer"}</strong>
+                </div>
               </div>
               <BidForm
                 canBuyOrSell={canBuyOrSell}

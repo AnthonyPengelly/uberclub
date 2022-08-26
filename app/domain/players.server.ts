@@ -52,6 +52,7 @@ export type GamePlayer = {
   captain: boolean;
   injured: boolean;
   stars: number;
+  loan: boolean;
   /**
    * this indicates that they are playing for an ai team
    */
@@ -61,6 +62,16 @@ export type GamePlayer = {
     name: string;
     imageUrl: string;
   };
+};
+
+export type LoanPlayer = {
+  id: string;
+  stars: number;
+  potential: number;
+  loaner: string;
+  loanee: string;
+  loaneeId: string;
+  name: string;
 };
 
 export async function getPlayersList(
@@ -103,7 +114,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars, team_id,
+      `id, lineup_position, captain, injured, stars, team_id, loanee_id,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url))`
     )
     .eq("team_id", teamId);
@@ -126,6 +137,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
         team: x.real_players.real_teams.name,
         teamImage: x.real_players.real_teams.image_url,
         imageUrl: x.real_players.image_url,
+        loan: !!x.loanee_id,
         country: x.real_players.real_countries && {
           name: x.real_players.real_countries.name,
           imageUrl: x.real_players.real_countries.image_url,
@@ -136,6 +148,29 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
       .sort((a, b) => b.stars - a.stars)
       .sort(sortPlayers) || []
   );
+}
+
+export async function getLoanedPlayers(gameId: string): Promise<LoanPlayer[]> {
+  const { data, error } = await supabase
+    .from("player_game_states")
+    .select(
+      `id, stars, loanee_id, loaner:team_id ( team_name ), loanee:loanee_id ( team_name ),
+        real_players (name, potential)`
+    )
+    .eq("game_id", gameId)
+    .not("loanee_id", "is", null);
+  if (error) {
+    throw error;
+  }
+  return data?.map((x) => ({
+    id: x.id,
+    stars: x.stars,
+    potential: x.real_players.potential,
+    name: x.real_players.name,
+    loanee: x.loanee.team_name,
+    loaneeId: x.loanee_id,
+    loaner: x.loaner.team_name,
+  }));
 }
 
 export async function getRealTeamPlayers(
@@ -170,6 +205,7 @@ export async function getRealTeamPlayers(
         team: x.real_players.real_teams.name,
         teamImage: x.real_players.real_teams.image_url,
         imageUrl: x.real_players.image_url,
+        loan: false,
         country: x.real_players.real_countries && {
           name: x.real_players.real_countries.name,
           imageUrl: x.real_players.real_countries.image_url,
@@ -186,7 +222,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars, team_id,
+      `id, lineup_position, captain, injured, stars, team_id, loanee_id,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url))`
     )
     .eq("id", id)
@@ -207,6 +243,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
     potential: data.real_players.potential,
     team: data.real_players.real_teams.name,
     teamImage: data.real_players.real_teams.image_url,
+    loan: !!data.loanee_id,
     imageUrl: data.real_players.image_url,
     country: data.real_players.real_countries && {
       name: data.real_players.real_countries.name,
@@ -318,6 +355,17 @@ export async function resetInjuredForGame(gameId: string) {
   }
 }
 
+export async function updateLoanee(id: string, loaneeId: string | null) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ loanee_id: loaneeId })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function drawPlayersFromDeck(
   gameId: string,
   numberOfPlayers: number
@@ -349,6 +397,7 @@ export async function drawPlayersFromDeck(
     team: x.real_players.real_teams.name,
     teamImage: x.real_players.real_teams.image_url,
     imageUrl: x.real_players.image_url,
+    loan: false,
     country: x.real_players.real_countries && {
       name: x.real_players.real_countries.name,
       imageUrl: x.real_players.real_countries.image_url,

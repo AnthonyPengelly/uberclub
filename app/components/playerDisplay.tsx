@@ -55,6 +55,15 @@ export default function PlayerDisplay({
             title={player.team}
           />
         ) : null}
+        {player.loan ? (
+          <div
+            aria-label="Player is on loan"
+            className="player__loan"
+            title="On loan"
+          >
+            ⏳
+          </div>
+        ) : null}
       </div>
       <div className="player__position">{player.position}</div>
       <div className="player__team">{player.team}</div>
@@ -64,7 +73,11 @@ export default function PlayerDisplay({
           {[...Array(chemistry).keys()].map(() => "★").join("")}
         </div>
       ) : null}
-      {player.captain ? <div className="player__captain">C</div> : null}
+      {player.captain ? (
+        <div aria-label="Team captain" className="player__captain">
+          C
+        </div>
+      ) : null}
     </div>
   );
 }

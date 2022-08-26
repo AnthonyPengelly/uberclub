@@ -9,6 +9,7 @@ export type TransferBid = {
   playerGameStateId: string;
   cost: number;
   status: Status;
+  loan: boolean;
 };
 
 export async function teamHasPendingBids(teamId: string): Promise<boolean> {
@@ -26,7 +27,7 @@ export async function getTransferBidsForTeam(
   const { data, error } = await supabase
     .from("transfer_bids")
     .select(
-      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, created_at"
+      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, created_at, loan"
     )
     .or(`buying_team_id.eq.${teamId},selling_team_id.eq.${teamId}`)
     .order("created_at", { ascending: false });
@@ -42,6 +43,7 @@ export async function getTransferBidsForTeam(
       playerGameStateId: x.player_game_state_id,
       cost: x.cost,
       status: x.status,
+      loan: x.loan,
     })) || []
   );
 }
@@ -50,7 +52,7 @@ export async function getTransferBid(id: string): Promise<TransferBid> {
   const { data, error } = await supabase
     .from("transfer_bids")
     .select(
-      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status"
+      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, loan"
     )
     .eq("id", id)
     .single();
@@ -65,13 +67,15 @@ export async function getTransferBid(id: string): Promise<TransferBid> {
     playerGameStateId: data.player_game_state_id,
     cost: data.cost,
     status: data.status,
+    loan: data.loan,
   };
 }
 
 export async function createTransferBidForPlayer(
   buyingTeamId: string,
   player: GamePlayer,
-  cost: number
+  cost: number,
+  loan: boolean = false
 ): Promise<string> {
   const { data, error } = await supabase
     .from("transfer_bids")
@@ -82,6 +86,7 @@ export async function createTransferBidForPlayer(
         player_game_state_id: player.id,
         cost,
         status: Status.Pending,
+        loan,
       },
     ])
     .single();

@@ -58,6 +58,7 @@ export async function getDeadlineDayPlayers(
       team: x.player_game_states.real_players.real_teams.name,
       teamImage: x.player_game_states.real_players.real_teams.image_url,
       imageUrl: x.player_game_states.real_players.image_url,
+      loan: false,
       country: x.player_game_states.real_players.real_countries && {
         name: x.player_game_states.real_players.real_countries.name,
         imageUrl: x.player_game_states.real_players.real_countries.image_url,

@@ -76,7 +76,8 @@ export const action: ActionFunction = async ({ request, params }) => {
     playerId,
     parseInt(formData.get("cost") as string, 10),
     bids,
-    game
+    game,
+    !!formData.get("loan")
   );
 
   const ownPlayers = await getTeamPlayers(team.id);
@@ -124,6 +125,11 @@ export default function BuyPage() {
           Here you can put in offers for players on opponent teams. You must put
           up the cash up-front and have space in your squad. However, you can
           cancel the bid to have it refunded.
+        </p>
+        <p>
+          You can also loan players! Loaned players will return at the end of
+          the season and will have gained one star from the experience (if
+          possible).
         </p>
         {!canBuy && <p>You can only buy players during pre-season.</p>}
       </div>
@@ -205,6 +211,8 @@ function BuyForm({
       buttonClass="mini-button"
     >
       <input type="hidden" name="player-id" value={player.id} />
+      <input type="checkbox" name="loan" />
+      <label htmlFor="loan">Loan?</label>
       <input
         className="mini-input"
         type="number"

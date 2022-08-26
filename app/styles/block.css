@@ -262,6 +262,13 @@
   bottom: 0.1rem;
 }
 
+.player__loan {
+  position: absolute;
+  top: 0.1rem;
+  right: 0;
+  font-size: 0.7rem;
+}
+
 .player__team-badge {
   width: 30%;
   max-width: 24px;

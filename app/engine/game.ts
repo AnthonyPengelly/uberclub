@@ -17,6 +17,7 @@ import { completeFinancesForAllTeams } from "./finances";
 import { MAX_TEAMS, resetStageOverrides } from "./team";
 import { checkForCupWinner, prepareCup, prepareNextRound } from "./cup";
 import { resetInjuredForGame } from "~/domain/players.server";
+import { returnLoans } from "./loans";
 
 export enum Stage {
   NotStarted = 0,
@@ -167,6 +168,7 @@ async function createNextSeason(gameId: string) {
   const currentSeason = await getCurrentSeason(gameId);
   await createSeason(gameId, currentSeason.seasonNumber + 1);
   await resetInjuredForGame(gameId);
+  await returnLoans(gameId);
 }
 
 export async function markTeamAsReady(gameId: string, team: Team) {
