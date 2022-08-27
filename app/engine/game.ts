@@ -167,8 +167,8 @@ async function advance(gameId: string) {
 async function createNextSeason(gameId: string) {
   const currentSeason = await getCurrentSeason(gameId);
   await createSeason(gameId, currentSeason.seasonNumber + 1);
+  await returnLoans(gameId, currentSeason);
   await resetInjuredForGame(gameId);
-  await returnLoans(gameId);
 }
 
 export async function markTeamAsReady(gameId: string, team: Team) {

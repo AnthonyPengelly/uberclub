@@ -260,3 +260,21 @@ export async function getFixtureLineups(
 
   throw error;
 }
+
+export async function countFixturesPlayed(playerId: string, seasonId: string) {
+  const { error, count } = await supabase
+    .from("fixture_lineups")
+    .select(
+      `id, player_game_state_id, real_team_id, results!inner (id, season_id)`,
+      { count: "exact" }
+    )
+    .eq("player_game_state_id", playerId)
+    .eq("results.season_id", seasonId)
+    .is("real_team_id", null);
+
+  if (error) {
+    throw error;
+  }
+
+  return count || 0;
+}

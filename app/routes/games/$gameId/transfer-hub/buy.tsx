@@ -16,6 +16,7 @@ import type { TransferBid } from "~/domain/transferBids.server";
 import { getTransferBidsForTeam } from "~/domain/transferBids.server";
 import { minBidPrice } from "~/engine/deadlineDay";
 import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
+import { LOAN_GAMES_REQUIRED_TO_IMPROVE } from "~/engine/loans";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { makeBidForPlayer, Status } from "~/engine/transfers";
 import { usePlayerFilters } from "~/hooks/usePlayerFilters";
@@ -128,8 +129,9 @@ export default function BuyPage() {
         </p>
         <p>
           You can also loan players! Loaned players will return at the end of
-          the season and will have gained one star from the experience (if
-          possible).
+          the season and will have gained one star from the experience if they
+          played in at least {LOAN_GAMES_REQUIRED_TO_IMPROVE} games (and they
+          haven't already reached their potential).
         </p>
         {!canBuy && <p>You can only buy players during pre-season.</p>}
       </div>
