@@ -160,6 +160,10 @@ function positionPenalty(
 }
 
 export function validateLineup(players: GamePlayer[]) {
+  if (players.filter((x) => !x.injured).length < 11) {
+    // No restrictions if they are forced to field less than 11 players
+    return;
+  }
   const lineup = players.filter((x) => x.lineupPosition) as (GamePlayer & {
     lineupPosition: number;
   })[];
