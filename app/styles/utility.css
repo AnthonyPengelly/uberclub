@@ -49,6 +49,10 @@
   justify-content: left !important;
 }
 
+.justify-centre {
+  justify-content: center;
+}
+
 .reverse {
   flex-direction: column-reverse !important;
 }
@@ -78,4 +82,13 @@
 .small-text {
   font-size: 0.55rem;
   line-height: 0.6rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.background-grey {
+  background-color: var(--color-background-grey);
+  border-radius: 4px;
 }

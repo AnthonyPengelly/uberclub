@@ -42,6 +42,12 @@
   padding: 0 0.2rem;
 }
 
+.button-centre {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
 .mini-input {
   width: 100%;
   font-size: 0.75rem;
@@ -199,6 +205,11 @@
 .players > .player {
   width: calc(20% - ((6px * 4) / 5));
   height: auto;
+}
+
+.players-width-2 > *,
+.players-width-2 > .player {
+  width: calc(50% - (6px / 2));
 }
 
 .squad-list {
@@ -467,4 +478,30 @@
   justify-content: space-between;
   gap: 0.25rem;
   flex-direction: column;
+}
+
+.switch-icon {
+  position: relative;
+}
+
+.switch-icon::after {
+  --icon-height: 1.35rem;
+  content: "↔";
+  border-radius: 100%;
+  position: absolute;
+  font-size: 0.75rem;
+  padding: 0.4rem;
+  line-height: 1rem;
+  width: var(--icon-height);
+  height: var(--icon-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  top: calc((100% - var(--icon-height)) / 2);
+  right: calc(-1 * var(--icon-height) / 2);
+  font-weight: bold;
+
+  background-color: var(--background-color-buttons--hover);
+  color: var(--color-secondary);
 }

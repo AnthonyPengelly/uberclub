@@ -1,15 +1,18 @@
 import { Status } from "~/engine/transfers";
-import type { GamePlayer } from "./players.server";
 import { supabase } from "./supabase.server";
 
 export type TransferBid = {
   id: string;
   buyingTeamId: string;
   sellingTeamId: string;
-  playerGameStateId: string;
   cost: number;
   status: Status;
-  loan: boolean;
+  players: {
+    buyingTeam: boolean;
+    loan: boolean;
+    playerId: string;
+    name: string;
+  }[];
 };
 
 export async function teamHasPendingBids(teamId: string): Promise<boolean> {
@@ -27,7 +30,8 @@ export async function getTransferBidsForTeam(
   const { data, error } = await supabase
     .from("transfer_bids")
     .select(
-      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, created_at, loan"
+      `id, buying_team_id, selling_team_id, cost, status, created_at,
+      player_transfers (player_game_state_id, buying_team, loan, player_game_states (real_players (name)))`
     )
     .or(`buying_team_id.eq.${teamId},selling_team_id.eq.${teamId}`)
     .order("created_at", { ascending: false });
@@ -40,10 +44,14 @@ export async function getTransferBidsForTeam(
       id: x.id,
       buyingTeamId: x.buying_team_id,
       sellingTeamId: x.selling_team_id,
-      playerGameStateId: x.player_game_state_id,
       cost: x.cost,
       status: x.status,
-      loan: x.loan,
+      players: x.player_transfers.map((y: any) => ({
+        playerId: y.player_game_state_id,
+        buyingTeam: y.buying_team,
+        loan: y.loan,
+        name: y.player_game_states.real_players.name,
+      })),
     })) || []
   );
 }
@@ -52,7 +60,8 @@ export async function getTransferBid(id: string): Promise<TransferBid> {
   const { data, error } = await supabase
     .from("transfer_bids")
     .select(
-      "id, buying_team_id, selling_team_id, cost, player_game_state_id, status, loan"
+      `id, buying_team_id, selling_team_id, cost, status,
+      player_transfers (player_game_state_id, buying_team, loan, player_game_states (real_players (name)))`
     )
     .eq("id", id)
     .single();
@@ -64,28 +73,53 @@ export async function getTransferBid(id: string): Promise<TransferBid> {
     id: data.id,
     buyingTeamId: data.buying_team_id,
     sellingTeamId: data.selling_team_id,
-    playerGameStateId: data.player_game_state_id,
     cost: data.cost,
     status: data.status,
-    loan: data.loan,
+    players: data.player_transfers.map((x: any) => ({
+      playerId: x.player_game_state_id,
+      buyingTeam: x.buying_team,
+      loan: x.loan,
+      name: x.player_game_states.real_players.name,
+    })),
   };
 }
 
-export async function createTransferBidForPlayer(
+export async function createTransferBid(
   buyingTeamId: string,
-  player: GamePlayer,
-  cost: number,
-  loan: boolean = false
+  sellingTeamId: string,
+  cost: number
 ): Promise<string> {
   const { data, error } = await supabase
     .from("transfer_bids")
     .insert([
       {
         buying_team_id: buyingTeamId,
-        selling_team_id: player.teamId,
-        player_game_state_id: player.id,
+        selling_team_id: sellingTeamId,
         cost,
         status: Status.Pending,
+      },
+    ])
+    .single();
+
+  if (error) {
+    throw error;
+  }
+  return data.id;
+}
+
+export async function createPlayerTransfer(
+  bidId: string,
+  playerId: string,
+  buyingTeam: boolean,
+  loan: boolean
+): Promise<string> {
+  const { data, error } = await supabase
+    .from("player_transfers")
+    .insert([
+      {
+        transfer_bid_id: bidId,
+        player_game_state_id: playerId,
+        buying_team: buyingTeam,
         loan,
       },
     ])

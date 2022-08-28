@@ -2,6 +2,10 @@
   margin-top: var(--flow-space, 1rem);
 }
 
+.mini-flow > * + * {
+  margin-top: var(--flow-space, 0.25rem);
+}
+
 .flex {
   display: flex;
   flex-direction: column;
@@ -26,4 +30,17 @@
 
 main {
   padding-bottom: 3rem;
+}
+
+.split {
+  display: flex;
+}
+
+.split > * {
+  width: 50%;
+  padding: 1rem;
+}
+
+.split > *:first-child {
+  border-right: 2px solid var(--color-secondary);
 }

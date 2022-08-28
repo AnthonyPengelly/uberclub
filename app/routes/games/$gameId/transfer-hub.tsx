@@ -28,10 +28,10 @@ export default function TransferHubPage() {
           Offers
         </NavLink>
         <NavLink
-          to={`/games/${gameId}/transfer-hub/buy`}
+          to={`/games/${gameId}/transfer-hub/players`}
           className={({ isActive }) => `${isActive ? "active" : ""}`}
         >
-          Buy
+          Players
         </NavLink>
         <NavLink
           to={`/games/${gameId}/transfer-hub/sell`}

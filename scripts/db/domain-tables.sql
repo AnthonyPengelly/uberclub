@@ -175,11 +175,21 @@ create table public.transfer_bids (
   id uuid not null default uuid_generate_v4(),
   buying_team_id uuid references public.teams not null,
   selling_team_id uuid references public.teams not null,
-  player_game_state_id uuid references public.player_game_states not null,
+  player_game_state_id uuid references public.player_game_states null,
   loan boolean not null default false,
   cost integer not null,
   status integer not null,
   created_at timestamptz not null default current_timestamp,
+
+  primary key (id)
+);
+
+create table public.player_transfers (
+  id uuid not null default uuid_generate_v4(),
+  transfer_bid_id uuid references public.transfer_bids not null,
+  player_game_state_id uuid references public.player_game_states not null,
+  buying_team boolean not null,
+  loan boolean not null default false,
 
   primary key (id)
 );
