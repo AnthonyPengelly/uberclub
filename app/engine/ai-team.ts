@@ -13,6 +13,7 @@ export function getPlayersWithAiPositions(players: GamePlayer[]) {
   });
   const orderedPlayers = players
     .filter((x) => !x.injured)
+    .sort(() => 0.5 - Math.random())
     .sort((a, b) => b.stars - a.stars);
   orderedPlayers[0].captain = true;
 
