@@ -8,14 +8,14 @@ import PlayerDisplay from "~/components/playerDisplay";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import type { GamePlayer } from "~/domain/players.server";
-import { getTeamPlayers } from "~/domain/players.server";
 import { getPlayer } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import type { TransferBid } from "~/domain/transferBids.server";
 import { getTransferBid } from "~/domain/transferBids.server";
-import { overrideGameStageWithTeam } from "~/engine/game";
+import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
+import { getSquadSize } from "~/engine/players";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { Status } from "~/engine/transfers";
 import { requireUserId } from "~/session.server";
@@ -26,7 +26,7 @@ type LoaderData = {
   game: Game;
   bid: TransferBid;
   players: GamePlayer[];
-  ownPlayers: GamePlayer[];
+  squadSize: { squadSize: number; committedSize: number };
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -59,7 +59,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     otherTeam,
     bid,
     players,
-    ownPlayers: await getTeamPlayers(team.id),
+    squadSize: await getSquadSize(team),
   });
 };
 
@@ -68,11 +68,10 @@ export const action: ActionFunction = async ({ request, params }) => {
 };
 
 export default function TransferPage() {
-  const { game, team, otherTeam, bid, players, ownPlayers } =
+  const { game, team, otherTeam, bid, players, squadSize } =
     useLoaderData<LoaderData>();
 
-  // TODO canBuy
-  //   const canBuy = canBuyOrSellPlayer(game);
+  const canBuy = canBuyOrSellPlayer(game);
 
   const buyingTeamPlayersIncluded = bid.players
     .filter((x) => x.buyingTeam && !x.loan)
@@ -86,12 +85,24 @@ export default function TransferPage() {
   const sellingTeamLoanPlayersIncluded = bid.players
     .filter((x) => !x.buyingTeam && x.loan)
     .map((x) => players.find((y) => y.id === x.playerId) as GamePlayer);
+
+  const playerBalance =
+    buyingTeamPlayersIncluded.length +
+    buyingTeamLoanPlayersIncluded.length -
+    (sellingTeamPlayersIncluded.length + sellingTeamLoanPlayersIncluded.length);
+  const tooFewPlayers =
+    playerBalance < 0 && squadSize.squadSize + playerBalance < 11;
+  const tooManyPlayers =
+    playerBalance > 0 &&
+    squadSize.committedSize + playerBalance > MAX_SQUAD_SIZE;
+  const canAfford = team.cash > bid.cost * -1;
   return (
     <>
       <h1>Transfer negotiations</h1>
       <h2>{team.cash}M cash available</h2>
       <div>
-        {ownPlayers.length}/{MAX_SQUAD_SIZE} players in squad
+        {squadSize.committedSize}/{MAX_SQUAD_SIZE} players in squad (incl.
+        pending transfers and deadline day bids)
       </div>
       {bid.cost > 0 && (
         <div className="notice | centre">💵💵➡ {bid.cost}M ➡💵💵</div>
@@ -152,7 +163,12 @@ export default function TransferPage() {
           )}
         </div>
       </div>
-      {bid.buyingTeamId === team.id && bid.status === Status.Pending && (
+      {!canBuy && (
+        <div className="centre">
+          Can use the transfer hub during the pre-season
+        </div>
+      )}
+      {bid.buyingTeamId === team.id && bid.status === Status.Pending && canBuy && (
         <LoadingForm
           method="post"
           action={`/games/${game.id}/transfer-hub/withdraw`}
@@ -163,32 +179,56 @@ export default function TransferPage() {
           <input type="hidden" name="bid-id" value={bid.id} />
         </LoadingForm>
       )}
-      {bid.sellingTeamId === team.id && bid.status === Status.Pending && (
-        <div className="horizontal-flow | justify-centre">
-          <LoadingForm
-            method="post"
-            action={`/games/${game.id}/transfer-hub/accept`}
-            submitButtonText="Accept"
-          >
-            <input type="hidden" name="bid-id" value={bid.id} />
-          </LoadingForm>
-          <LoadingForm
-            method="post"
-            action={`/games/${game.id}/transfer-hub/counter`}
-            submitButtonText="Counter offer"
-          >
-            <input type="hidden" name="bid-id" value={bid.id} />
-          </LoadingForm>
-          <LoadingForm
-            method="post"
-            action={`/games/${game.id}/transfer-hub/reject`}
-            buttonClass="button-secondary"
-            submitButtonText="Reject"
-          >
-            <input type="hidden" name="bid-id" value={bid.id} />
-          </LoadingForm>
-        </div>
-      )}
+      {bid.sellingTeamId === team.id &&
+        bid.status === Status.Pending &&
+        canBuy && (
+          <>
+            <div className="horizontal-flow | justify-centre">
+              {!tooFewPlayers && !tooManyPlayers && canAfford && (
+                <LoadingForm
+                  method="post"
+                  action={`/games/${game.id}/transfer-hub/accept`}
+                  submitButtonText="Accept"
+                >
+                  <input type="hidden" name="bid-id" value={bid.id} />
+                </LoadingForm>
+              )}
+              <LoadingForm
+                method="post"
+                action={`/games/${game.id}/transfer-hub/counter`}
+                buttonClass="button-secondary"
+                submitButtonText="Counter offer"
+              >
+                <input type="hidden" name="bid-id" value={bid.id} />
+              </LoadingForm>
+              <LoadingForm
+                method="post"
+                action={`/games/${game.id}/transfer-hub/reject`}
+                buttonClass="button-secondary"
+                submitButtonText="Reject"
+              >
+                <input type="hidden" name="bid-id" value={bid.id} />
+              </LoadingForm>
+            </div>
+
+            {tooFewPlayers && (
+              <div className="centre">
+                Can't accept - this would leave you with less than 11 players!
+              </div>
+            )}
+            {tooManyPlayers && (
+              <div className="centre">
+                Can't accept - you don't have space in your squad! Sell first or
+                withdraw other transfer bids
+              </div>
+            )}
+            {!canAfford && (
+              <div className="centre">
+                Can't accept - you don't have enough cash!
+              </div>
+            )}
+          </>
+        )}
       {bid.status === Status.Accepted && (
         <div className="centre">✅ Accepted</div>
       )}

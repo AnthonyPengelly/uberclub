@@ -7,9 +7,9 @@ import {
   updateLoanee,
   updatePlayerLineupPosition,
 } from "~/domain/players.server";
-import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamById, updateCash } from "~/domain/team.server";
+import type { TransferBid } from "~/domain/transferBids.server";
 import {
   createPlayerTransfer,
   createTransferBid,
@@ -20,6 +20,8 @@ import {
   updateTransferBidStatus,
 } from "~/domain/transferBids.server";
 import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "./game";
+import { getSquadSize } from "./players";
+import { MAX_SQUAD_SIZE } from "./team";
 
 export enum Status {
   Pending = 0,
@@ -45,14 +47,23 @@ export async function rejectBid(bidId: string, team: Team) {
     });
   }
   const newTeam = await getTeamById(bid.buyingTeamId);
-  await updateTransferBidStatus(bidId, Status.Rejected);
+  await handleBidRejection(game.id, bid, newTeam, team);
+}
+
+async function handleBidRejection(
+  gameId: string,
+  bid: TransferBid,
+  buyingTeam: Team,
+  sellingTeam: Team
+) {
+  await updateTransferBidStatus(bid.id, Status.Rejected);
   if (bid.cost > 0) {
-    await updateCash(newTeam.id, newTeam.cash + bid.cost);
+    await updateCash(buyingTeam.id, buyingTeam.cash + bid.cost);
   }
   await createGameLog(
-    game.id,
-    `${team.teamName} have rejected an offer from ${
-      newTeam.teamName
+    gameId,
+    `${sellingTeam.teamName} have rejected an offer from ${
+      buyingTeam.teamName
     } including ${bid.players.map((x) => x.name).join(", ")}!`
   );
 }
@@ -112,14 +123,25 @@ export async function acceptBid(bidId: string, sellingTeam: Team) {
       statusText: "Not enough cash!",
     });
   }
-  // TODO player limitations
-  // const teamPlayers = await getTeamPlayers(team.id);
-  // if (teamPlayers.length === 11) {
-  //   throw new Response("Bad Request", {
-  //     status: 400,
-  //     statusText: "You don't have enough players to sell any more!",
-  //   });
-  // }
+  const squadSize = await getSquadSize(sellingTeam);
+  const playerBalance =
+    bid.players.filter((x) => x.buyingTeam).length -
+    bid.players.filter((x) => !x.buyingTeam).length;
+  if (playerBalance < 0 && squadSize.squadSize + playerBalance < 11) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "You don't have enough players to sell any more!",
+    });
+  }
+  if (
+    playerBalance > 0 &&
+    squadSize.committedSize + playerBalance > MAX_SQUAD_SIZE
+  ) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "You don't have space in your squad for these players!",
+    });
+  }
   const buyingTeam = await getTeamById(bid.buyingTeamId);
   await updateTransferBidStatus(bidId, Status.Accepted);
   await updateCash(sellingTeam.id, sellingTeam.cash + bid.cost);
@@ -137,6 +159,7 @@ export async function acceptBid(bidId: string, sellingTeam: Team) {
         : `${buyingTeam.teamName} have sent ${sellingTeam.teamName} ${bid.cost}M as part of a transfer negotiation`
     );
   }
+  const bidsToReject: string[] = [];
   await Promise.all(
     bid.players.map(async (x) => {
       await addPlayerToTeam(
@@ -164,7 +187,18 @@ export async function acceptBid(bidId: string, sellingTeam: Team) {
           y.players.find((z) => z.playerId === x.playerId) &&
           y.status === Status.Pending
       );
-      await Promise.all(otherBids.map((x) => rejectBid(x.id, sellingTeam)));
+
+      otherBids.forEach((y) => {
+        bidsToReject.push(y.id);
+      });
+    })
+  );
+  await Promise.all(
+    [...new Set(bidsToReject)].map(async (bidId) => {
+      const bid = await getTransferBid(bidId);
+      const buyingTeam = await getTeamById(bid.buyingTeamId);
+      const sellingTeam = await getTeamById(bid.sellingTeamId);
+      handleBidRejection(game.id, bid, buyingTeam, sellingTeam);
     })
   );
 }
@@ -190,23 +224,53 @@ export async function createBid(
       statusText: "Not enough cash!",
     });
   }
-  // TODO squad size
-  const teamPlayers = await getTeamPlayers(team.id);
+
+  const players = await Promise.all(playerIds.map((x) => getPlayer(x)));
+  const loanPlayers = await Promise.all(loanPlayerIds.map((x) => getPlayer(x)));
+
+  const squadSize = await getSquadSize(team);
+  // how many players this team would be set to gain
+  const playerBalance =
+    [...players, ...loanPlayers].filter((x) => team.id !== x.teamId).length -
+    [...players, ...loanPlayers].filter((x) => team.id === x.teamId).length;
+  if (playerBalance < 0 && squadSize.squadSize + playerBalance < 11) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "You don't have enough players to sell any more!",
+    });
+  }
+  if (
+    playerBalance > 0 &&
+    squadSize.committedSize + playerBalance > MAX_SQUAD_SIZE
+  ) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "You don't have space in your squad for these players!",
+    });
+  }
 
   const bidId = await createTransferBid(team.id, sellingTeamId, cost);
   if (cost > 0) {
     await updateCash(team.id, team.cash - cost);
   }
   await Promise.all(
-    playerIds.map(async (id) => {
-      const player = await getPlayer(id);
-      await createPlayerTransfer(bidId, id, player.teamId === team.id, false);
+    players.map(async (player) => {
+      await createPlayerTransfer(
+        bidId,
+        player.id,
+        player.teamId === team.id,
+        false
+      );
     })
   );
   await Promise.all(
-    loanPlayerIds.map(async (id) => {
-      const player = await getPlayer(id);
-      await createPlayerTransfer(bidId, id, player.teamId === team.id, true);
+    loanPlayers.map(async (player) => {
+      await createPlayerTransfer(
+        bidId,
+        player.id,
+        player.teamId === team.id,
+        true
+      );
     })
   );
 

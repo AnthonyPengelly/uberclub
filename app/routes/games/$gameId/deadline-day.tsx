@@ -18,8 +18,8 @@ import {
 import type { Bid, DeadlineDayPlayer } from "~/domain/deadlineDay.server";
 import LoadingForm from "~/components/loadingForm";
 import PlayerDisplay from "~/components/playerDisplay";
-import { getTeamPlayers } from "~/domain/players.server";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
+import { getSquadSize } from "~/engine/players";
 
 type LoaderData = {
   team: Team;
@@ -40,14 +40,13 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     throw new Response("Not Found", { status: 404 });
   }
   const players = await deadlineDayPlayers(params.gameId);
-  const squad = await getTeamPlayers(team.id);
   const bids = await bidsForTeam(team);
   return json({
     game,
     team,
     players,
     bids,
-    squadSize: squad.length,
+    squadSize: (await getSquadSize(team)).committedSize,
   });
 };
 
@@ -60,7 +59,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   const team = await getTeam(userId, params.gameId);
   const game = await getGame(params.gameId);
   overrideGameStageWithTeam(game, team);
-  const squad = await getTeamPlayers(team.id);
   const bids = await bidsForTeam(team);
 
   if (!team) {
@@ -69,7 +67,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   await bidForPlayer(
     playerId,
     team,
-    bids,
     parseInt(formData.get("cost") as string, 10)
   );
   const players = await deadlineDayPlayers(params.gameId);
@@ -78,7 +75,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     team,
     players,
     bids,
-    squadSize: squad.length,
+    squadSize: (await getSquadSize(team)).committedSize,
   });
 };
 
@@ -110,6 +107,10 @@ export default function DeadlineDayPage() {
           </p>
         )}
       </div>
+      <div>
+        {squadSize}/{MAX_SQUAD_SIZE} players in squad (incl. pending transfers
+        and deadline day bids)
+      </div>
       {game.stage === Stage.DeadlineDay && !team.isReady && (
         <LoadingForm
           method="post"
@@ -128,7 +129,7 @@ export default function DeadlineDayPage() {
                 !team.isReady &&
                 (team.cash < minBidPrice(x) ? (
                   <div>Not enough cash!</div>
-                ) : squadSize + bids.length >= MAX_SQUAD_SIZE ? (
+                ) : squadSize >= MAX_SQUAD_SIZE ? (
                   <div>Your squad is full!</div>
                 ) : (
                   <LoadingForm

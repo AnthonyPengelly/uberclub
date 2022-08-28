@@ -5,6 +5,7 @@ export type LoadingFormProps = {
   children?: React.ReactNode | React.ReactNode[];
   submitButtonText?: string;
   buttonClass?: string;
+  disabled?: boolean;
 } & FormProps &
   React.RefAttributes<HTMLFormElement>;
 
@@ -13,6 +14,7 @@ export default function LoadingForm({
   submitButtonText,
   className,
   buttonClass,
+  disabled,
   ...formProps
 }: LoadingFormProps) {
   const transition = useTransition();
@@ -26,6 +28,7 @@ export default function LoadingForm({
             data-submitting={transition.state === "submitting"}
             data-loading={transition.state === "loading"}
             type="submit"
+            disabled={disabled}
           >
             {submitButtonText}
           </button>

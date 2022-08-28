@@ -9,7 +9,6 @@ import {
   addPlayerToTeam,
   drawPlayersFromDeck,
   getPlayer,
-  getTeamPlayers,
   markPlayerOutOfDeck,
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
@@ -17,6 +16,7 @@ import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
 import { overrideGameStageWithTeam, Stage } from "./game";
 import { MAX_SQUAD_SIZE } from "./team";
+import { getSquadSize } from "./players";
 
 export async function getScoutedPlayers(team: Team) {
   const season = await getCurrentSeason(team.gameId);
@@ -47,11 +47,11 @@ export async function buyScoutedPlayer(playerId: string, team: Team) {
       statusText: "Not enough cash!",
     });
   }
-  const players = await getTeamPlayers(team.id);
-  if (players.length === MAX_SQUAD_SIZE) {
+  const squadSize = await getSquadSize(team);
+  if (squadSize.committedSize === MAX_SQUAD_SIZE) {
     throw new Response("Bad Request", {
       status: 400,
-      statusText: "Too many players! Sell first",
+      statusText: "Too many players! Sell first, or withdraw transfer bids",
     });
   }
   await addPlayerToTeam(playerId, team.id);

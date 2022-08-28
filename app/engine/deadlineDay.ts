@@ -9,7 +9,6 @@ import {
 } from "~/domain/deadlineDay.server";
 import { createGameLog } from "~/domain/logs.server";
 import type { GamePlayer } from "~/domain/players.server";
-import { getTeamPlayers } from "~/domain/players.server";
 import { addPlayerToTeam } from "~/domain/players.server";
 import {
   drawPlayersFromDeck,
@@ -19,6 +18,7 @@ import { getCurrentSeason } from "~/domain/season.server";
 import type { Team } from "~/domain/team.server";
 import { countTeamsInGame } from "~/domain/team.server";
 import { getTeamsInGame, updateCash } from "~/domain/team.server";
+import { getSquadSize } from "./players";
 import { MAX_SQUAD_SIZE } from "./team";
 
 export async function setDeadlineDayPlayers(gameId: string) {
@@ -35,12 +35,7 @@ export async function setDeadlineDayPlayers(gameId: string) {
   );
 }
 
-export async function bidForPlayer(
-  playerId: string,
-  team: Team,
-  bids: Bid[],
-  cost: number
-) {
+export async function bidForPlayer(playerId: string, team: Team, cost: number) {
   const season = await getCurrentSeason(team.gameId);
   const players = await getDeadlineDayPlayers(season.id);
   const player = players.find((x) => x.deadlineDayId === playerId);
@@ -58,11 +53,11 @@ export async function bidForPlayer(
       statusText: "Not enough cash!",
     });
   }
-  const teamPlayers = await getTeamPlayers(team.id);
-  if (teamPlayers.length + bids.length === MAX_SQUAD_SIZE) {
+  const squadSize = await getSquadSize(team);
+  if (squadSize.committedSize === MAX_SQUAD_SIZE) {
     throw new Response("Bad Request", {
       status: 400,
-      statusText: "Too many players! Sell first",
+      statusText: "Too many players! Sell first or withdraw transfer bids",
     });
   }
   await createDeadlineDayBid(team.id, player.deadlineDayId, cost);
@@ -133,7 +128,9 @@ export async function resolveDeadlineDayPlayer(
 
 export function pickWinnerFromDraw(bids: Bid[], teams: Team[]) {
   const randomlySortedTeams = teams.sort(() => 0.5 - Math.random());
-  return randomlySortedTeams.find((x) => bids.find((y) => y.teamId === x.id)) as Team;
+  return randomlySortedTeams.find((x) =>
+    bids.find((y) => y.teamId === x.id)
+  ) as Team;
 }
 
 export async function deadlineDayPlayers(gameId: string) {

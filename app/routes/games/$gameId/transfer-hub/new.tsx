@@ -15,7 +15,8 @@ import { getTeamById } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
 import type { TransferBid } from "~/domain/transferBids.server";
 import { getTransferBid } from "~/domain/transferBids.server";
-import { overrideGameStageWithTeam } from "~/engine/game";
+import { canBuyOrSellPlayer, overrideGameStageWithTeam } from "~/engine/game";
+import { getSquadSize } from "~/engine/players";
 import { MAX_SQUAD_SIZE } from "~/engine/team";
 import { createBid } from "~/engine/transfers";
 import { requireUserId } from "~/session.server";
@@ -28,6 +29,7 @@ type LoaderData = {
   otherTeamPlayers: GamePlayer[];
   costPlaceholder: number;
   preselectedPlayers: { playerId: string; loan: boolean }[];
+  squadSize: { squadSize: number; committedSize: number };
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -75,6 +77,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     otherTeamPlayers,
     costPlaceholder,
     preselectedPlayers,
+    squadSize: await getSquadSize(team),
   });
 };
 
@@ -127,18 +130,19 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function NewTransferPage() {
   const {
+    game,
     team,
     otherTeam,
     ownPlayers,
     otherTeamPlayers,
     costPlaceholder,
     preselectedPlayers,
+    squadSize,
   } = useLoaderData<LoaderData>();
   const [playersIncluded, setPlayersIncluded] =
     useState<{ playerId: string; loan: boolean }[]>(preselectedPlayers);
 
-  // TODO canBuy
-  //   const canBuy = canBuyOrSellPlayer(game);
+  const canBuy = canBuyOrSellPlayer(game);
   const ownPlayersIncluded = ownPlayers.filter((x) =>
     playersIncluded.find((y) => y.playerId === x.id && !y.loan)
   );
@@ -152,18 +156,30 @@ export default function NewTransferPage() {
     playersIncluded.find((y) => y.playerId === x.id && y.loan)
   );
 
+  const playerBalance =
+    theirPlayersIncluded.length +
+    theirLoanPlayersIncluded.length -
+    (ownPlayersIncluded.length + ownLoanPlayersIncluded.length);
+  const tooFewPlayers =
+    playerBalance < 0 && squadSize.squadSize + playerBalance < 11;
+  const tooManyPlayers =
+    playerBalance > 0 &&
+    squadSize.committedSize + playerBalance > MAX_SQUAD_SIZE;
+
   return (
     <>
       <h1>Transfer negotiations</h1>
       <h2>{team.cash}M cash available</h2>
       <div>
-        {ownPlayers.length}/{MAX_SQUAD_SIZE} players in squad
+        {squadSize.committedSize}/{MAX_SQUAD_SIZE} players in squad (incl.
+        pending transfers and deadline day bids)
       </div>
       <LoadingForm
         method="post"
         submitButtonText="Submit offer"
         buttonClass="button-centre"
         className="flow"
+        disabled={!canBuy || tooFewPlayers || tooManyPlayers}
       >
         <div className="split | background-grey">
           <div className="flow | switch-icon">
@@ -251,6 +267,16 @@ export default function NewTransferPage() {
             )}
           </div>
         </div>
+        {tooFewPlayers && (
+          <div>This would leave you with less than 11 players!</div>
+        )}
+        {tooManyPlayers && (
+          <div>
+            You don't have space in your squad! Sell first or withdraw other
+            transfer bids
+          </div>
+        )}
+        {!canBuy && <div>Can only make transfer offers in pre-season</div>}
       </LoadingForm>
       <details className="flow">
         <summary>

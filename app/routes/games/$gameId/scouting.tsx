@@ -6,7 +6,6 @@ import { getTeam } from "~/domain/team.server";
 import { requireUserId } from "~/session.server";
 import invariant from "tiny-invariant";
 import type { GamePlayer } from "~/domain/players.server";
-import { getTeamPlayers } from "~/domain/players.server";
 import type { ActionFunction } from "@remix-run/node";
 import {
   buyScoutedPlayer,
@@ -20,6 +19,8 @@ import { getGame } from "~/domain/games.server";
 import { overrideGameStageWithTeam, Stage } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import ScoutPlayer from "~/components/scoutPlayer";
+import { getSquadSize } from "~/engine/players";
+import { MAX_SQUAD_SIZE } from "~/engine/team";
 
 type LoaderData = {
   team: Team;
@@ -39,7 +40,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
   const game = await getGame(params.gameId);
   overrideGameStageWithTeam(game, team);
-  const squad = await getTeamPlayers(team.id);
   const scoutedPlayers = await getScoutedPlayers(team);
   const scoutingLogs = await getScoutingLogs(team);
 
@@ -47,7 +47,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     game,
     team,
     scoutedPlayers,
-    squadSize: squad.length,
+    squadSize: (await getSquadSize(team)).committedSize,
     scoutingLogs,
   });
 };
@@ -63,7 +63,6 @@ export const action: ActionFunction = async ({ request, params }) => {
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
-  const squad = await getTeamPlayers(team.id);
   switch (formData.get("action")) {
     case "scout-a-player": {
       await scoutPlayer(team);
@@ -83,7 +82,7 @@ export const action: ActionFunction = async ({ request, params }) => {
     game,
     team,
     scoutedPlayers,
-    squadSize: squad.length,
+    squadSize: (await getSquadSize(team)).committedSize,
     scoutingLogs,
   });
 };
@@ -111,6 +110,9 @@ export default function ScoutingPage() {
         )}
       </div>
       <h2>{team.cash}M cash available</h2>
+      <div>
+        {squadSize}/{MAX_SQUAD_SIZE} players committed (incl. pending transfers)
+      </div>
       {game.stage === Stage.Scouting && team.isReady && (
         <div>Waiting for other players</div>
       )}

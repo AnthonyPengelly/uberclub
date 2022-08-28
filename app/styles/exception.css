@@ -85,3 +85,10 @@
   border-right-color: var(--color-green--background);
   border-bottom-color: var(--color-green--background);
 }
+
+button:disabled {
+  background-color: white !important;
+  color: var(--color-background-grey) !important;
+  border: 1px solid var(--background-color-buttons--hover);
+  cursor: default;
+}

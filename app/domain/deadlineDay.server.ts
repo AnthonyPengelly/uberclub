@@ -109,6 +109,19 @@ export async function getBidsForTeam(
   );
 }
 
+export async function countBidsCommitted(
+  teamId: string,
+  seasonId: string
+): Promise<number> {
+  const { count } = await supabase
+    .from("deadline_day_bids")
+    .select("id, deadline_day_players!inner(season_id)", { count: "exact" })
+    .eq("team_id", teamId)
+    .eq("deadline_day_players.season_id", seasonId);
+
+  return count || 0;
+}
+
 export async function getBidsForPlayer(
   deadlineDayPlayerId: string
 ): Promise<Bid[]> {

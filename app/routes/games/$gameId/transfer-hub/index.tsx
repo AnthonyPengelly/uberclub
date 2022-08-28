@@ -69,12 +69,14 @@ export default function OffersPage() {
         heading="Active offers"
         gameId={game.id}
         teamId={team.id}
+        accordionOpen
       />
       <BidList
         bids={completedBids}
         heading="Completed offers"
         gameId={game.id}
         teamId={team.id}
+        accordionOpen={false}
       />
     </>
   );
@@ -85,15 +87,22 @@ type BidListProps = {
   heading: string;
   gameId: string;
   teamId: string;
+  accordionOpen: boolean;
 };
 
-function BidList({ bids, heading, gameId, teamId }: BidListProps) {
-  if (bids.length === 0) {
-    return null;
-  }
+function BidList({
+  bids,
+  heading,
+  gameId,
+  teamId,
+  accordionOpen,
+}: BidListProps) {
   return (
-    <>
-      <h3>{heading}</h3>
+    <details className="flow" open={accordionOpen}>
+      <summary>
+        <h3 className="inline">{heading}</h3>
+      </summary>
+      {bids.length === 0 && <div>No {heading}</div>}
       {bids.map((x) => {
         const buyingTeamPlayers = x.bid.players.filter((y) => y.buyingTeam);
         const sellingTeamPlayers = x.bid.players.filter((y) => !y.buyingTeam);
@@ -138,6 +147,6 @@ function BidList({ bids, heading, gameId, teamId }: BidListProps) {
           </div>
         );
       })}
-    </>
+    </details>
   );
 }

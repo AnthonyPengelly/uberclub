@@ -150,6 +150,18 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   );
 }
 
+export async function countTeamPlayers(teamId: string): Promise<number> {
+  const { error, count } = await supabase
+    .from("player_game_states")
+    .select(`id`, { count: "exact" })
+    .eq("team_id", teamId);
+
+  if (error) {
+    throw error;
+  }
+  return count || 0;
+}
+
 export async function getLoanedPlayers(gameId: string): Promise<LoanPlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
