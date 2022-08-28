@@ -46,7 +46,7 @@ export async function rejectBid(bidId: string, team: Team) {
   }
   const newTeam = await getTeamById(bid.buyingTeamId);
   await updateTransferBidStatus(bidId, Status.Rejected);
-  if (bid.cost < 0) {
+  if (bid.cost > 0) {
     await updateCash(newTeam.id, newTeam.cash + bid.cost);
   }
   await createGameLog(
@@ -75,7 +75,7 @@ export async function withdrawBid(bidId: string, team: Team) {
   }
   const otherTeam = await getTeamById(bid.sellingTeamId);
   await updateTransferBidStatus(bidId, Status.Withdrawn);
-  if (bid.cost < 0) {
+  if (bid.cost > 0) {
     await updateCash(team.id, team.cash + bid.cost);
   }
   await createGameLog(
