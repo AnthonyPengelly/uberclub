@@ -29,7 +29,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const team = await getTeam(userId, params.gameId);
   overrideGameStageWithTeam(game, team);
 
-  const players = await getTeamPlayers(team.id);
+  const players = (await getTeamPlayers(team.id)).filter((x) => !x.loan);
   if (!team) {
     throw new Response("Not Found", { status: 404 });
   }
@@ -54,7 +54,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   }
 
   await sellPlayer(params.gameId, playerId, team);
-  const players = await getTeamPlayers(team.id);
+  const players = (await getTeamPlayers(team.id)).filter((x) => !x.loan);
 
   return json({ game, team, players });
 };

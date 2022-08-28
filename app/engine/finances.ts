@@ -100,6 +100,12 @@ function calculateStadiumIncome(level: number, score: number) {
 
 export async function sellPlayer(gameId: string, playerId: string, team: Team) {
   const player = await getPlayer(playerId);
+  if (player.loan) {
+    throw new Response("Bad Request", {
+      status: 400,
+      statusText: "Can't sell players on loan",
+    });
+  }
   const cost = getScoutPrice(player.stars, player.potential);
   await createGameLog(
     gameId,

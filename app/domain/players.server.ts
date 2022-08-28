@@ -181,7 +181,7 @@ export async function getLoanedPlayers(gameId: string): Promise<LoanPlayer[]> {
     name: x.real_players.name,
     loanee: x.loanee.team_name,
     loaneeId: x.loanee_id,
-    loaner: x.loaner.team_name,
+    loaner: x.loaner?.team_name,
   }));
 }
 
