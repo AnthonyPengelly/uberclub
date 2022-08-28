@@ -46,7 +46,9 @@ export async function rejectBid(bidId: string, team: Team) {
   }
   const newTeam = await getTeamById(bid.buyingTeamId);
   await updateTransferBidStatus(bidId, Status.Rejected);
-  await updateCash(newTeam.id, newTeam.cash + bid.cost);
+  if (bid.cost < 0) {
+    await updateCash(newTeam.id, newTeam.cash + bid.cost);
+  }
   await createGameLog(
     game.id,
     `${team.teamName} have rejected an offer from ${
@@ -73,7 +75,9 @@ export async function withdrawBid(bidId: string, team: Team) {
   }
   const otherTeam = await getTeamById(bid.sellingTeamId);
   await updateTransferBidStatus(bidId, Status.Withdrawn);
-  await updateCash(team.id, team.cash + bid.cost);
+  if (bid.cost < 0) {
+    await updateCash(team.id, team.cash + bid.cost);
+  }
   await createGameLog(
     game.id,
     `${team.teamName} have withdrawn their bid to ${otherTeam.teamName}!`
@@ -123,12 +127,16 @@ export async function acceptBid(bidId: string, sellingTeam: Team) {
   if (bid.cost < 0) {
     await updateCash(bid.buyingTeamId, buyingTeam.cash - bid.cost);
   }
-  await createGameLog(
-    game.id,
-    bid.cost < 0
-      ? `${sellingTeam.teamName} have sent ${buyingTeam.teamName} as part of a transfer negotiation`
-      : `${buyingTeam.teamName} have sent ${sellingTeam.teamName} as part of a transfer negotiation`
-  );
+  if (bid.cost !== 0) {
+    await createGameLog(
+      game.id,
+      bid.cost < 0
+        ? `${sellingTeam.teamName} have sent ${buyingTeam.teamName} ${
+            bid.cost * -1
+          }M as part of a transfer negotiation`
+        : `${buyingTeam.teamName} have sent ${sellingTeam.teamName} ${bid.cost}M as part of a transfer negotiation`
+    );
+  }
   await Promise.all(
     bid.players.map(async (x) => {
       await addPlayerToTeam(
