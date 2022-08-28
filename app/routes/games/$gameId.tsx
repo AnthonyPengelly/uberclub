@@ -1,6 +1,6 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Link, Outlet, useLoaderData } from "@remix-run/react";
+import { Link, Outlet, useCatch, useLoaderData } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
 import type { Team } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
@@ -92,6 +92,18 @@ export function ErrorBoundary({ error }: { error: Error }) {
       <h1>Something went wrong!</h1>
       <Link to=".">«Go back to game dashboard»</Link>
       <div>{error?.message}</div>
+    </Layout>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <Layout>
+      <h1>
+        {caught.status}: {caught.statusText}
+      </h1>
+      <Link to=".">«Go back to game dashboard»</Link>
     </Layout>
   );
 }

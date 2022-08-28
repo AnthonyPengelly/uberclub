@@ -12,6 +12,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useCatch,
 } from "@remix-run/react";
 
 import main from "./styles/main.css";
@@ -77,7 +78,7 @@ export default function App() {
   );
 }
 
-export function ErrorBoundary({ error }: {error: Error}) {
+export function ErrorBoundary({ error }: { error: Error }) {
   console.error(error);
   return (
     <html>
@@ -103,8 +104,45 @@ export function ErrorBoundary({ error }: {error: Error}) {
       </head>
       <body>
         <Layout>
-        <h1>Something went wrong!</h1>
-      <Link to="/">«Go back to game list»</Link>
+          <h1>Something went wrong!</h1>
+          <Link to="/">«Go back to game list»</Link>
+        </Layout>
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link
+          rel="preload"
+          href="//cdn.shopify.com/s/files/1/0407/3678/4540/t/9/assets/avertaregular.woff2?v=49235355855020092321654083099"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="//cdn.shopify.com/s/files/1/0407/3678/4540/t/9/assets/avertabold.woff2?v=14125607424772896621654083098"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <Layout>
+          <h1>
+            {caught.status}: {caught.statusText}
+          </h1>
+          <Link to="/">«Go back to game list»</Link>
         </Layout>
         <Scripts />
       </body>
