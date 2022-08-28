@@ -489,9 +489,10 @@
   content: "↔";
   border-radius: 100%;
   position: absolute;
-  font-size: 0.75rem;
+  font-size: 1rem;
   padding: 0.4rem;
-  line-height: 1rem;
+  padding-top: 0.2rem;
+  line-height: var(--icon-height);
   width: var(--icon-height);
   height: var(--icon-height);
   display: flex;

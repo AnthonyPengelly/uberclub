@@ -4,8 +4,6 @@ import { Link, useLoaderData } from "@remix-run/react";
 import invariant from "tiny-invariant";
 import type { Game } from "~/domain/games.server";
 import { getGame } from "~/domain/games.server";
-import type { GamePlayer } from "~/domain/players.server";
-import { getTeamPlayers } from "~/domain/players.server";
 import type { Team } from "~/domain/team.server";
 import { getTeamsInGame } from "~/domain/team.server";
 import { getTeam } from "~/domain/team.server";
@@ -25,7 +23,6 @@ type LoaderData = {
   team: Team;
   game: Game;
   bids: BidSummary[];
-  players: GamePlayer[];
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
@@ -50,25 +47,14 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     }))
   );
 
-  const players = await getTeamPlayers(team.id);
-  return json<LoaderData>({ game, team, bids, players });
+  return json<LoaderData>({ game, team, bids });
 };
 
 export default function OffersPage() {
-  const { game, team, bids, players } = useLoaderData<LoaderData>();
+  const { game, bids, team } = useLoaderData<LoaderData>();
   const canBuyOrSell = canBuyOrSellPlayer(game);
-  const incomingBids = bids.filter(
-    (x) => x.sellingTeam.id === team.id && x.bid.status === Status.Pending
-  );
-  const outgoingBids = bids.filter(
-    (x) => x.buyingTeam.id === team.id && x.bid.status === Status.Pending
-  );
-  const olderIncomingBids = bids.filter(
-    (x) => x.sellingTeam.id === team.id && x.bid.status !== Status.Pending
-  );
-  const olderOutgoingBids = bids.filter(
-    (x) => x.buyingTeam.id === team.id && x.bid.status !== Status.Pending
-  );
+  const activeBids = bids.filter((x) => x.bid.status === Status.Pending);
+  const completedBids = bids.filter((x) => x.bid.status !== Status.Pending);
 
   return (
     <>
@@ -79,40 +65,16 @@ export default function OffersPage() {
         )}
       </div>
       <BidList
-        bids={incomingBids}
-        heading="Incoming offers"
-        canBuyOrSell={canBuyOrSell}
-        notEnoughPlayers={players.length === 11}
+        bids={activeBids}
+        heading="Active offers"
         gameId={game.id}
         teamId={team.id}
-        outbound={false}
       />
       <BidList
-        bids={outgoingBids}
-        heading="Outgoing offers"
-        canBuyOrSell={canBuyOrSell}
-        notEnoughPlayers={players.length === 11}
+        bids={completedBids}
+        heading="Completed offers"
         gameId={game.id}
         teamId={team.id}
-        outbound
-      />
-      <BidList
-        bids={olderIncomingBids}
-        heading="Previous incoming offers"
-        canBuyOrSell={canBuyOrSell}
-        notEnoughPlayers={players.length === 11}
-        gameId={game.id}
-        teamId={team.id}
-        outbound={false}
-      />
-      <BidList
-        bids={olderOutgoingBids}
-        heading="Previous outgoing offers"
-        canBuyOrSell={canBuyOrSell}
-        notEnoughPlayers={players.length === 11}
-        gameId={game.id}
-        teamId={team.id}
-        outbound
       />
     </>
   );
@@ -121,54 +83,61 @@ export default function OffersPage() {
 type BidListProps = {
   bids: BidSummary[];
   heading: string;
-  canBuyOrSell: boolean;
-  notEnoughPlayers: boolean;
   gameId: string;
   teamId: string;
-  outbound: boolean;
 };
 
-function BidList({ bids, heading, gameId, teamId, outbound }: BidListProps) {
+function BidList({ bids, heading, gameId, teamId }: BidListProps) {
   if (bids.length === 0) {
     return null;
   }
   return (
     <>
       <h3>{heading}</h3>
-      <table className="table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>{outbound ? "To" : "From"}</th>
-            <th>Players</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {bids.map((x) => (
-            <tr key={x.bid.id}>
-              <td>
-                {x.bid.status === Status.Pending && "⏳"}
-                {(x.bid.status === Status.Rejected ||
-                  x.bid.status === Status.Withdrawn) &&
-                  "❌"}
-                {x.bid.status === Status.Accepted && "✅"}
-              </td>
-              <td>
+      {bids.map((x) => {
+        const buyingTeamPlayers = x.bid.players.filter((y) => y.buyingTeam);
+        const sellingTeamPlayers = x.bid.players.filter((y) => !y.buyingTeam);
+        const outbound = x.buyingTeam.id === teamId;
+        return (
+          <div key={x.bid.id}>
+            <div>
+              {outbound ? "To" : "From"}{" "}
+              <strong>
                 {outbound
                   ? x.sellingTeam.managerName
                   : x.buyingTeam.managerName}
-              </td>
-              <td>{x.bid.players.map((y) => y.name).join(", ")}</td>
-              <td>
+              </strong>
+            </div>
+            <div className="quote | flow" data-outbound={outbound}>
+              <p>
+                I will give you{" "}
+                {buyingTeamPlayers.length !== 0 &&
+                  buyingTeamPlayers
+                    .map((y) => `${y.name}${y.loan ? " (loan)" : ""}`)
+                    .join(", ")}{" "}
+                {buyingTeamPlayers.length !== 0 && "and "}
+                {x.bid.cost >= 0 ? `${x.bid.cost}M` : "0M"} in exchange for{" "}
+                {sellingTeamPlayers.length !== 0 &&
+                  sellingTeamPlayers
+                    .map((y) => `${y.name}${y.loan ? " (loan)" : ""}`)
+                    .join(", ")}{" "}
+                {sellingTeamPlayers.length !== 0 && "and "}
+                {x.bid.cost < 0 ? `${x.bid.cost * -1}M` : "0M"}
+                {". "}
                 <Link to={`/games/${gameId}/transfer-hub/${x.bid.id}`}>
                   «View»
                 </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </p>
+              <p>
+                {x.bid.status === Status.Pending && "⏳ Pending"}
+                {x.bid.status === Status.Accepted && "✅ Accepted"}
+                {x.bid.status === Status.Rejected && "❌ Reject"}
+                {x.bid.status === Status.Withdrawn && "❌ Withdrawn"}
+              </p>
+            </div>
+          </div>
+        );
+      })}
     </>
   );
 }

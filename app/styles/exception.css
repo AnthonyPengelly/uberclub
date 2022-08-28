@@ -75,3 +75,13 @@
 [data-result="Loss"] {
   background-color: var(--position-defender);
 }
+
+[data-outbound="true"] {
+  background-color: var(--color-green--background);
+  color: var(--color-secondary);
+}
+
+[data-outbound="true"]::after {
+  border-right-color: var(--color-green--background);
+  border-bottom-color: var(--color-green--background);
+}
