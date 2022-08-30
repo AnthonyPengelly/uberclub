@@ -79,11 +79,22 @@
 [data-outbound="true"] {
   background-color: var(--color-green--background);
   color: var(--color-secondary);
+  margin-left: 1rem;
+}
+
+[data-outbound="false"] {
+  margin-right: 1rem;
 }
 
 [data-outbound="true"]::after {
-  border-right-color: var(--color-green--background);
-  border-bottom-color: var(--color-green--background);
+  right: -15px;
+  left: auto;
+  z-index: 1;
+  border-top: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-left: 10px solid var(--color-green--background);
+  border-bottom: 10px solid var(--color-green--background);
+  box-shadow: 4px 10px 5px -7px rgb(0 0 0 / 70%);
 }
 
 button:disabled {
