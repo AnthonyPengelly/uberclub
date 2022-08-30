@@ -33,7 +33,7 @@ import TeamList from "~/components/teamList";
 
 type LoaderData = {
   game: Game;
-  team: Team;
+  team?: Team;
   seasons: {
     season: SeasonModel;
     teamSeasons: PositionedTeamSeason[];
@@ -87,7 +87,7 @@ export default function GameDetailsPage() {
   const { team, logs, seasons, game, teamsInGame, hasPendingBids } =
     useLoaderData<LoaderData>();
   useRevalidateOnInterval({
-    enabled: team.isReady || game.stage === 0 || false,
+    enabled: team?.isReady || game.stage === 0 || false,
     intervalSeconds: 60,
     game,
   });
@@ -112,47 +112,51 @@ export default function GameDetailsPage() {
           !🏆
         </div>
       )}
-      <article className="flow | quote">
-        {game.stage === Stage.NotStarted ? (
+      {team && (
+        <article className="flow | quote">
+          {game.stage === Stage.NotStarted ? (
+            <p>
+              Welcome to the <strong>{team.teamName}</strong> back office. We're
+              currently waiting for more players to join.
+            </p>
+          ) : (
+            <>
+              {team.isReady ? (
+                <p>
+                  ✅ Good work <strong>{team.managerName}</strong>,{" "}
+                  <strong>{team.teamName}</strong> are ready for the next phase,
+                  put your feet up.
+                </p>
+              ) : (
+                <p>
+                  ⏳ <strong>{team.teamName}</strong> are waiting for your next
+                  move, <strong>{team.managerName}</strong>! The banner above
+                  will direct you where you need to go 👆
+                </p>
+              )}
+            </>
+          )}
           <p>
-            Welcome to the <strong>{team.teamName}</strong> back office. We're
-            currently waiting for more players to join.
+            Be the first to reach {game.victoryPoints} points in one season to
+            win. Alternatively, win 3 seasons and then the Cup!
           </p>
-        ) : (
-          <>
-            {team.isReady ? (
-              <p>
-                ✅ Good work <strong>{team.managerName}</strong>,{" "}
-                <strong>{team.teamName}</strong> are ready for the next phase,
-                put your feet up.
-              </p>
-            ) : (
-              <p>
-                ⏳ <strong>{team.teamName}</strong> are waiting for your next
-                move, <strong>{team.managerName}</strong>! The banner above will
-                direct you where you need to go 👆
-              </p>
-            )}
-          </>
-        )}
-        <p>
-          Be the first to reach {game.victoryPoints} points in one season to
-          win. Alternatively, win 3 seasons and then the Cup!
-        </p>
-        {canBuyOrSellPlayer(game) && !hasPendingBids ? (
-          <p>
-            The transfer window is open, check out the{" "}
-            <Link to={`/games/${game.id}/transfer-hub`}>«Transfer hub»</Link>.
-          </p>
-        ) : null}
-      </article>
-      {game.stage === Stage.NotStarted && teamsInGame.length >= MIN_TEAMS && (
-        <LoadingForm
-          method="post"
-          action={`/games/${game.id}/start`}
-          submitButtonText="Start game"
-        />
+          {canBuyOrSellPlayer(game) && !hasPendingBids ? (
+            <p>
+              The transfer window is open, check out the{" "}
+              <Link to={`/games/${game.id}/transfer-hub`}>«Transfer hub»</Link>.
+            </p>
+          ) : null}
+        </article>
       )}
+      {team &&
+        game.stage === Stage.NotStarted &&
+        teamsInGame.length >= MIN_TEAMS && (
+          <LoadingForm
+            method="post"
+            action={`/games/${game.id}/start`}
+            submitButtonText="Start game"
+          />
+        )}
       <TeamList teams={teamsInGame} seasons={seasons} />
       {seasons[0] && (
         <>
@@ -161,11 +165,11 @@ export default function GameDetailsPage() {
             teamSeasons={seasons[0].teamSeasons}
             results={seasons[0].results}
             startOpen={true}
-            usersTeamName={team.teamName}
+            usersTeamName={team?.teamName || ""}
           />
           <PreviousSeasons
             seasons={seasons.slice(1)}
-            usersTeamName={team.teamName}
+            usersTeamName={team?.teamName || ""}
           />
         </>
       )}

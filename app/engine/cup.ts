@@ -1,4 +1,4 @@
-import { createCupLeaderboardEntry } from "~/domain/cupLeaderboard.server";
+import { createCupLeaderboardEntry } from "~/domain/leaderboard.server";
 import {
   createResult,
   getResults,
@@ -138,7 +138,7 @@ export async function checkForCupWinner(gameId: string) {
       season.seasonNumber,
       teamSeason.score,
       teams.length,
-      `/spectator/results/${final.id}`
+      `/games/${game.id}/results/${final.id}`
     );
   }
 }

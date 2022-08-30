@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import type { CupLeaderboardEntry } from "~/domain/cupLeaderboard.server";
+import type { CupLeaderboardEntry } from "~/domain/leaderboard.server";
 
 export type CupLeaderboardProps = {
   cupLeaderboardEntries: CupLeaderboardEntry[];
@@ -11,7 +11,8 @@ export default function CupLeaderboard({
   const sortedEntries = cupLeaderboardEntries
     .sort((a, b) => b.seasonPoints - a.seasonPoints)
     .sort((a, b) => b.numberOfTeams - a.numberOfTeams)
-    .sort((a, b) => a.season - b.season);
+    .sort((a, b) => a.season - b.season)
+    .slice(0, 10);
   return (
     <>
       <h2>🏆 Cup Winners Leaderboard 🏆</h2>

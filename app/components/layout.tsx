@@ -1,14 +1,16 @@
 import { Form, Link } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
+import type { Team } from "~/domain/team.server";
 import { Stage } from "~/engine/game";
 import PhaseSummary from "./phaseSummary";
 
 export type LayoutProps = {
   game?: Game;
+  team?: Team;
   children: React.ReactNode | React.ReactNode[];
 };
 
-export default function Layout({ game, children }: LayoutProps) {
+export default function Layout({ game, team, children }: LayoutProps) {
   const gameStarted = game && game.stage !== Stage.NotStarted;
   return (
     <>
@@ -27,12 +29,12 @@ export default function Layout({ game, children }: LayoutProps) {
           </Link>
         </div>
         <div className="header__right">
-          {game && gameStarted && (
+          {game && gameStarted && team && (
             <Link to={game ? `/games/${game.id}/team` : "/"}>My Team</Link>
           )}
         </div>
       </nav>
-      {game && gameStarted && <PhaseSummary game={game} />}
+      {game && gameStarted && <PhaseSummary game={game} team={team} />}
       {(!game || !gameStarted) && <header className="header__separator" />}
       <main
         className={`flow wrapper ${
@@ -49,7 +51,7 @@ export default function Layout({ game, children }: LayoutProps) {
           ) : (
             <Link to="/">Home</Link>
           )}
-          {game && gameStarted && (
+          {game && gameStarted && team && (
             <>
               <Link to={`/games/${game.id}/team`}>My Team</Link>
               <Link to={`/games/${game.id}/transfer-hub`}>Transfer hub</Link>

@@ -1,6 +1,7 @@
 import { getResults } from "~/domain/fixtures.server";
 import type { Game } from "~/domain/games.server";
 import { getGame, recordWinner } from "~/domain/games.server";
+import { createPointLeaderboardEntry } from "~/domain/leaderboard.server";
 import { createGameLog } from "~/domain/logs.server";
 import {
   getPlayer,
@@ -35,13 +36,22 @@ export async function completeFinancesForAllTeams(gameId: string) {
   await Promise.all(
     positionedTeamSeasons
       .sort((a, b) => b.position - a.position)
-      .map((x) => completeFinances(game, x))
+      .map((x) =>
+        completeFinances(
+          game,
+          x,
+          season.seasonNumber,
+          seasonAndResults.teamSeasons.length
+        )
+      )
   );
 }
 
 async function completeFinances(
   game: Game,
-  positionedTeamSeason: PositionedTeamSeason
+  positionedTeamSeason: PositionedTeamSeason,
+  seasonNumber: number,
+  numberOfTeams: number
 ) {
   const team = await getTeamById(positionedTeamSeason.teamId);
   if (
@@ -53,6 +63,16 @@ async function completeFinances(
       `*** ${team.managerName} has expertly led ${team.teamName} to 100 points in 1 season! WE HAVE A WINNER! ***`
     );
     await recordWinner(game.id, team.teamName);
+  }
+  if (positionedTeamSeason.position === 1 && seasonNumber === 10) {
+    await createPointLeaderboardEntry(
+      game.name,
+      team.teamName,
+      team.managerName,
+      positionedTeamSeason.score,
+      numberOfTeams,
+      `/games/${game.id}`
+    );
   }
   const placementAward = 110 - 10 * positionedTeamSeason.position;
   const stadiumIncome = calculateStadiumIncome(

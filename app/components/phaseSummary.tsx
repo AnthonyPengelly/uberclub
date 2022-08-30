@@ -1,21 +1,24 @@
 import { Link } from "@remix-run/react";
 import type { Game } from "~/domain/games.server";
+import type { Team } from "~/domain/team.server";
 import { Stage } from "~/engine/game";
 
 type PhaseSummaryProps = {
   game: Game;
+  team?: Team;
 };
 
-export default function PhaseSummary({ game }: PhaseSummaryProps) {
+export default function PhaseSummary({ game, team }: PhaseSummaryProps) {
   switch (game.stage) {
     case Stage.NotStarted:
-      return <PhaseHeading heading="Waiting for Players" />;
+      return <PhaseHeading heading="Waiting for Players" team={team} />;
     case Stage.Training:
       return (
         <PhaseHeading
           heading="Training Phase"
           callToAction="Go To Training"
           href={`/games/${game.id}/training`}
+          team={team}
         />
       );
     case Stage.Scouting:
@@ -24,6 +27,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Scouting Phase"
           callToAction="Go To Scouting"
           href={`/games/${game.id}/scouting`}
+          team={team}
         />
       );
     case Stage.Improvements:
@@ -32,6 +36,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Improvements Phase"
           callToAction="Improvements"
           href={`/games/${game.id}/improvements`}
+          team={team}
         />
       );
     case Stage.DeadlineDay:
@@ -40,6 +45,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Who is up for grabs?"
           callToAction="Deadline Day"
           href={`/games/${game.id}/deadline-day`}
+          team={team}
         />
       );
     case Stage.Match1:
@@ -48,6 +54,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Match Day 1"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.Match2:
@@ -56,6 +63,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Match Day 2"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.Match3:
@@ -64,6 +72,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Match Day 3"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.Match4:
@@ -72,6 +81,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Match Day 4"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.Match5:
@@ -80,6 +90,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Final Match Day"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.CupQuarterFinal:
@@ -88,6 +99,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Cup Quarter Final"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.CupSemiFinal:
@@ -96,6 +108,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Cup Semi Final"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     case Stage.CupFinal:
@@ -104,6 +117,7 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
           heading="Cup Final!"
           callToAction="Your lineup"
           href={`/games/${game.id}/team`}
+          team={team}
         />
       );
     default:
@@ -113,16 +127,19 @@ export default function PhaseSummary({ game }: PhaseSummaryProps) {
 
 type PhaseProps = {
   heading: string;
+  team?: Team;
   callToAction?: string;
   href?: string;
 };
 
-function PhaseHeading({ heading, callToAction, href }: PhaseProps) {
+function PhaseHeading({ heading, team, callToAction, href }: PhaseProps) {
   return (
     <aside className="banner">
       <div className="wrapper | banner__text">
         <span>{heading}</span>
-        {callToAction && href && <Link to={href}>«{callToAction}»</Link>}
+        {team && callToAction && href && (
+          <Link to={href}>«{callToAction}»</Link>
+        )}
       </div>
     </aside>
   );

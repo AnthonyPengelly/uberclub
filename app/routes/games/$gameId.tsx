@@ -11,6 +11,7 @@ import {
   isOpenForPlayers,
   joinGame,
   overrideGameStageWithTeam,
+  Stage,
 } from "~/engine/game";
 import LoadingForm from "~/components/loadingForm";
 import Layout from "~/components/layout";
@@ -54,33 +55,27 @@ export default function GamePage() {
   const { game, team } = useLoaderData<LoaderData>();
 
   return (
-    <Layout game={game}>
-      {team && <Outlet />}
-      {!team &&
-        (isOpenForPlayers(game) ? (
-          <>
-            <h1>🏆{game.name}🏆</h1>
-            <LoadingForm className="flow" method="post" submitButtonText="Join">
-              <div>
-                <label htmlFor="team-name">Team Name</label>
-              </div>
-              <div>
-                <input type="text" name="team-name" id="team-name" />
-              </div>
-              <div>
-                <label htmlFor="manager-name">Manager Name</label>
-              </div>
-              <div>
-                <input type="text" name="manager-name" id="manager-name" />
-              </div>
-            </LoadingForm>
-          </>
-        ) : (
-          <>
-            <h1>🏆{game.name}🏆</h1>
-            <div>Sorry, this game is not open for registration</div>
-          </>
-        ))}
+    <Layout game={game} team={team || undefined}>
+      {(team || game.stage !== Stage.NotStarted) && <Outlet />}
+      {!team && isOpenForPlayers(game) && (
+        <>
+          <h1>🏆{game.name}🏆</h1>
+          <LoadingForm className="flow" method="post" submitButtonText="Join">
+            <div>
+              <label htmlFor="team-name">Team Name</label>
+            </div>
+            <div>
+              <input type="text" name="team-name" id="team-name" />
+            </div>
+            <div>
+              <label htmlFor="manager-name">Manager Name</label>
+            </div>
+            <div>
+              <input type="text" name="manager-name" id="manager-name" />
+            </div>
+          </LoadingForm>
+        </>
+      )}
     </Layout>
   );
 }
