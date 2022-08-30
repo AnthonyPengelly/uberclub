@@ -486,12 +486,12 @@
 
 .switch-icon::after {
   --icon-height: 1.35rem;
-  content: "↔";
+  content: "⇄";
   border-radius: 100%;
   position: absolute;
   font-size: 1rem;
   padding: 0.4rem;
-  padding-top: 0.2rem;
+  padding-top: 0.3rem;
   line-height: var(--icon-height);
   width: var(--icon-height);
   height: var(--icon-height);
