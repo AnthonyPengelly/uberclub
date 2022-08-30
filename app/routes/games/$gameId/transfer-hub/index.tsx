@@ -109,7 +109,7 @@ function BidList({
         const outbound = x.buyingTeam.id === teamId;
         return (
           <div key={x.bid.id}>
-            <div>
+            <div data-outbound-recipient={outbound}>
               {outbound ? "To" : "From"}{" "}
               <strong>
                 {outbound

@@ -79,11 +79,27 @@
 [data-outbound="true"] {
   background-color: var(--color-green--background);
   color: var(--color-secondary);
-  margin-left: 1rem;
+  margin-left: 20%;
+}
+
+[data-outbound="true"],
+[data-outbound-recipient="true"] {
+  margin-left: 20%;
 }
 
 [data-outbound="false"] {
-  margin-right: 1rem;
+  margin-right: 20%;
+}
+
+@media only screen and (min-width: 800px) {
+  [data-outbound="true"],
+  [data-outbound-recipient="true"] {
+    margin-left: 40%;
+  }
+
+  [data-outbound="false"] {
+    margin-right: 40%;
+  }
 }
 
 [data-outbound="true"]::after {
