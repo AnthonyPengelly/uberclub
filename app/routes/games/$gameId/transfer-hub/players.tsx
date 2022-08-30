@@ -124,6 +124,8 @@ function NegotiateForm({ canBuy, player, gameId }: NegotiateFormProps) {
     >
       <input type="hidden" name="player-id" value={player.id} />
       <input type="hidden" name="selling-team-id" value={player.teamId} />
+      <input type="checkbox" name="loan" />
+      <label htmlFor="loan">Loan?</label>
     </LoadingForm>
   );
 }

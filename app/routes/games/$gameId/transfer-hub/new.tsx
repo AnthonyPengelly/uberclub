@@ -46,6 +46,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const sellingTeamId = url.searchParams.get("selling-team-id");
   const bidId = url.searchParams.get("from");
   const playerId = url.searchParams.get("player-id");
+  const loan = !!url.searchParams.get("loan");
   invariant(
     sellingTeamId || bidId,
     "Must provide selling-team-id or from param"
@@ -58,7 +59,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
   const preselectedPlayers = previousBid
     ? previousBid.players
-    : [{ playerId: playerId as string, loan: false }];
+    : [{ playerId: playerId as string, loan }];
 
   const ownPlayers = (await getTeamPlayers(team.id)).filter((x) => !x.loan);
   const otherTeamPlayers = (await getTeamPlayers(otherTeam.id))
