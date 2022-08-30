@@ -5,6 +5,7 @@ import {
   createScoutingLog,
   getScoutingLogsForSeason,
 } from "~/domain/logs.server";
+import type { GamePlayer } from "~/domain/players.server";
 import {
   addPlayerToTeam,
   drawPlayersFromDeck,
@@ -31,10 +32,7 @@ export async function scoutPlayer(team: Team) {
   await assertCanScout(team.gameId, season.id, team);
   await createScoutingLog(season.id, team.id, player.id);
   await markPlayerOutOfDeck(player.id);
-  await createGameLog(
-    team.gameId,
-    `${team.teamName} have discovered a hidden gem: ${player.name} already playing at ${player.overall} stars`
-  );
+  await createGameLog(team.gameId, getScoutReport(player, team));
   return player;
 }
 
@@ -118,4 +116,23 @@ export function canScout(
     return false;
   }
   return true;
+}
+
+export function getScoutReport(player: GamePlayer, team: Team) {
+  if (player.overall >= 6) {
+    return `World class player ${player.name} has been causing all sorts of drama in the ${team.teamName} dressing room and they are desperate to offload the hefty wage bill on someone else. They are rumoured to have offered the ${player.overall} star player to ${team.teamName}.`;
+  }
+  if (player.overall >= 5) {
+    return `${player.team} star ${player.name} is refusing to sign a new contract. The ${player.overall} star ${player.position} has expressed an interest in a move to ${team.teamName} instead.`;
+  }
+  if (player.potential >= 5) {
+    return `On the scouts advice, ${team.teamName} are lining up a shock move for wonderkid ${player.name}, currently playing at ${player.overall}.`;
+  }
+  if (player.overall === player.potential && player.overall >= 3) {
+    return `${player.team} have offered ${team.managerName} ${player.overall} star player ${player.name}, who already has experience at this level and could bring a lot to ${team.teamName}.`;
+  }
+  if (player.potential > player.overall) {
+    return `The ${team.teamName} scouts have identified ${player.overall} star ${player.position} ${player.name} as one to watch.`;
+  }
+  return `Against their scouts' advice, ${team.managerName} is hoping that veteran ${player.name} can bring his experience to the ${team.teamName} dressing room.`;
 }
