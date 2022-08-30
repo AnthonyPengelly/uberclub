@@ -71,6 +71,7 @@ export default function NewGamePage() {
           <select name="player-collection" id="player-collection">
             {playerCollections.map((x) => (
               <option key={x.id} value={x.id}>
+                {x.deprecated && "[deprecated] "}
                 {x.name}
               </option>
             ))}

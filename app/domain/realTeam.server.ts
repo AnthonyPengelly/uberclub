@@ -33,13 +33,20 @@ export async function getRealTeam(id: string): Promise<RealTeam> {
 export type PlayerCollection = {
   id: string;
   name: string;
+  deprecated: boolean;
 };
 
 export async function getPlayerCollections(): Promise<PlayerCollection[]> {
-  const { data, error } = await supabase.from("player_collections").select(`*`);
+  const { data, error } = await supabase
+    .from<PlayerCollection>("player_collections")
+    .select(`*`);
 
   if (error) {
     throw error;
   }
-  return data || [];
+  return (
+    data
+      ?.sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => (a.deprecated ? 1 : 0) - (b.deprecated ? 1 : 0)) || []
+  );
 }

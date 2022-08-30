@@ -36,6 +36,7 @@ create table public.game_logs (
 create table public.player_collections (
   id uuid not null default uuid_generate_v4(),
   name varchar not null,
+  deprecated boolean not null default false,
 
   primary key (id)
 )
