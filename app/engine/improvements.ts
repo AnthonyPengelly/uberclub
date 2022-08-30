@@ -74,17 +74,17 @@ async function canImprove(gameId: string, seasonId: string, team: Team) {
 export function improvementCost(team: Team, improvement: Improvements) {
   switch (improvement) {
     case Improvements.Training:
-      if (team.trainingLevel >= 4) {
+      if (team.trainingLevel >= 8) {
         return null;
       }
       return 15 * Math.pow(2, team.trainingLevel - 1);
     case Improvements.Scouting:
-      if (team.scoutingLevel >= 4) {
+      if (team.scoutingLevel >= 8) {
         return null;
       }
       return 15 * Math.pow(2, team.scoutingLevel - 1);
     case Improvements.Stadium:
-      if (team.stadiumLevel >= 4) {
+      if (team.stadiumLevel >= 8) {
         return null;
       }
       return 20 * Math.pow(2, team.stadiumLevel - 1);
