@@ -228,7 +228,7 @@ export async function getFixtureLineups(
   const { data, error } = await supabase
     .from("fixture_lineups")
     .select(
-      `lineup_position, captain_boost, real_team_id, injured, player_game_states (id, stars, team_id, injured, loanee_id,
+      `lineup_position, captain_boost, real_team_id, injured, player_game_states (id, stars, team_id, injured, loanee_id, hidden_gem_games,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url)))`
     )
     .eq("result_id", resultId);
@@ -243,6 +243,7 @@ export async function getFixtureLineups(
       injured: x.injured,
       stars: x.player_game_states.stars,
       loan: !!x.player_game_states.loanee_id,
+      hiddenGemGames: x.player_game_states.hidden_gem_games,
       name: x.player_game_states.real_players.name,
       position: x.player_game_states.real_players.positions.name,
       overall: x.player_game_states.real_players.overall,

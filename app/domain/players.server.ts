@@ -62,6 +62,7 @@ export type GamePlayer = {
     name: string;
     imageUrl: string;
   };
+  hiddenGemGames: number;
 };
 
 export type LoanPlayer = {
@@ -114,7 +115,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars, team_id, loanee_id,
+      `id, lineup_position, captain, injured, stars, team_id, loanee_id, hidden_gem_games,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url))`
     )
     .eq("team_id", teamId);
@@ -130,6 +131,7 @@ export async function getTeamPlayers(teamId: string): Promise<GamePlayer[]> {
         captain: x.captain,
         injured: x.injured,
         stars: x.stars,
+        hiddenGemGames: x.hidden_gem_games,
         name: x.real_players.name,
         position: x.real_players.positions.name,
         overall: x.real_players.overall,
@@ -218,6 +220,7 @@ export async function getRealTeamPlayers(
         teamImage: x.real_players.real_teams.image_url,
         imageUrl: x.real_players.image_url,
         loan: false,
+        hiddenGemGames: 0,
         country: x.real_players.real_countries && {
           name: x.real_players.real_countries.name,
           imageUrl: x.real_players.real_countries.image_url,
@@ -234,7 +237,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
   const { data, error } = await supabase
     .from("player_game_states")
     .select(
-      `id, lineup_position, captain, injured, stars, team_id, loanee_id,
+      `id, lineup_position, captain, injured, stars, team_id, loanee_id, hidden_gem_games,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url))`
     )
     .eq("id", id)
@@ -249,6 +252,7 @@ export async function getPlayer(id: string): Promise<GamePlayer> {
     captain: data.captain,
     injured: data.injured,
     stars: data.stars,
+    hiddenGemGames: data.hidden_gem_games,
     name: data.real_players.name,
     position: data.real_players.positions.name,
     overall: data.real_players.overall,
@@ -378,6 +382,17 @@ export async function updateLoanee(id: string, loaneeId: string | null) {
   }
 }
 
+export async function updateHiddenGemGames(id: string, games: number) {
+  const { error } = await supabase
+    .from("player_game_states")
+    .update({ hidden_gem_games: games })
+    .eq("id", id);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function drawPlayersFromDeck(
   gameId: string,
   numberOfPlayers: number
@@ -410,6 +425,7 @@ export async function drawPlayersFromDeck(
     teamImage: x.real_players.real_teams.image_url,
     imageUrl: x.real_players.image_url,
     loan: false,
+    hiddenGemGames: 0,
     country: x.real_players.real_countries && {
       name: x.real_players.real_countries.name,
       imageUrl: x.real_players.real_countries.image_url,

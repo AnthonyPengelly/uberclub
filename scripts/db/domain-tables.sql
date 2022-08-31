@@ -127,6 +127,7 @@ create table public.player_game_states (
   out_of_deck boolean not null default false,
   stars integer not null,
   loanee_id uuid references public.teams null,
+  hidden_gem_games integer not null default 0,
 
   primary key (id),
   unique (player_id, game_id)

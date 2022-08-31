@@ -106,7 +106,7 @@ export default function TrainingPage() {
       <div className="players squad-list">
         {players.map((x) => (
           <PlayerDisplay key={x.id} player={x}>
-            {x.potential - x.stars && hasTrainingRemaining ? (
+            {x.potential - x.stars > 0 && hasTrainingRemaining ? (
               <LoadingForm
                 method="post"
                 submitButtonText="Train"

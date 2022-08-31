@@ -8,6 +8,10 @@ import { getGame } from "~/domain/games.server";
 import { createGameLog } from "~/domain/logs.server";
 import type { GamePlayer } from "~/domain/players.server";
 import {
+  updateHiddenGemGames,
+  updatePlayerStars,
+} from "~/domain/players.server";
+import {
   setInjured,
   updatePlayerLineupPosition,
 } from "~/domain/players.server";
@@ -27,6 +31,9 @@ import { createSeasonFixtures } from "./fixtures";
 import { Stage } from "./game";
 import { getLineupScores, MAX_DEF_POSITION, MAX_MID_POSITION } from "./lineup";
 import { calculateScoreForTeam } from "./team";
+
+const HIDDEN_GEM_GAMES_REQUIRED = 10;
+const HIDDEN_GEM_PROBABILITY = 0.4;
 
 type TeamWithPlayer = {
   team: Team;
@@ -120,6 +127,16 @@ async function playFixture(
   }
   await saveFixtureLineup(homeTeam, fixture.id);
   await saveFixtureLineup(awayTeam, fixture.id);
+  await recordGamesForHiddenGems(
+    homeTeam.players,
+    homeTeam.team.teamName,
+    gameId
+  );
+  await recordGamesForHiddenGems(
+    awayTeam.players,
+    awayTeam.team.teamName,
+    gameId
+  );
   await removeInjuredPlayersFromSquads([
     ...homeTeam.players,
     ...awayTeam.players,
@@ -178,6 +195,7 @@ async function playSim(
   }
   await saveFixtureLineup(team, fixture.id);
   await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);
+  await recordGamesForHiddenGems(team.players, team.team.teamName, gameId);
   await removeInjuredPlayersFromSquads([
     ...team.players,
     ...realTeamWithPlayers.players,
@@ -194,6 +212,36 @@ async function saveFixtureLineup(
     team.players.filter((x) => x.lineupPosition),
     team.team.captainBoost,
     realTeamId
+  );
+}
+
+async function recordGamesForHiddenGems(
+  players: GamePlayer[],
+  teamName: string,
+  gameId: string
+) {
+  await Promise.all(
+    players
+      .filter((x) => x.lineupPosition)
+      .filter((x) => x.stars === x.potential && x.stars >= x.overall + 2)
+      .map(async (x) => {
+        await updateHiddenGemGames(x.id, x.hiddenGemGames + 1);
+        if ((x.hiddenGemGames + 1) % HIDDEN_GEM_GAMES_REQUIRED === 0) {
+          if (Math.random() <= HIDDEN_GEM_PROBABILITY) {
+            await updatePlayerStars(x.id, x.stars + 1);
+            await createGameLog(
+              gameId,
+              `After a run of brilliant performances and some fantastic coaching at ${teamName}, ${
+                x.name
+              } has proven the pundits wrong, and grown to ${
+                x.stars + 1
+              } stars!`
+            );
+          } else {
+            console.log(`${x.name} missed out of the hidden gem upgrade.`);
+          }
+        }
+      })
   );
 }
 

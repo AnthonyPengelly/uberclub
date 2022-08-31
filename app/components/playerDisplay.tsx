@@ -29,9 +29,10 @@ export default function PlayerDisplay({
       <div className="player__name">{player.name}</div>
       <div className="player__stars">
         {[...Array(player.stars).keys()].map(() => "★").join("")}
-        {[...Array(player.potential - player.stars).keys()]
-          .map(() => "☆")
-          .join("")}
+        {player.potential > player.stars &&
+          [...Array(player.potential - player.stars).keys()]
+            .map(() => "☆")
+            .join("")}
       </div>
       <div className="relative">
         <img
