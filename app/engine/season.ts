@@ -125,8 +125,8 @@ async function playFixture(
     );
     await updateScoreOnTeamSeason(awayTeamSeason.id, awayTeamSeason.score + 2);
   }
-  await saveFixtureLineup(homeTeam, fixture.id);
-  await saveFixtureLineup(awayTeam, fixture.id);
+  await saveFixtureLineup(homeTeam, true, fixture.id);
+  await saveFixtureLineup(awayTeam, false, fixture.id);
   await recordGamesForHiddenGems(
     homeTeam.players,
     homeTeam.team.teamName,
@@ -193,8 +193,8 @@ async function playSim(
       await updateScoreOnTeamSeason(teamSeason.id, teamSeason.score + 2);
     }
   }
-  await saveFixtureLineup(team, fixture.id);
-  await saveFixtureLineup(realTeamWithPlayers, fixture.id, realTeam.id);
+  await saveFixtureLineup(team, true, fixture.id);
+  await saveFixtureLineup(realTeamWithPlayers, false, fixture.id, realTeam.id);
   await recordGamesForHiddenGems(team.players, team.team.teamName, gameId);
   await removeInjuredPlayersFromSquads([
     ...team.players,
@@ -204,6 +204,7 @@ async function playSim(
 
 async function saveFixtureLineup(
   team: BasicTeamWithPlayer,
+  home: boolean,
   resultId: string,
   realTeamId?: string
 ) {
@@ -211,6 +212,7 @@ async function saveFixtureLineup(
     resultId,
     team.players.filter((x) => x.lineupPosition),
     team.team.captainBoost,
+    home,
     realTeamId
   );
 }

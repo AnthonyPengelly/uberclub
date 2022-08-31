@@ -247,6 +247,8 @@ create table public.fixture_lineups (
   captain_boost integer null,
   real_team_id uuid references public.real_teams null,
   injured boolean not null,
+  stars integer not null default 0,
+  home boolean not null default false,
 
   primary key (id)
 )

@@ -202,6 +202,7 @@ export async function createFixtureLineups(
   resultId: string,
   players: GamePlayer[],
   captainBoost: number,
+  home: boolean,
   realTeamId?: string
 ) {
   const { data, error } = await supabase.from("fixture_lineups").insert(
@@ -212,6 +213,8 @@ export async function createFixtureLineups(
       captain_boost: x.captain ? captainBoost : null,
       real_team_id: realTeamId,
       injured: !!x.injured,
+      stars: x.stars,
+      home,
     }))
   );
 
@@ -223,15 +226,17 @@ export async function createFixtureLineups(
 }
 
 export async function getFixtureLineups(
-  resultId: string
+  resultId: string,
+  home: boolean
 ): Promise<GamePlayer[]> {
   const { data, error } = await supabase
     .from("fixture_lineups")
     .select(
-      `lineup_position, captain_boost, real_team_id, injured, player_game_states (id, stars, team_id, injured, loanee_id, hidden_gem_games,
+      `lineup_position, captain_boost, real_team_id, injured, stars, home, player_game_states (id, stars, team_id, injured, loanee_id, hidden_gem_games,
         real_players (name, overall, potential, image_url, positions (name), real_teams (name, image_url), real_countries (name, image_url)))`
     )
-    .eq("result_id", resultId);
+    .eq("result_id", resultId)
+    .eq("home", home);
 
   if (!error) {
     return data.map((x) => ({
@@ -241,7 +246,7 @@ export async function getFixtureLineups(
       captain: !!x.captain_boost,
       captainBoost: x.captain_boost,
       injured: x.injured,
-      stars: x.player_game_states.stars,
+      stars: x.stars,
       loan: !!x.player_game_states.loanee_id,
       hiddenGemGames: x.player_game_states.hidden_gem_games,
       name: x.player_game_states.real_players.name,

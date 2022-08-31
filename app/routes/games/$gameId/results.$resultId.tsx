@@ -31,23 +31,22 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   const realTeam = result.realTeamId
     ? await getRealTeam(result.realTeamId)
     : undefined;
-  const players = await getFixtureLineups(result.id);
+  const homePlayers = await getFixtureLineups(result.id, true);
+  const awayPlayers = await getFixtureLineups(result.id, false);
 
   return json<LoaderData>({
     homeTeam: {
       team: homeTeam,
-      lineup: players.filter((x) => x.teamId === homeTeam.id && !x.realTeamId),
+      lineup: homePlayers,
     },
     awayTeam: awayTeam
       ? {
           team: awayTeam,
-          lineup: players.filter(
-            (x) => x.teamId === awayTeam.id && !x.realTeamId
-          ),
+          lineup: awayPlayers,
         }
       : {
           team: { teamName: realTeam?.name || "", captainBoost: 1 },
-          lineup: players.filter((x) => x.realTeamId === result.realTeamId),
+          lineup: awayPlayers,
         },
     result,
   });
