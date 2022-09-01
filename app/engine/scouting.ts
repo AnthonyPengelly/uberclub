@@ -120,7 +120,7 @@ export function canScout(
 
 export function getScoutReport(player: GamePlayer, team: Team) {
   if (player.overall >= 6) {
-    return `World class player ${player.name} has been causing all sorts of drama in the ${team.teamName} dressing room and they are desperate to offload the hefty wage bill on someone else. They are rumoured to have offered the ${player.overall} star player to ${team.teamName}.`;
+    return `World class player ${player.name} has been causing all sorts of drama in the ${player.team} dressing room and they are desperate to offload the hefty wage bill on someone else. They are rumoured to have offered the ${player.overall} star player to ${team.teamName}.`;
   }
   if (player.overall >= 5) {
     return `${player.team} star ${player.name} is refusing to sign a new contract. The ${player.overall} star ${player.position} has expressed an interest in a move to ${team.teamName} instead.`;
