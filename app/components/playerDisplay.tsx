@@ -70,7 +70,7 @@ export default function PlayerDisplay({
       <div className="player__team">{player.team}</div>
       {children && <div className="player__actions">{children}</div>}
       {chemistry !== 0 ? (
-        <div className="player__chemistry">
+        <div className="player__chemistry" data-gkp-chemistry={player.position === 'GKP'}>
           {[...Array(chemistry).keys()].map(() => "★").join("")}
         </div>
       ) : null}

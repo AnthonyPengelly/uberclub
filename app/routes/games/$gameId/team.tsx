@@ -299,7 +299,8 @@ function Position({
   setSelectedPlayerPosition: (id: SelectedPlayerPosition | undefined) => void;
 }) {
   const existingPlayer = findPlayerInPosition(players, position);
-  const previousPlayer = findPlayerInPosition(players, position - 1);
+  // Match the GKP to position 4, the middle defender
+  const previousPlayer = findPlayerInPosition(players, position === 1 ? 4 : position - 1);
   const chemistry = existingPlayer
     ? getChemistry(existingPlayer, previousPlayer)
     : 0;

@@ -58,7 +58,8 @@ export function getLineupScores(players: GamePlayer[], captainBoost: number) {
       const position = x.lineupPosition === 1 ? "GKP" : "DEF";
       const previousPlayer = findPlayerInPosition(
         playersInLineup,
-        x.lineupPosition - 1
+        // Match goalkeepers to the middle defender
+        position === 'GKP' ? 4 : x.lineupPosition - 1
       );
       scores.DEF += playerScore(x, position, captainBoost, previousPlayer);
     });
@@ -104,7 +105,7 @@ export function getChemistry(
   player: LineupPlayer,
   previousPlayer: LineupPlayer | undefined
 ) {
-  if (player.lineupPosition === 1 || !previousPlayer) {
+  if (!previousPlayer) {
     return 0;
   }
   // Don't add chemistry between different lines in the formation

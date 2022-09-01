@@ -76,7 +76,8 @@ export default function Lineup({
             .map((x) => {
               const previousPlayer = findPlayerInPosition(
                 players,
-                x.lineupPosition! - 1
+                // Match the GKP to position 4, the middle defender
+                x.lineupPosition === 1 ? 4 : x.lineupPosition! - 1
               );
               const chemistry = previousPlayer
                 ? getChemistry(x as LineupPlayer, previousPlayer)
