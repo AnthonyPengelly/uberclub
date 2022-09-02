@@ -14,8 +14,7 @@ import {
 } from "~/domain/players.server";
 import { getCurrentSeason } from "~/domain/season.server";
 import type { Game } from "~/domain/games.server";
-import { getGame } from "~/domain/games.server";
-import { overrideGameStageWithTeam, Stage } from "./game";
+import { Stage } from "./game";
 import { MAX_SQUAD_SIZE } from "./team";
 import { getSquadSize } from "./players";
 
@@ -26,10 +25,15 @@ export async function getScoutedPlayers(team: Team) {
   return players;
 }
 
+export async function scoutAllPlayers(team: Team) {
+  for (let i = 0; i < team.scoutingLevel; i++) {
+    await scoutPlayer(team);
+  }
+}
+
 export async function scoutPlayer(team: Team) {
   const player = (await drawPlayersFromDeck(team.gameId, 1))[0];
   const season = await getCurrentSeason(team.gameId);
-  await assertCanScout(team.gameId, season.id, team);
   await createScoutingLog(season.id, team.id, player.id);
   await markPlayerOutOfDeck(player.id);
   await createGameLog(team.gameId, getScoutReport(player, team));
@@ -93,15 +97,6 @@ const getScoutPriceFromOverall = (overall: number) => {
 export async function getScoutingLogs(team: Team) {
   const season = await getCurrentSeason(team.gameId);
   return await getScoutingLogsForSeason(season.id, team.id);
-}
-
-async function assertCanScout(gameId: string, seasonId: string, team: Team) {
-  const game = await getGame(gameId);
-  overrideGameStageWithTeam(game, team);
-  const scoutingLogs = await getScoutingLogsForSeason(seasonId, team.id);
-  if (!canScout(game, scoutingLogs, team)) {
-    throw new Error("Not currently able to scout");
-  }
 }
 
 export function canScout(

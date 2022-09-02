@@ -36,7 +36,6 @@ export default function ScoutPlayer({
               submitButtonText="Sign"
               buttonClass="mini-button"
             >
-              <input type="hidden" name="action" value="buy-player" />
               <input type="hidden" name="player-id" value={player.id} />
             </LoadingForm>
           ))}

@@ -3,6 +3,7 @@ import { redirect } from "@remix-run/node";
 import invariant from "tiny-invariant";
 import { getTeam, updateStageOverride } from "~/domain/team.server";
 import { Stage } from "~/engine/game";
+import { scoutAllPlayers } from "~/engine/scouting";
 import { requireUserId } from "~/session.server";
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -16,6 +17,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const currentStage = formData.get("current-stage") as string;
   if (parseInt(currentStage, 10) === Stage.Training) {
     await updateStageOverride(team.id, Stage.Scouting);
+    await scoutAllPlayers(team);
     return redirect(`/games/${params.gameId}/scouting`);
   }
   if (parseInt(currentStage, 10) === Stage.Scouting) {
