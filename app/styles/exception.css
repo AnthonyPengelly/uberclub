@@ -125,3 +125,11 @@ button:disabled {
   bottom: calc(-1rem - ((var(--icon-height) - 1rem) / 2));
   top: auto;
 }
+
+[data-gkp-chemistry="true"][data-def-position="left"].player__chemistry {
+  left: 0;
+}
+
+[data-gkp-chemistry="true"][data-def-position="right"].player__chemistry {
+  left: 100%;
+}

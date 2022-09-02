@@ -5,12 +5,14 @@ export type PlayerDisplayProps = {
   chemistry?: number;
   children?: React.ReactNode | React.ReactNode[];
   noPlayerText?: string;
+  centralDefPosition?: "centre" | "left" | "right";
 };
 
 export default function PlayerDisplay({
   player,
   chemistry = 0,
   noPlayerText,
+  centralDefPosition,
   children,
 }: PlayerDisplayProps) {
   if (!player) {
@@ -70,7 +72,11 @@ export default function PlayerDisplay({
       <div className="player__team">{player.team}</div>
       {children && <div className="player__actions">{children}</div>}
       {chemistry !== 0 ? (
-        <div className="player__chemistry" data-gkp-chemistry={player.position === 'GKP'}>
+        <div
+          className="player__chemistry"
+          data-gkp-chemistry={player.position === "GKP"}
+          data-def-position={centralDefPosition}
+        >
           {[...Array(chemistry).keys()].map(() => "★").join("")}
         </div>
       ) : null}

@@ -38,8 +38,12 @@ export default function Lineup({
   const sortedPlayers = players.sort(
     (a, b) => (a.lineupPosition as number) - (b.lineupPosition as number)
   );
+  const goalkeeper = findPlayerInPosition(players, 1);
   const scores = getLineupScores(players, team.captainBoost);
-
+  const centralDefender = findPlayerInPosition(players, 4);
+  const gkpChemistry = centralDefender
+    ? getChemistry(goalkeeper as LineupPlayer, centralDefender)
+    : 0;
   return (
     <div
       className={
@@ -64,7 +68,11 @@ export default function Lineup({
             direction === "bottom-up" ? "margin-top" : "margin-bottom"
           }`}
         >
-          <PlayerDisplay player={sortedPlayers[0]} />
+          <PlayerDisplay
+            player={goalkeeper}
+            chemistry={gkpChemistry}
+            centralDefPosition={centralDefenderPosition(players)}
+          />
         </div>
         <div className="players">
           {sortedPlayers
@@ -76,8 +84,7 @@ export default function Lineup({
             .map((x) => {
               const previousPlayer = findPlayerInPosition(
                 players,
-                // Match the GKP to position 4, the middle defender
-                x.lineupPosition === 1 ? 4 : x.lineupPosition! - 1
+                x.lineupPosition! - 1
               );
               const chemistry = previousPlayer
                 ? getChemistry(x as LineupPlayer, previousPlayer)
@@ -146,4 +153,16 @@ export default function Lineup({
       </div>
     </div>
   );
+}
+
+function centralDefenderPosition(players: GamePlayer[]) {
+  const defenderPositions = (
+    players.map((x) => x.lineupPosition).filter((x) => x) as number[]
+  ).filter((x) => x > 1 && x <= MAX_DEF_POSITION);
+  const playersToTheLeft = defenderPositions.filter((x) => x < 4).length;
+  const playersToTheRight = defenderPositions.filter((x) => x > 4).length;
+  if (playersToTheLeft === playersToTheRight) {
+    return "centre";
+  }
+  return playersToTheLeft > playersToTheRight ? "right" : "left";
 }
