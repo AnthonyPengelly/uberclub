@@ -160,6 +160,10 @@
   padding: 0.5rem;
 }
 
+.table th {
+  white-space: nowrap;
+}
+
 .table tbody tr {
   border-bottom: 1px solid var(--color-borders);
 }
@@ -170,6 +174,10 @@
 
 .table tbody tr:last-of-type {
   border-bottom: 2px solid var(--color-green--background);
+}
+
+.table a {
+  white-space: normal;
 }
 
 .quote {

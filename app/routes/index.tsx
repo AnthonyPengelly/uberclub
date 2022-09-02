@@ -13,11 +13,15 @@ import type { DetailedGame } from "~/domain/games.server";
 import { getGamesList } from "~/domain/games.server";
 import { requireUserId } from "~/session.server";
 import PointLeaderboard from "~/components/pointLeaderboard";
+import type { TeamSeasonSummary } from "~/domain/season.server";
+import { getTopTeamSeasonsEver } from "~/domain/season.server";
+import SquadLeaderboard from "~/components/squadLeaderboard";
 
 type LoaderData = {
   games: DetailedGame[];
   cupLeaderboardEntries: CupLeaderboardEntry[];
   pointLeaderboardEntries: PointLeaderboardEntry[];
+  squadLeaderboardEntries: TeamSeasonSummary[];
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -25,12 +29,22 @@ export const loader: LoaderFunction = async ({ request }) => {
   const games = await getGamesList();
   const cupLeaderboardEntries = await getCupLeaderboard();
   const pointLeaderboardEntries = await getPointLeaderboard();
-  return json({ games, cupLeaderboardEntries, pointLeaderboardEntries });
+  const squadLeaderboardEntries = await getTopTeamSeasonsEver();
+  return json<LoaderData>({
+    games,
+    cupLeaderboardEntries,
+    pointLeaderboardEntries,
+    squadLeaderboardEntries,
+  });
 };
 
 export default function Index() {
-  const { games, cupLeaderboardEntries, pointLeaderboardEntries } =
-    useLoaderData<LoaderData>();
+  const {
+    games,
+    cupLeaderboardEntries,
+    pointLeaderboardEntries,
+    squadLeaderboardEntries,
+  } = useLoaderData<LoaderData>();
   return (
     <Layout>
       <h1>Games</h1>
@@ -75,6 +89,7 @@ export default function Index() {
       </table>
       <CupLeaderboard cupLeaderboardEntries={cupLeaderboardEntries} />
       <PointLeaderboard pointLeaderboardEntries={pointLeaderboardEntries} />
+      <SquadLeaderboard squadLeaderboardEntries={squadLeaderboardEntries} />
       <h2>Past games</h2>
 
       <table className="table">

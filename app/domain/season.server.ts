@@ -15,6 +15,8 @@ export type TeamSeason = {
 
 export type TeamSeasonSummary = TeamSeason & {
   teamName: string;
+  gameId: string;
+  season: number;
 };
 
 export async function createSeason(gameId: string, seasonNumber: number) {
@@ -119,7 +121,9 @@ export async function getTeamSeasons(
 ): Promise<TeamSeasonSummary[]> {
   const { data, error } = await supabase
     .from("team_seasons")
-    .select("id, score, starting_score, team_id, teams (team_name)")
+    .select(
+      "id, score, starting_score, team_id, teams (team_name, game_id), seasons (season)"
+    )
     .eq("season_id", seasonId);
 
   if (error) {
@@ -131,7 +135,41 @@ export async function getTeamSeasons(
     startingScore: x.starting_score,
     teamName: x.teams.team_name,
     teamId: x.team_id,
+    gameId: x.teams.game_id,
+    season: x.seasons.season,
   }));
+}
+
+export async function getTopTeamSeasonsEver(): Promise<TeamSeasonSummary[]> {
+  const { data, error } = await supabase
+    .from("team_seasons")
+    .select(
+      "id, score, starting_score, team_id, teams (team_name, game_id), seasons (season)"
+    )
+    .order("starting_score", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    throw error;
+  }
+  const seasons = data.map((x) => ({
+    id: x.id,
+    score: x.score,
+    startingScore: x.starting_score,
+    teamName: x.teams.team_name,
+    teamId: x.team_id,
+    gameId: x.teams.game_id,
+    season: x.seasons.season,
+  }));
+  const seasonsForUniqueTeams: TeamSeasonSummary[] = [];
+  const map = new Map();
+  seasons.forEach((season) => {
+    if (!map.has(season.teamId)) {
+      map.set(season.teamId, true);
+      seasonsForUniqueTeams.push(season);
+    }
+  });
+  return seasonsForUniqueTeams.slice(0, 10);
 }
 
 export async function updateScoreOnTeamSeason(id: string, score: number) {
