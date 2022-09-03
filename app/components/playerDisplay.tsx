@@ -5,7 +5,7 @@ export type PlayerDisplayProps = {
   chemistry?: number;
   children?: React.ReactNode | React.ReactNode[];
   noPlayerText?: string;
-  centralDefPosition?: "centre" | "left" | "right";
+  centralDefPosition?: { y: "top" | "bottom"; x: "centre" | "left" | "right" };
 };
 
 export default function PlayerDisplay({
@@ -75,7 +75,8 @@ export default function PlayerDisplay({
         <div
           className="player__chemistry"
           data-gkp-chemistry={player.position === "GKP"}
-          data-def-position={centralDefPosition}
+          data-def-position-x={centralDefPosition?.x}
+          data-def-position-y={centralDefPosition?.y}
         >
           {[...Array(chemistry).keys()].map(() => "★").join("")}
         </div>

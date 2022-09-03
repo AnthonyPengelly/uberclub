@@ -71,7 +71,10 @@ export default function Lineup({
           <PlayerDisplay
             player={goalkeeper}
             chemistry={gkpChemistry}
-            centralDefPosition={centralDefenderPosition(players)}
+            centralDefPosition={{
+              y: direction === "bottom-up" ? "top" : "bottom",
+              x: centralDefenderPosition(players),
+            }}
           />
         </div>
         <div className="players">

@@ -120,16 +120,27 @@ button:disabled {
   cursor: default;
 }
 
-[data-gkp-chemistry="true"].player__chemistry {
+[data-gkp-chemistry="true"][data-def-position-x="centre"].player__chemistry {
   left: calc(50% - (var(--icon-height) / 2));
+  right: auto;
+}
+
+[data-gkp-chemistry="true"][data-def-position-x="left"].player__chemistry {
+  left: calc(-1 * var(--icon-height) / 2);
+  right: auto;
+}
+
+[data-gkp-chemistry="true"][data-def-position-x="right"].player__chemistry {
+  right: calc(-1 * var(--icon-height) / 2);
+  left: auto;
+}
+
+[data-gkp-chemistry="true"][data-def-position-y="top"].player__chemistry {
+  top: calc(-1rem - ((var(--icon-height) - 1rem) / 2));
+  bottom: auto;
+}
+
+[data-gkp-chemistry="true"][data-def-position-y="bottom"].player__chemistry {
   bottom: calc(-1rem - ((var(--icon-height) - 1rem) / 2));
   top: auto;
-}
-
-[data-gkp-chemistry="true"][data-def-position="left"].player__chemistry {
-  left: 0;
-}
-
-[data-gkp-chemistry="true"][data-def-position="right"].player__chemistry {
-  left: 100%;
 }
