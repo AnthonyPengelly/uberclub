@@ -120,6 +120,14 @@ button:disabled {
   cursor: default;
 }
 
+[data-gkp-chemistry="true"].player__chemistry {
+  left: calc(50% - (var(--icon-height) / 2));
+  right: auto;
+  bottom: calc(-1rem - ((var(--icon-height) - 1rem) / 2));
+  top: auto;
+}
+
+[data-gkp-chemistry="true"].player__chemistry,
 [data-gkp-chemistry="true"][data-def-position-x="centre"].player__chemistry {
   left: calc(50% - (var(--icon-height) / 2));
   right: auto;
