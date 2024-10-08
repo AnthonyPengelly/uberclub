@@ -44,7 +44,7 @@ const mapPosition = (position) => {
 };
 
 // Grab this id in advance
-const collectionId = "076f22fe-a095-47ba-b98a-67bba9035e0b";
+const collectionId = "130142b1-dbb3-439d-b48a-bd5375d1041b";
 // Use the timeout to click into the webpage and focus
 setTimeout(() => {
   navigator.clipboard.readText().then((copied) => {
@@ -55,25 +55,26 @@ setTimeout(() => {
         const summary = {
           name: row.find(".name").text().trim("\n"),
           countryName: row
+            .find(".nation")
+            .attr("src"),
+          countryImage: row
+            .find(".nation")
+            .attr("src"),
+          team: row
             .find(".team")
             .text()
             .trim("\n")
             .trim(" ")
             .replace(/.*\|+ /, ""),
-          countryImage: "TODO",
-          team: "Rest of World",
-          teamImage: "/images/rest-of-world.png",
+          teamImage: row
+            .find(".club")
+            .attr("src"),
           position: mapPosition($(stats[2]).text().trim("\n").trim(" ")),
           overall: mapStarRating(parseInt($(stats[0]).text().trim("\n"), 10)),
           potential: mapStarRating(parseInt($(stats[1]).text().trim("\n"), 10)),
-          image: `https://www.futwiz.com${row.find(".player-img").attr("src")}`,
+          image: row.find(".player-img").attr("src"),
         };
         summary.potential = Math.max(summary.potential, summary.overall);
-        if (summary.countryName.indexOf("|") !== -1) {
-          summary.countryName = "Free Agents";
-          summary.countryImage =
-            "https://fifastatic.fifaindex.com/FIFA21/images/crest/3/light/111592@3x.png";
-        }
         return (
           `INSERT INTO public.real_teams (name, player_collection_id, image_url) SELECT '${summary.team}', '${collectionId}', '${summary.teamImage}' ` +
           `WHERE NOT EXISTS (SELECT id FROM public.real_teams WHERE name = '${summary.team}' AND player_collection_id = '${collectionId}');` +
@@ -91,6 +92,6 @@ setTimeout(() => {
       .join("");
 
     console.log(query);
-    navigator.clipboard.writeText(query);
+    navigator.clipboard.writeText(copied + query);
   });
 }, 5000);

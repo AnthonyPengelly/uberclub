@@ -99,7 +99,7 @@ export async function createTransferBid(
         status: Status.Pending,
       },
     ])
-    .single();
+    .select();
 
   if (error) {
     throw error;
@@ -123,7 +123,7 @@ export async function createPlayerTransfer(
         loan,
       },
     ])
-    .single();
+    .select();
 
   if (error) {
     throw error;

@@ -5,11 +5,11 @@ document.getElementsByTagName("head")[0].appendChild(script);
 
 const mapStarRating = (rating) => {
   if (rating >= 97) return 7;
-  if (rating >= 92) return 6;
-  if (rating >= 88) return 5;
-  if (rating >= 84) return 4;
-  if (rating >= 79) return 3;
-  if (rating >= 75) return 2;
+  if (rating >= 90) return 6;
+  if (rating >= 86) return 5;
+  if (rating >= 80) return 4;
+  if (rating >= 75) return 3;
+  if (rating >= 70) return 2;
   return 1;
 };
 
@@ -49,7 +49,7 @@ const mapPosition = (position) => {
 };
 
 // Grab this id in advance
-const collectionId = "619a54cf-02ce-461f-a73c-e01ec4b34fc9";
+const collectionId = "18ae350e-dc58-4e0e-ae6a-64272d0084d0";
 // Use the timeout to click into the webpage and focus
 setTimeout(() => {
   navigator.clipboard.readText().then((copied) => {
@@ -84,13 +84,12 @@ setTimeout(() => {
           potential: mapStarRating(
             parseInt(row.find('[data-title="OVR / POT"] span').eq(1).text(), 10)
           ),
-          image: row.find(".player img").attr("src").replace(".png", "@2x.png"),
+          image: row.find(".player img").attr("src"),
           countryName: row.find(".link-nation").first().attr("title"),
           countryImage: row
             .find(".link-nation img")
             .first()
-            .attr("src")
-            .replace(".png", "@2x.png"),
+            .attr("src"),
         };
         summary.potential = Math.max(summary.potential, summary.overall);
         return (

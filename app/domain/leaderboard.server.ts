@@ -33,7 +33,7 @@ export async function createCupLeaderboardEntry(
         fixture_url: fixtureUrl,
       },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data?.id;
@@ -92,7 +92,7 @@ export async function createPointLeaderboardEntry(
         game_url: gameUrl,
       },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data?.id;

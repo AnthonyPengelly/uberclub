@@ -25,7 +25,7 @@ export async function createSeason(gameId: string, seasonNumber: number) {
     .insert([
       { game_id: gameId, name: `Season ${seasonNumber}`, season: seasonNumber },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data;
@@ -85,7 +85,7 @@ export async function createTeamSeason(
         starting_score: startingScore,
       },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data;

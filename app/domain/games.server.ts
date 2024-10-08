@@ -80,10 +80,10 @@ export async function createGame(
         victory_points: victoryPoints || 100,
       },
     ])
-    .single();
+    .select();
 
   if (!error) {
-    return data as Game;
+    return data[0] as Game;
   }
 
   throw error;

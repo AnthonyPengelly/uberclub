@@ -36,7 +36,7 @@ export async function createResult(result: Omit<Result, "id">) {
         stage: result.stage,
       },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data.id;

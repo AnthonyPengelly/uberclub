@@ -14,7 +14,7 @@ export async function createTrainingLog(
   const { data, error } = await supabase
     .from("training_logs")
     .insert([{ season_id: seasonId, team_id: teamId, result: improvement }])
-    .single();
+    .select();
 
   if (!error) {
     return data;
@@ -48,7 +48,7 @@ export async function createScoutingLog(
     .insert([
       { season_id: seasonId, team_id: teamId, player_game_state_id: playerId },
     ])
-    .single();
+    .select();
 
   if (!error) {
     return data;
@@ -76,7 +76,7 @@ export async function createImprovementLog(seasonId: string, teamId: string) {
   const { data, error } = await supabase
     .from("improvement_logs")
     .insert([{ season_id: seasonId, team_id: teamId }])
-    .single();
+    .select();
 
   if (!error) {
     return data;
@@ -104,7 +104,7 @@ export async function createGameLog(gameId: string, event: string) {
   const { data, error } = await supabase
     .from("game_logs")
     .insert([{ game_id: gameId, event }])
-    .single();
+    .select();
 
   if (!error) {
     return data;

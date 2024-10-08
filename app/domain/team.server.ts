@@ -130,7 +130,7 @@ export async function addTeamToGame({
         captain_boost: 1,
       },
     ])
-    .single();
+    .select();
 
   if (error) {
     throw error;
