@@ -104,7 +104,7 @@ export async function createTransferBid(
   if (error) {
     throw error;
   }
-  return data.id;
+  return data[0].id;
 }
 
 export async function createPlayerTransfer(
@@ -125,10 +125,11 @@ export async function createPlayerTransfer(
     ])
     .select();
 
+    console.log(error);
   if (error) {
     throw error;
   }
-  return data.id;
+  return data[0].id;
 }
 
 export async function updateTransferBidStatus(
